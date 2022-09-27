@@ -12,8 +12,14 @@ The deployment script uses following tools, please follow the links provided to 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - [wget](https://www.jcchouinard.com/wget/)
 - The scripts are executed on bash shell, so if using a computer with windows based operating system, install a [WSL](https://docs.microsoft.com/windows/wsl/about) environment to execute the script.
-- The user performing the deployment of the bicep template and the associated scripts should have `Owner` role assigned at the subscription to which the resources are being deployed. This is needed in order to grant IAM roles to managed identities in bicep templates.
 - The bicep templates have been written to adhere to the syntax and rules for bicep version >= 0.8.2. Please check your bicep version using `az bicep version` or `bicep --version` if you run into bicep related errors.
+
+#### RBAC requirement
+
+The user performing the deployment of the bicep template and the associated scripts should have `Owner` role assigned at the subscription to which the resources are being deployed. This is needed in order to grant IAM roles to managed identities in bicep templates.
+
+> [!NOTE]
+If you have started the deployment with a different role Ex: `Contributor`, and the deployment failed due to insufficient access. Please change the role to `Owner` and refresh the credentials by re-logging before attempting to deploy again.
 
 ### How does the scripts work?
 
