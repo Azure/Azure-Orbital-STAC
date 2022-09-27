@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-app-stacfastapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-stacfastapi
+  template:
+    metadata:
+      labels:
+        app: app-stacfastapi
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - args:
+            - bash
+            - -c
+            - ./scripts/wait-for-it.sh ${PGHOST}:${PGPORT} && pypgstac pgready && pypgstac migrate && python -m stac_fastapi.pgstac.app
+          env:
+            - name: APP_HOST
+              value: 0.0.0.0
+            - name: APP_PORT
+              value: "8082"
+            - name: DB_MAX_CONN_SIZE
+              value: "1"
+            - name: DB_MIN_CONN_SIZE
+              value: "1"
+            - name: ENVIRONMENT
+              value: local
+            - name: GDAL_DISABLE_READDIR_ON_OPEN
+              value: EMPTY_DIR
+            - name: GDAL_HTTP_MERGE_CONSECUTIVE_RANGES
+              value: "YES"
+            - name: POSTGRES_DBNAME
+              value: postgres
+            - name: POSTGRES_HOST_READER
+              value: ${PGHOST}
+            - name: POSTGRES_HOST_WRITER
+              value: ${PGHOST}
+            - name: POSTGRES_PASS
+              value: ${PGPASSWORD}
+            - name: POSTGRES_PORT
+              value: "${PGPORT}"
+            - name: POSTGRES_USER
+              value: ${PGUSER}
+            - name: RELOAD
+              value: "false"
+            - name: USE_API_HYDRATE
+              value: "false"
+            - name: VSI_CACHE
+              value: "TRUE"
+            - name: WEB_CONCURRENCY
+              value: "10"
+            - name: PGUSER
+              value: ${PGUSER}
+            - name: PGPASSWORD
+              value: ${PGPASSWORD}
+            - name: PGHOST
+              value: ${PGHOST}
+            - name: PGDATABASE
+              value: "postgres"
+          image: ${ACR_DNS}/stac-fastapi
+          imagePullPolicy: Always
+          name: stac-fastapi-pgstac
+          ports:
+            - containerPort: 8082
+              protocol: TCP
+          resources:
+            requests:
+              memory: "2.5G"
+              cpu: "1000m"
+            limits:
+              memory: "8G"
+              cpu: "8"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-stacfastapi
+  annotations:
+    service.beta.kubernetes.io/azure-dns-label-name: app-stacfastapi-${ENV_NAME}
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "8082"
+      port: 8082
+      targetPort: 8082
+  selector:
+    app: app-stacfastapi
