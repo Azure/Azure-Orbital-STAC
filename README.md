@@ -1,8 +1,6 @@
-# Project
+# Azure Orbital STAC
 
-<img src="./docs/stac-030-long.png" alt="stac-logo" width="700"/>
-
-This repository contains sample solutoin that demonstrate how to deploy and execute [Azure Orbital STAC](./) workload on your Azure tenant. We recommend that you read the document on "Azure Orbital STAC" before deploying this solution.
+This repository contains sample solution that demonstrate how to deploy and execute [Azure Orbital STAC](./) workload on your Azure tenant. We recommend that you read the document on "Azure Orbital STAC" before deploying this solution.
 
 Disclaimer: The solution and samples provided in this repository is for learning purpose only. They're intended to explore the possibilities of the Azure Services and are a starting point to developing your own solution. We recommend that you follow the security best practices as per the Microsoft documentation for individual services.
 

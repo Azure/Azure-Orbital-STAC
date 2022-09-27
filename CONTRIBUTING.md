@@ -15,9 +15,9 @@ or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any addi
 
 ## Contributors
 
-This repository is currently maintained by [Azure Orbital analytics](https://github.com/orgs/Azure/teams/azure-orbital-analytics-contributors) team.
+This repository is currently maintained by Azure Orbital analytics team.
 
-Azure Orbital analytics has benefited from following developers (in alphabetic order)
+This sample solution has benefited from following developers (in alphabetic order)
  - [Ardon Bailey]()
  - [Karthick Narendran](https://github.com/karthick-rn)
  - [Kungumaraj Nachimuthu](https://github.com/senthilkungumaraj)
