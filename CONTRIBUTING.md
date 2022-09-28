@@ -18,9 +18,9 @@ or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any addi
 This repository is currently maintained by Azure Orbital analytics team.
 
 This sample solution has benefited from following developers (in alphabetic order)
- - [Ardon Bailey]()
+ - [Ardon Bailey](https://github.com/waystilos)
  - [Karthick Narendran](https://github.com/karthick-rn)
- - [Kun Cheng]()
+ - [Kun Cheng](https://github.com/guessfish)
  - [Kungumaraj Nachimuthu](https://github.com/senthilkungumaraj)
  - [Mandar Inamdar](https://github.com/mandarinamdar)
  - [Nikhil Manchanda](https://github.com/SlickNik)
