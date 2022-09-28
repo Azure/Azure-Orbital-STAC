@@ -20,6 +20,7 @@ This repository is currently maintained by Azure Orbital analytics team.
 This sample solution has benefited from following developers (in alphabetic order)
  - [Ardon Bailey]()
  - [Karthick Narendran](https://github.com/karthick-rn)
+ - [Kun Cheng]()
  - [Kungumaraj Nachimuthu](https://github.com/senthilkungumaraj)
  - [Mandar Inamdar](https://github.com/mandarinamdar)
  - [Nikhil Manchanda](https://github.com/SlickNik)
