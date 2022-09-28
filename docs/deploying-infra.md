@@ -15,73 +15,69 @@ The deployment involves the following steps outlined below:
 
 No | Step | Duration (approx.) | Required / Optional
 ---|------|----------|---------------------
-1 | Preparing to execute the script | 1 minute | required
-2 | Deployment of Infrastructure using bicep template | 60 minutes | required
-3 | Building Docker images | 20 minutes | optional
-4 | Configuring and Deploying container applications | 5 minutes | required
+1 | Deployment of Infrastructure using bicep template | 60 minutes | required
+2 | Building Docker images | 20 minutes | optional
+3 | Configuring and Deploying container applications | 5 minutes | required
 
-Steps 2 through 4 can instead be deployed using a single script as shown below:
+## Deployment & Configurations
+
+Before executing the script, user needs to login to azure as shown below and set the correct subscription in which they want to provision the resources.
+
+```azurecli
+az login
+az account set -s <subscription_id>
+```
+
+For end-to-end deployment, you can either choose to run the `setup.sh` script that will take care of deploying all the services, building the docker images and configuring the variables or run the scripts individually as shown below.
 
 ```bash
 ./deploy/scripts/setup.sh <environmentCode> <location> <jumpboxPassword>
 ```
 
-## Preparing to execute the script
+OR
 
-Before executing the script one would need to login to azure using `az` cli and set the correct subscription in which they want to provision the resources.
+1. Deployment of Infrastructure using bicep template.
 
-```bash
-az login
-az account set -s <subscription_id>
-```
+   This step will provision all the required Azure resources.
 
-## Deployment of Infrastructure using bicep template
+   ```bash
+   ./deploy/scripts/install.sh <environmentCode> <location> <jumpboxPassword>
+    ```
 
-If you have deployed the solution using `setup.sh` script, you should skip this step. However, if you have not run the `setup.sh` script, the steps outlined in this section are required.
+   For eg.
 
-To install infrastructure execute `install.sh` script as follows
+    ```bash
+   ./deploy/scripts/install.sh stac1 westus3 "<your-password>"
+    ```
 
-```bash
-./deploy/scripts/install.sh <environmentCode> <location> <jumpboxPassword>
-```
+   Default values for the parameters are provided in the script itself.
 
-Default values for the parameters are provided in the script itself.
+   Arguments | Required | Type | Sample value
+   ----------|-----------|-------|------------
+   environmentCode | yes | string | stac1
+   location | yes | string | westus3
+   jumpboxPassword | yes | string | Jump@123
 
-Arguments | Required | Type | Sample value
-----------|-----------|-------|------------
-environmentCode | yes | string | stac1
-location | yes | string | westus3
-jumpboxPassword | yes | string | P@ssw0rd@123
+2. Building Docker images
 
-For eg.
+   In this step, Docker images such as stac-event-consumer, generate-stac-json, stac-collection, and stac-fastapi will be built and deployed to ACR (Azure Container Registry).
 
-```bash
-./deploy/scripts/install.sh stac1 westus3 "P@ssw0rd@123"
-```
+   ```bash
+   ./deploy/scripts/build.sh <environmentCode>
+   ```
 
-## Building Docker images
+3. Configuring and Deploying container applications
 
-Docker images need to be built and deployed to the ACR (Azure Container Registry). Top level `setup.sh` would call `build.sh` for initial build and deployment. Aftwards, run `build.sh` script alone by following the syntax below to update docker images (i.e. stac-event-consumer, generate-stac-json, stac-collection, and stac-fastapi):
+   This step collects the required configuration variables from the infrastructure, and passes them to kubectl deployment specification.
 
-```bash
-./deploy/scripts/build.sh <environmentCode>
-```
-
-## Configuring and Deploying container applications
-
-`configure.sh` collects the required configuration variables from the infrastructure, and passes them to kubectl deployment specification. You may run this step as a stand-alone once you complete the initial setup with `setup.sh`.
-
-```bash
-./deploy/scripts/configure.sh <environmentCode>
-```
+   ```bash
+   ./deploy/scripts/configure.sh <environmentCode>
+   ```
 
 ## Cleanup Script
 
-We have a cleanup script to cleanup the resource groups and thus the resources provisioned using the `environmentCode`.
-As discussed above the `environmentCode` is used as prefix to generate resource group names, so the cleanup-script deletes the resource groups with generated names.
+   Run the below script to clean up the Azure resources provisioned as part of the deployment. The script uses `environmentCode` to identify and remove the services.
 
-Execute the cleanup script as follows:
-
-```bash
-./deploy/scripts/cleanup.sh <environmentCode>
-```
+   ```bash
+   ./deploy/scripts/cleanup.sh <environmentCode>
+   ```
