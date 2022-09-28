@@ -1,14 +1,17 @@
-# Project
+# Azure Orbital STAC
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+This repository contains sample solution that demonstrate how to deploy and execute [Azure Orbital STAC](./) workload on your Azure tenant. We recommend that you read the document on "Azure Orbital STAC" before deploying this solution.
 
-As the maintainer of this project, please make a few updates:
+Disclaimer: The solution and samples provided in this repository is for learning purpose only. They're intended to explore the possibilities of the Azure Services and are a starting point to developing your own solution. We recommend that you follow the security best practices as per the Microsoft documentation for individual services.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+# Getting Started
+
+This repository contains Bicep templates and code samples to help you setup the Azure Orbital STAC solution. To get started, follow the steps in the [deploy](./deploy/README.md) document to setup the Azure resources required to build your pipeline.
+
+Once your infrastructure is setup, use the [Cataloging Sample Data](./docs/cataloging-sample-data.md) document to catalog the sample data provided.
+
+Cataloged STAC Objects can be accessed through the standard [STAC API Specificiation](https://github.com/radiantearth/stac-api-spec). 
+
 
 ## Contributing
 
