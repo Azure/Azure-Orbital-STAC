@@ -26,6 +26,7 @@ This sample solution has benefited from following developers (in alphabetic orde
  - [Nikhil Manchanda](https://github.com/SlickNik)
  - [Seokwon Yang](https://github.com/sjyang18)
  - [Sushil Kumar](https://github.com/sushilkm)
+ - [Tai Yee](https://github.com/taiyee)
  - [Taylor Corbett](https://github.com/TaylorCorbett)
  - [Tushar Dhadiwal](https://github.com/tushardhadiwal)
  - [Xiaoyuan Yang](https://github.com/xiaoyuan-ms)

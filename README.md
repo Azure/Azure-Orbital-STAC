@@ -1,4 +1,4 @@
-# Azure Orbital STAC
+# Organizing Spaceborne Geospatial Data with SpatioTemporal Asset Catalog (STAC)
 
 This repository contains sample solution that demonstrate how to deploy and execute [Azure Orbital STAC](./) workload on your Azure tenant. We recommend that you read the document on "Azure Orbital STAC" before deploying this solution.
 
