@@ -24,12 +24,17 @@ az acr build --registry $ACR_NAME --image stac-event-consumer ${PRJ_ROOT}/src/st
 az acr build --registry $ACR_NAME --image generate-stac-json ${PRJ_ROOT}/src/stac_ingestion/generate_stac_item/
 az acr build --registry $ACR_NAME --image stac-collection ${PRJ_ROOT}/src/stac_ingestion/stac_collection/
 
-
 # build stac-fastapi from https://github.com/stac-utils/stac-fastapi/archive/refs/tags/${STAC_FASTAPI_VERSION}.tar.gz
 STAC_FASTAPI_SRC_DIR=${STAC_FASTAPI_SRC_DIR:-"${PRJ_ROOT}/src/stac_fastapi_k8s/src"}
 STAC_FASTAPI_RELEASE_URI=${STAC_FASTAPI_RELEASE_URI:-"https://github.com/stac-utils/stac-fastapi/archive/refs/tags/${STAC_FASTAPI_VERSION}.tar.gz"}
 mkdir -p $STAC_FASTAPI_SRC_DIR
-wget $STAC_FASTAPI_RELEASE_URI -P $STAC_FASTAPI_SRC_DIR
-tar xvf ${STAC_FASTAPI_SRC_DIR}/${STAC_FASTAPI_VERSION}.tar.gz -C ${STAC_FASTAPI_SRC_DIR}
-az acr build --registry $ACR_NAME --image stac-fastapi ${STAC_FASTAPI_SRC_DIR}/stac-fastapi-${STAC_FASTAPI_VERSION}
+# wget $STAC_FASTAPI_RELEASE_URI -P $STAC_FASTAPI_SRC_DIR
+# tar xvf ${STAC_FASTAPI_SRC_DIR}/${STAC_FASTAPI_VERSION}.tar.gz -C ${STAC_FASTAPI_SRC_DIR}
+# az acr build --registry $ACR_NAME --image stac-fastapi ${STAC_FASTAPI_SRC_DIR}/stac-fastapi-${STAC_FASTAPI_VERSION}
+
+# Released versions of stac-fastapi are broken because of an unreleased fix https://github.com/stac-utils/stac-fastapi/pull/466
+# Using github master branch for the build as of now
+# TODO: Uncomment the code above and comment/remove this code which pulls stac-fastapi from master branch
+git clone https://github.com/stac-utils/stac-fastapi $STAC_FASTAPI_SRC_DIR/stac-fastapi
+az acr build --registry $ACR_NAME --image stac-fastapi ${STAC_FASTAPI_SRC_DIR}/stac-fastapi
 rm -rf ${STAC_FASTAPI_SRC_DIR}
