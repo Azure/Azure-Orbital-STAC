@@ -36,5 +36,9 @@ mkdir -p $STAC_FASTAPI_SRC_DIR
 # Using github master branch for the build as of now
 # TODO: Uncomment the code above and comment/remove this code which pulls stac-fastapi from master branch
 git clone https://github.com/stac-utils/stac-fastapi $STAC_FASTAPI_SRC_DIR/stac-fastapi
+CURRENT_WORKING_DIRECTORY="$(pwd)"
+cd $STAC_FASTAPI_SRC_DIR/stac-fastapi
+git reset --hard 926698034f836ed4db13e03c9c33257c4a86020a
+cd $CURRENT_WORKING_DIRECTORY
 az acr build --registry $ACR_NAME --image stac-fastapi ${STAC_FASTAPI_SRC_DIR}/stac-fastapi
 rm -rf ${STAC_FASTAPI_SRC_DIR}
