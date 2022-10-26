@@ -192,5 +192,4 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set stacfastapi.env.POSTGRES_USER=${PGUSER} \
     --set stacfastapi.env.PGUSER=${PGUSER} \
     --set stacfastapi.env.PGPASSWORD=${PGPASSWORD} \
-    --set stacfastapi.env.PGHOST=${PGHOST}
-    
+    --set stacfastapi.env.PGHOST=${PGHOST}    
