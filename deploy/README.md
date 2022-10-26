@@ -10,6 +10,7 @@ The deployment script uses following tools, please follow the links provided to 
 - [bicep](https://docs.microsoft.com/azure/azure-resource-manager/bicep/install)
 - [jq](https://stedolan.github.io/jq/download/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- [helm](https://helm.sh/)
 - [wget](https://www.jcchouinard.com/wget/)
 - The scripts are executed on bash shell, so if using a computer with windows based operating system, install a [WSL](https://docs.microsoft.com/windows/wsl/about) environment to execute the script.
 - The bicep templates have been written to adhere to the syntax and rules for bicep version >= 0.8.2. Please check your bicep version using `az bicep version` or `bicep --version` if you run into bicep related errors.
@@ -28,7 +29,7 @@ If you have started the deployment with a different role Ex: `Contributor`, and 
 - `build.sh`: This script invokes `az acr build` to pack the source code, upload to, and build the docker images in the ACR, setup by `install.sh`.
 - `configure.sh`: This script retrieves the azure resource names, credentials, and connection strings from the infrastructure provisioned & its key vault, and invoke `kubectl apply` to deploy container applications.
 
-For instructions on deploying & configuring the solution, please visit [here](../docs/deploying-infra.md).
+**For instructions on deploying & configuring the solution, please visit [here](../docs/deploying-infra.md).**
 
 ## Cataloging sample data
 
