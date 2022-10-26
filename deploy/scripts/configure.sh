@@ -34,7 +34,7 @@ DATA_STORAGE_ACCOUNT_NAME=$(az storage account list \
 DATA_STORAGE_ACCOUNT_KEY=$(az storage account keys list \
     --account-name ${DATA_STORAGE_ACCOUNT_NAME} --resource-group ${DATA_RESOURCE_GROUP} \
     --query "[0].value" -o tsv)
-STORAGE_ACCOUNT_ENDPOINT_SUFFIX=$(az cloud show --query suffixes.storageEndpoint --output tsv) 
+STORAGE_ACCOUNT_ENDPOINT_SUFFIX=$(az cloud show --query suffixes.storageEndpoint --output tsv)
 
 DATA_STORAGE_ACCOUNT_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=$STORAGE_ACCOUNT_ENDPOINT_SUFFIX;AccountName=$DATA_STORAGE_ACCOUNT_NAME;AccountKey=$DATA_STORAGE_ACCOUNT_KEY"
 
@@ -118,10 +118,58 @@ az aks get-credentials --resource-group ${AKS_RESOURCE_GROUP} --name ${AKS_CLUST
 kubectl config set-context ${AKS_CLUSTER_NAME}
 
 echo "creating $AKS_NAMESPACE namespace"
-envsubst < "${PRJ_ROOT}/deploy/kube_yaml/namespace.yaml" | kubectl apply -f -
+kubectl create namespace ${AKS_NAMESPACE}
 
 echo "deploying stacfastapi"
-envsubst < ${PRJ_ROOT}/src/stac_fastapi_k8s/app-stacfastapi-deployment.tpl.yaml | kubectl -n $AKS_NAMESPACE apply -f -
+helm install stac-scaler ${PRJ_ROOT} -n $AKS_NAMESPACE apply -f -
 
-echo "deploying aks-ingest"
-envsubst < ${PRJ_ROOT}/src/stac_ingestion/aks-ingest-deployment.yaml | kubectl -n $AKS_NAMESPACE apply -f -
+echo "Deploying chart to Kubernetes Cluster"
+helm install stac-scaler ${PRJ_ROOT}/deploy/kube_yaml/stac-scaler \
+    --namespace pgstac --values ${PRJ_ROOT}/deploy/kube_yaml/stac-scaler/values-custom.yaml \
+    --set serviceBusConnectionString=${STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING} \
+    --set processors.stac-collection.namespace=${SERVICE_BUS_NAMESPACE} \
+    --set processors.stac-collection.image.repository=${ACR_DNS} \
+    --set processors.stac-collection.env.STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING=${STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING} \
+    --set processors.stac-collection.env.STACCOLLECTION_SERVICE_BUS_TOPIC_NAME=${STACCOLLECTION_SERVICE_BUS_TOPIC_NAME} \
+    --set processors.stac-collection.env.STACCOLLECTION_SERVICE_BUS_SUBSCRIPTION_NAME=${STACCOLLECTION_SERVICE_BUS_SUBSCRIPTION_NAME} \
+    --set processors.stac-collection.env.DATA_STORAGE_ACCOUNT_CONNECTION_STRING=${DATA_STORAGE_ACCOUNT_CONNECTION_STRING} \
+    --set processors.stac-collection.env.DATA_STORAGE_ACCOUNT_NAME=${DATA_STORAGE_ACCOUNT_NAME} \
+    --set processors.stac-collection.env.DATA_STORAGE_ACCOUNT_KEY=${DATA_STORAGE_ACCOUNT_KEY} \
+    --set processors.stac-collection.env.STACCOLLECTION_STORAGE_CONTAINER_NAME=${STACCOLLECTION_STORAGE_CONTAINER_NAME} \
+    --set processors.stac-collection.env.AZURE_LOG_CONNECTION_STRING=${AZURE_LOG_CONNECTION_STRING} \
+    --set processors.stac-collection.env.PGHOST=${PGHOSTONLY} \
+    --set processors.stac-collection.env.PGPORT=5432 \
+    --set processors.stac-collection.env.PGUSER=${PGUSER} \
+    --set processors.stac-collection.env.PGDATABASE=${PGDATABASE} \
+    --set processors.stac-collection.env.PGPASSWORD=${PGPASSWORD} \
+    --set processors.stac-event-consumer.namespace=${SERVICE_BUS_NAMESPACE} \
+    --set processors.stac-event-consumer.image.repository=${ACR_DNS} \
+    --set processors.stac-event-consumer.env.PGSTAC_SERVICE_BUS_CONNECTION_STRING=${PGSTAC_SERVICE_BUS_CONNECTION_STRING} \
+    --set processors.stac-event-consumer.env.PGSTAC_SERVICE_BUS_TOPIC_NAME=${PGSTAC_SERVICE_BUS_TOPIC_NAME} \
+    --set processors.stac-event-consumer.env.PGSTAC_SERVICE_BUS_SUBSCRIPTION_NAME=${PGSTAC_SERVICE_BUS_SUBSCRIPTION_NAME} \
+    --set processors.stac-event-consumer.env.DATA_STORAGE_ACCOUNT_CONNECTION_STRING=${DATA_STORAGE_ACCOUNT_CONNECTION_STRING} \
+    --set processors.stac-event-consumer.env.GENERATED_STAC_STORAGE_CONTAINER_NAME=${GENERATED_STAC_STORAGE_CONTAINER_NAME} \
+    --set processors.stac-event-consumer.env.AZURE_LOG_CONNECTION_STRING=${AZURE_LOG_CONNECTION_STRING} \
+    --set processors.stac-event-consumer.env.DATA_STORAGE_PGSTAC_CONTAINER_NAME=${DATA_STORAGE_PGSTAC_CONTAINER_NAME} \
+    --set processors.stac-event-consumer.env.PGHOST=${PGHOSTONLY} \
+    --set processors.stac-event-consumer.env.PGPORT=5432 \
+    --set processors.stac-event-consumer.env.PGUSER=${PGUSER} \
+    --set processors.stac-event-consumer.env.PGDATABASE=${PGDATABASE} \
+    --set processors.stac-event-consumer.env.PGPASSWORD=${PGPASSWORD} \
+    --set processors.generate-stac-json.namespace=${SERVICE_BUS_NAMESPACE} \
+    --set processors.generate-stac-json.image.repository=${ACR_DNS} \
+    --set processors.generate-stac-json.env.DATA_STORAGE_ACCOUNT_CONNECTION_STRING=${DATA_STORAGE_ACCOUNT_CONNECTION_STRING} \
+    --set processors.generate-stac-json.env.DATA_STORAGE_ACCOUNT_NAME=${DATA_STORAGE_ACCOUNT_NAME} \
+    --set processors.generate-stac-json.env.DATA_STORAGE_ACCOUNT_KEY=${DATA_STORAGE_ACCOUNT_KEY} \
+    --set processors.generate-stac-json.env.STACIFY_STORAGE_CONTAINER_NAME=${STACIFY_STORAGE_CONTAINER_NAME} \
+    --set processors.generate-stac-json.env.STACIFY_SERVICE_BUS_CONNECTION_STRING=${STACIFY_SERVICE_BUS_CONNECTION_STRING} \
+    --set processors.generate-stac-json.env.STACIFY_SERVICE_BUS_TOPIC_NAME=${STACIFY_SERVICE_BUS_TOPIC_NAME} \
+    --set processors.generate-stac-json.env.STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME=${STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME} \
+    --set processors.generate-stac-json.env.GENERATED_STAC_STORAGE_CONTAINER_NAME=${GENERATED_STAC_STORAGE_CONTAINER_NAME} \
+    --set processors.generate-stac-json.env.AZURE_LOG_CONNECTION_STRING=5432 \
+    --set processors.generate-stac-json.env.DATA_STORAGE_PGSTAC_CONTAINER_NAME=${DATA_STORAGE_PGSTAC_CONTAINER_NAME} \
+    --set processors.generate-stac-json.env.STAC_METADATA_TYPE_NAME=${STAC_METADATA_TYPE_NAME} \
+    --set processors.generate-stac-json.env.JPG_EXTENSION=${JPG_EXTENSION} \
+    --set processors.generate-stac-json.env.XML_EXTENSION=${XML_EXTENSION} \
+    --set processors.generate-stac-json.env.COLLECTION_ID=${COLLECTION_ID}
+    
