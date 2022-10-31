@@ -9,6 +9,7 @@ activeDeadlineSeconds: 600
 
 namespace: pgstac
 serviceBusConnectionString: "service-bus-conn-string"
+envCode: stac
 
 processors:
   stac-collection:
@@ -17,6 +18,7 @@ processors:
     topicName: "staccollectiontopic"
     subscriptionName: "staccollectionsubscription"
     authenticationRef: "azure-servicebus-auth"
+    messageCount: 1
     pollingInterval: 30
     minReplicaCount: 0
     maxReplicaCount: 10
@@ -52,6 +54,7 @@ processors:
     topicName: "pgstactopic"
     subscriptionName: "pgstacsubscription"
     authenticationRef: "azure-servicebus-auth"
+    messageCount: 1
     pollingInterval: 30
     minReplicaCount: 0
     maxReplicaCount: 10
@@ -86,6 +89,7 @@ processors:
     topicName: "stacifytopic"
     subscriptionName: "stacifysubscription"
     authenticationRef: "azure-servicebus-auth"
+    messageCount: 1
     pollingInterval: 30
     minReplicaCount: 0
     maxReplicaCount: 10
@@ -119,7 +123,7 @@ processors:
 
 stacfastapi:
   replicas: 1
-  labels: 
+  labels:
     app: app-stacfastapi
   image:
     repository: acr.azurecr.io
@@ -139,7 +143,7 @@ stacfastapi:
     POSTGRES_HOST_WRITER: "host"
     POSTGRES_PASS: "password"
     POSTGRES_PORT: "5432"
-    POSTGRES_USER: "user"    
+    POSTGRES_USER: "user"
     RELOAD: "false"
     USE_API_HYDRATE: "false"
     VSI_CACHE: "TRUE"
