@@ -58,6 +58,13 @@ GENERATE_STAC_JSON_IMAGE_NAME=${GENERATE_STAC_JSON_IMAGE_NAME:-"generate-stac-js
 DATA_STORAGE_PGSTAC_CONTAINER_NAME=${DATA_STORAGE_PGSTAC_CONTAINER_NAME:-"pgstac"}
 ENV_LABLE=${ENV_LABLE:-"stacpool"} # aks agent pool name to deploy kubectl deployment yaml files
 
+SERVICE_BUS_AUTH_POLICY_NAME=${SERVICE_BUS_AUTH_POLICY_NAME:-"RootManageSharedAccessKey"}
+SERVICE_BUS_CONNECTION_STRING=$(az servicebus namespace authorization-rule keys list \
+    --resource-group ${DATA_RESOURCE_GROUP} \
+    --namespace-name ${SERVICE_BUS_NAMESPACE} \
+    --name ${SERVICE_BUS_AUTH_POLICY_NAME} \
+    --query "primaryConnectionString" -otsv)
+
 STAC_EVENT_CONSUMER_IMAGE_NAME=${STAC_EVENT_CONSUMER_IMAGE_NAME:-"stac-event-consumer"}
 PGSTAC_SERVICE_BUS_TOPIC_NAME=${PGSTAC_SERVICE_BUS_TOPIC_NAME:-"pgstactopic"}
 PGSTAC_SERVICE_BUS_TOPIC_AUTH_POLICY_NAME=${PGSTAC_SERVICE_BUS_TOPIC_AUTH_POLICY_NAME:-"pgstacpolicy"}
@@ -117,16 +124,21 @@ az postgres flexible-server \
 az aks get-credentials --resource-group ${AKS_RESOURCE_GROUP} --name ${AKS_CLUSTER_NAME} --context ${AKS_CLUSTER_NAME} --overwrite-existing
 kubectl config set-context ${AKS_CLUSTER_NAME}
 
-echo "creating $AKS_NAMESPACE namespace"
-kubectl create namespace ${AKS_NAMESPACE}
+NS=$(kubectl get namespace $AKS_NAMESPACE --ignore-not-found);
+if [[ "$NS" ]]; then
+    echo "Skipping creation of ${AKS_NAMESPACE} namespace in k8s cluster as it already exists"
+else
+    echo "Creating ${AKS_NAMESPACE} namespace in k8s cluster"
+    kubectl create namespace ${AKS_NAMESPACE}
+fi; 
 
 echo "deploying stacfastapi"
-helm install stac-scaler ${PRJ_ROOT} -n $AKS_NAMESPACE apply -f -
+#helm install stac-scaler ${PRJ_ROOT} -n $AKS_NAMESPACE apply -f -
 
 echo "Deploying chart to Kubernetes Cluster"
-helm install stac-scaler ${PRJ_ROOT}/deploy/kube_yaml/stac-scaler \
-    --namespace pgstac --values ${PRJ_ROOT}/deploy/kube_yaml/stac-scaler/values-custom.yaml \
-    --set serviceBusConnectionString=${STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING} \
+helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
+    --namespace pgstac \
+    --set serviceBusConnectionString=${SERVICE_BUS_CONNECTION_STRING} \
     --set processors.stac-collection.namespace=${SERVICE_BUS_NAMESPACE} \
     --set processors.stac-collection.image.repository=${ACR_DNS} \
     --set processors.stac-collection.env.STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING=${STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING} \
@@ -137,7 +149,7 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/kube_yaml/stac-scaler \
     --set processors.stac-collection.env.DATA_STORAGE_ACCOUNT_KEY=${DATA_STORAGE_ACCOUNT_KEY} \
     --set processors.stac-collection.env.STACCOLLECTION_STORAGE_CONTAINER_NAME=${STACCOLLECTION_STORAGE_CONTAINER_NAME} \
     --set processors.stac-collection.env.AZURE_LOG_CONNECTION_STRING=${AZURE_LOG_CONNECTION_STRING} \
-    --set processors.stac-collection.env.PGHOST=${PGHOSTONLY} \
+    --set processors.stac-collection.env.PGHOST=${PGHOST} \
     --set processors.stac-collection.env.PGPORT=5432 \
     --set processors.stac-collection.env.PGUSER=${PGUSER} \
     --set processors.stac-collection.env.PGDATABASE=${PGDATABASE} \
@@ -151,7 +163,7 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/kube_yaml/stac-scaler \
     --set processors.stac-event-consumer.env.GENERATED_STAC_STORAGE_CONTAINER_NAME=${GENERATED_STAC_STORAGE_CONTAINER_NAME} \
     --set processors.stac-event-consumer.env.AZURE_LOG_CONNECTION_STRING=${AZURE_LOG_CONNECTION_STRING} \
     --set processors.stac-event-consumer.env.DATA_STORAGE_PGSTAC_CONTAINER_NAME=${DATA_STORAGE_PGSTAC_CONTAINER_NAME} \
-    --set processors.stac-event-consumer.env.PGHOST=${PGHOSTONLY} \
+    --set processors.stac-event-consumer.env.PGHOST=${PGHOST} \
     --set processors.stac-event-consumer.env.PGPORT=5432 \
     --set processors.stac-event-consumer.env.PGUSER=${PGUSER} \
     --set processors.stac-event-consumer.env.PGDATABASE=${PGDATABASE} \
@@ -166,10 +178,18 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/kube_yaml/stac-scaler \
     --set processors.generate-stac-json.env.STACIFY_SERVICE_BUS_TOPIC_NAME=${STACIFY_SERVICE_BUS_TOPIC_NAME} \
     --set processors.generate-stac-json.env.STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME=${STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME} \
     --set processors.generate-stac-json.env.GENERATED_STAC_STORAGE_CONTAINER_NAME=${GENERATED_STAC_STORAGE_CONTAINER_NAME} \
-    --set processors.generate-stac-json.env.AZURE_LOG_CONNECTION_STRING=5432 \
+    --set processors.generate-stac-json.env.AZURE_LOG_CONNECTION_STRING=${AZURE_LOG_CONNECTION_STRING} \
     --set processors.generate-stac-json.env.DATA_STORAGE_PGSTAC_CONTAINER_NAME=${DATA_STORAGE_PGSTAC_CONTAINER_NAME} \
     --set processors.generate-stac-json.env.STAC_METADATA_TYPE_NAME=${STAC_METADATA_TYPE_NAME} \
     --set processors.generate-stac-json.env.JPG_EXTENSION=${JPG_EXTENSION} \
     --set processors.generate-stac-json.env.XML_EXTENSION=${XML_EXTENSION} \
-    --set processors.generate-stac-json.env.COLLECTION_ID=${COLLECTION_ID}
+    --set processors.generate-stac-json.env.COLLECTION_ID=${COLLECTION_ID} \
+    --set stacfastapi.image.repository=${ACR_DNS} \
+    --set stacfastapi.env.POSTGRES_HOST_READER=${PGHOST} \
+    --set stacfastapi.env.POSTGRES_HOST_WRITER=${PGHOST} \
+    --set stacfastapi.env.POSTGRES_PASS=${PGPASSWORD} \
+    --set stacfastapi.env.POSTGRES_USER=${PGUSER} \
+    --set stacfastapi.env.PGUSER=${PGUSER} \
+    --set stacfastapi.env.PGPASSWORD=${PGPASSWORD} \
+    --set stacfastapi.env.PGHOST=${PGHOST}
     
