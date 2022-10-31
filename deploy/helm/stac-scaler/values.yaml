@@ -18,7 +18,7 @@ processors:
     subscriptionName: "staccollectionsubscription"
     authenticationRef: "azure-servicebus-auth"
     pollingInterval: 30
-    minReplicaCount: 1
+    minReplicaCount: 0
     maxReplicaCount: 10
     successfulJobsHistoryLimit: 3
     failedJobsHistoryLimit: 2
@@ -53,7 +53,7 @@ processors:
     subscriptionName: "pgstacsubscription"
     authenticationRef: "azure-servicebus-auth"
     pollingInterval: 30
-    minReplicaCount: 1
+    minReplicaCount: 0
     maxReplicaCount: 10
     successfulJobsHistoryLimit: 3
     failedJobsHistoryLimit: 2
@@ -87,7 +87,7 @@ processors:
     subscriptionName: "stacifysubscription"
     authenticationRef: "azure-servicebus-auth"
     pollingInterval: 30
-    minReplicaCount: 1
+    minReplicaCount: 0
     maxReplicaCount: 10
     successfulJobsHistoryLimit: 3
     failedJobsHistoryLimit: 2
@@ -116,3 +116,45 @@ processors:
       limits:
         cpu: "100m"
         memory: "512Mi"
+
+stacfastapi:
+  replicas: 1
+  labels: 
+    app: app-stacfastapi
+  image:
+    repository: acr.azurecr.io
+    name: stac-fastapi
+    pullPolicy: Always
+    tag: "latest"
+  env:
+    APP_HOST: 0.0.0.0
+    APP_PORT: "8082"
+    DB_MAX_CONN_SIZE: "1"
+    DB_MIN_CONN_SIZE: "1"
+    ENVIRONMENT: local
+    GDAL_DISABLE_READDIR_ON_OPEN: EMPTY_DIR
+    GDAL_HTTP_MERGE_CONSECUTIVE_RANGES: "YES"
+    POSTGRES_DBNAME: postgres
+    POSTGRES_HOST_READER: "host"
+    POSTGRES_HOST_WRITER: "host"
+    POSTGRES_PASS: "password"
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: "user"    
+    RELOAD: "false"
+    USE_API_HYDRATE: "false"
+    VSI_CACHE: "TRUE"
+    WEB_CONCURRENCY: "10"
+    PGUSER: "user"
+    PGPASSWORD: "password"
+    PGHOST: "host"
+    PGDATABASE: "postgres"
+  resources:
+    requests:
+      memory: "2.5G"
+      cpu: "1000m"
+    limits:
+      memory: "8G"
+      cpu: "8"
+  ports:
+    - containerPort: 8082
+      protocol: TCP
