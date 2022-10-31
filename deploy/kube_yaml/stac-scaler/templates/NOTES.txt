@@ -1,9 +1,0 @@
-You have succesfully installed Azure Orbital STAC through {{ .Chart.Name }} Chart.
-
-Your release is named {{ .Release.Name }}.
-
-To learn more about the components deployed as part of this chart, refer to the README.md file under the 'stac-scaler' folder.
-
-To remove the components deployed through this Chart, it is recommended to delete this chart using the command below in order to cleanly remove all the components:
-
-helm -n {{ .Release.Namespace }} delete {{ .Release.Name }}
