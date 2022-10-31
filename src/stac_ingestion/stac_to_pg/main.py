@@ -24,7 +24,6 @@ logger.setLevel(logging.INFO)
 logger.addHandler(AzureLogHandler(
     connection_string=AZURE_LOG_CONNECTION_STRING))
 
-
 async def download_blob_data(file_path: str):
     """
     Download blob data from Blob Storage
@@ -90,8 +89,10 @@ def main():
         receiver = client.get_subscription_receiver(
             topic_name=PGSTAC_SERVICE_BUS_TOPIC_NAME, subscription_name=PGSTAC_SERVICE_BUS_SUBSCRIPTION_NAME)
 
+        messages = receiver.receive_messages(max_message_count=1)
+
         with receiver:
-            for msg in receiver:
+            for msg in messages:
 
                 # start time for processing
                 start_time = datetime.utcnow()

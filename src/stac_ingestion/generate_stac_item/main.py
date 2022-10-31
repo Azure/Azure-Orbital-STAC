@@ -25,7 +25,14 @@ logger.addHandler(AzureLogHandler(
     connection_string=AZURE_LOG_CONNECTION_STRING))
 
 
-def create_item_in_blob(state: str, year: str, cog_href: str, dst: str, thumbnail: str, providers: str, cog_url: str, stac_metadata: str = None) -> str:
+def create_item_in_blob(state: str, 
+                        year: str, 
+                        cog_href: str, 
+                        dst: str, 
+                        thumbnail: str, 
+                        providers: str, 
+                        cog_url: str, 
+                        stac_metadata: str = None) -> str:
     """Creates a STAC Item based on metadata.
 
     STATE is the state this NAIP tile belongs to.
@@ -66,7 +73,8 @@ def create_item_in_blob(state: str, year: str, cog_href: str, dst: str, thumbnai
     return item.id
 
 
-def translate_tif_to_jpeg(title: str, tif_file: str) -> None:
+def translate_tif_to_jpeg(title: str, 
+                          tif_file: str) -> None:
     """
     Translates a TIFF file to a JPEG file.
     """
@@ -87,7 +95,10 @@ def translate_tif_to_jpeg(title: str, tif_file: str) -> None:
         print(f"{title}.jpg not translated. The error is: {e}")
 
 
-def log_time_to_complete(start_time, end_time, item_id, file_name):
+def log_time_to_complete(start_time, 
+                         end_time, 
+                         item_id, 
+                         file_name):
     """
     Logs the time to complete a specific activity
 
@@ -121,11 +132,20 @@ def get_incoming_message():
     Get the incoming message from the service bus.
     """
     renewer = AutoLockRenewer()
-    with ServiceBusClient.from_connection_string(conn_str=STACIFY_SERVICE_BUS_CONNECTION_STRING, retry_total=1, retry_backoff_factor=10, retry_mode="fixed") as client:
-        receiver = client.get_subscription_receiver(
-            topic_name=STACIFY_SERVICE_BUS_TOPIC_NAME, subscription_name=STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME)
+    with ServiceBusClient.from_connection_string(conn_str=STACIFY_SERVICE_BUS_CONNECTION_STRING, 
+                                                 retry_total=1, 
+                                                 retry_backoff_factor=10, 
+                                                 retry_mode="fixed") as client:
+        
+        receiver = client.get_subscription_receiver(topic_name=STACIFY_SERVICE_BUS_TOPIC_NAME, 
+                                                    subscription_name=STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME)
+        
+        
+        messages = receiver.receive_messages(max_message_count=1)
+        
         with receiver:
-            for msg in receiver:
+            
+            for msg in messages:
 
                 start_time = datetime.utcnow()
 
