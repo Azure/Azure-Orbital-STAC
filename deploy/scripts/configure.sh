@@ -139,6 +139,7 @@ echo "Deploying chart to Kubernetes Cluster"
 helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --namespace pgstac \
     --set serviceBusConnectionString=${SERVICE_BUS_CONNECTION_STRING} \
+    --set envCode=${ENV_CODE} \
     --set processors.stac-collection.namespace=${SERVICE_BUS_NAMESPACE} \
     --set processors.stac-collection.image.repository=${ACR_DNS} \
     --set processors.stac-collection.env.STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING=${STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING} \
