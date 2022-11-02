@@ -18,7 +18,7 @@ processors:
     topicName: "staccollectiontopic"
     subscriptionName: "staccollectionsubscription"
     authenticationRef: "azure-servicebus-auth"
-    messageCount: 1
+    messageCount: '1'
     pollingInterval: 30
     minReplicaCount: 0
     maxReplicaCount: 10
@@ -54,7 +54,7 @@ processors:
     topicName: "pgstactopic"
     subscriptionName: "pgstacsubscription"
     authenticationRef: "azure-servicebus-auth"
-    messageCount: 1
+    messageCount: '1'
     pollingInterval: 30
     minReplicaCount: 0
     maxReplicaCount: 10
@@ -89,7 +89,7 @@ processors:
     topicName: "stacifytopic"
     subscriptionName: "stacifysubscription"
     authenticationRef: "azure-servicebus-auth"
-    messageCount: 1
+    messageCount: '1'
     pollingInterval: 30
     minReplicaCount: 0
     maxReplicaCount: 10
