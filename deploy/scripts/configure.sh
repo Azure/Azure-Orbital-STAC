@@ -130,10 +130,7 @@ if [[ "$NS" ]]; then
 else
     echo "Creating ${AKS_NAMESPACE} namespace in k8s cluster"
     kubectl create namespace ${AKS_NAMESPACE}
-fi; 
-
-echo "deploying stacfastapi"
-#helm install stac-scaler ${PRJ_ROOT} -n $AKS_NAMESPACE apply -f -
+fi;
 
 echo "Deploying chart to Kubernetes Cluster"
 helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
@@ -193,4 +190,3 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set stacfastapi.env.PGUSER=${PGUSER} \
     --set stacfastapi.env.PGPASSWORD=${PGPASSWORD} \
     --set stacfastapi.env.PGHOST=${PGHOST}
-    
