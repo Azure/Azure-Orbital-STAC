@@ -35,6 +35,7 @@ DEPLOYMENT_NAME=${6:-${DEPLOYMENT_NAME:-"${ENV_TAG}-deploy"}}
 CONFIGURE_POD_IDENTITY=${7:-${CONFIGURE_POD_IDENTITY:-"false"}}
 ENABLE_PUBLIC_ACCESS=${8:-${ENABLE_PUBLIC_ACCESS:-"false"}}
 USER_OBJ_ID=${USER_OBJ_ID:-"$(az ad signed-in-user show --query id --output tsv 2> /dev/null || echo '')"}
+LB_PRIVATE_IP=${LB_PRIVATE_IP:-"10.6.3.255"}
 
 if [[ -z "$USER_OBJ_ID" ]]
   then
@@ -50,6 +51,7 @@ DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
     environment=$ENV_TAG \
     jumpboxAdminUsername=$JUMPBOX_USERNAME \
     jumpboxAdminPassword=$JUMPBOX_PASSWORD \
+    loadBalancerPrivateIP=$LB_PRIVATE_IP \
     configurePodIdentity=$CONFIGURE_POD_IDENTITY \
     enablePublicAccess=$ENABLE_PUBLIC_ACCESS \
     owner_aad_object_id=$USER_OBJ_ID"

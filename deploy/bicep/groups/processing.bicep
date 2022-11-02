@@ -14,12 +14,17 @@ param acrName string = ''
 param acrSku string = 'Standard'
 param storageAccountNameForApim string
 param storageAccountResourceGroupName string
-param loadBalancerDNSSuffix string = '.cloudapp.azure.com'
+param loadBalancerPrivateIP string = '10.6.3.255'
 // Roles for APIM and its Managed Identity
 param apimMISRoles array = [
   'ba92f5b4-2d11-453d-a403-e96b0029c9fe' // Storage Blob Data Contributor
 ]
+
+// Parameters for Virtual Network Information
+param vnetName string
+param vnetResourceGroup string
 param vnetSubnetID string
+
 // Parameters for AKS
 param aksClusterName string = ''
 param aksVmSize string = 'Standard_D2_v5'
@@ -166,7 +171,7 @@ var apiOperationConfigs = [
       displayName: 'fast-stac-api'
       apiRevision: '1'
       subscriptionRequired: false
-      serviceUrl: 'http://app-stacfastapi-stac-${environmentCode}.${location}${loadBalancerDNSSuffix}:8082'
+      serviceUrl: 'http://${loadBalancerPrivateIP}:8082'
       path: 'api'
       protocols: [
         'https'
@@ -400,6 +405,26 @@ module aksCluster '../modules/aks-cluster-with-pod-identity.bicep' =  {
   ]
 }
 
+module grantNetworkContributorToAksCluster '../modules/vnet.role-assignment.bicep' = {
+  name: '${namingPrefix}-aks-grant-network-contributor-on-vnet'
+  scope: resourceGroup(vnetResourceGroup)
+  params: {
+    vnetName: vnetName
+    principalId: aksCluster.outputs.principalId
+    // Role definition id maps to 'Network Contributor' role
+    roleDefinitionId: '/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7'
+  }
+}
+
+module grantNetworkResourceGroupReadAccessToAksCluster '../modules/resourcegroup.role-assignment.bicep' = {
+  name: '${namingPrefix}-aks-grant-reader-to-vnet-rgp'
+  scope: resourceGroup(vnetResourceGroup)
+  params: {
+    principalId: aksCluster.outputs.principalId
+    // Role definition id maps to 'Reader' role
+    roleDefinitionId: '/providers/Microsoft.Authorization/roleDefinitionsacdd72a7-3385-48ef-bd42-f606fba81ae7'
+  }
+}
 module attachACRtoAKS '../modules/aks-attach-acr.bicep' =  {
   name: '${namingPrefix}-attachACRtoAKS'
   params: {

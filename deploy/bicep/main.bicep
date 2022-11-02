@@ -46,6 +46,7 @@ var projectName = 'stac'
 var namingPrefix = '${environmentCode}-${projectName}'
 
 param configurePodIdentity bool = false
+param loadBalancerPrivateIP string = '10.6.3.255'
 
 // This parameter is a placeholder to retain current work we have for public access
 // Setting it to true may not work for all cases.
@@ -203,11 +204,14 @@ module processingModule 'groups/processing.bicep' = {
     keyVaultName: keyvaultNameVar
     keyVaultResourceGroupName: dataRg.name
     logAnalyticsWorkspaceResourceID: monitoringModule.outputs.workspaceId
+    vnetResourceGroup: vnetResourceGroupName
+    vnetName: vnetNameVar
     vnetSubnetID: networkingModule.outputs.aksSubnetId
     userManagedIdentityIdForJumpboxStateCheck: uami.outputs.uamiId
     jumpboxSubnetID: networkingModule.outputs.jumpboxSubnetId
     jumpboxAdminUsername: jumpboxAdminUsername
     jumpboxAdminPasswordOrKey: jumpboxAdminPassword
+    loadBalancerPrivateIP: loadBalancerPrivateIP
     configurePodIdentity: configurePodIdentity
     storageAccountNameForApim: dataModule.outputs.storageAccountName
     storageAccountResourceGroupName: dataRg.name
