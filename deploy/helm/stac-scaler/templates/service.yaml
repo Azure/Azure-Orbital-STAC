@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: app-stacfastapi
   annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
     service.beta.kubernetes.io/azure-dns-label-name: app-stacfastapi-{{ .Values.envCode }}
 spec:
   type: LoadBalancer
