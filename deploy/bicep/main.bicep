@@ -46,7 +46,7 @@ var projectName = 'stac'
 var namingPrefix = '${environmentCode}-${projectName}'
 
 param configurePodIdentity bool = false
-param loadBalancerPrivateIP string = '10.6.3.255'
+param loadBalancerPrivateIP string = '10.6.3.254'
 
 // This parameter is a placeholder to retain current work we have for public access
 // Setting it to true may not work for all cases.

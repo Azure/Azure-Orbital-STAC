@@ -14,7 +14,7 @@ param acrName string = ''
 param acrSku string = 'Standard'
 param storageAccountNameForApim string
 param storageAccountResourceGroupName string
-param loadBalancerPrivateIP string = '10.6.3.255'
+param loadBalancerPrivateIP string = '10.6.3.254'
 // Roles for APIM and its Managed Identity
 param apimMISRoles array = [
   'ba92f5b4-2d11-453d-a403-e96b0029c9fe' // Storage Blob Data Contributor
@@ -422,7 +422,7 @@ module grantNetworkResourceGroupReadAccessToAksCluster '../modules/resourcegroup
   params: {
     principalId: aksCluster.outputs.principalId
     // Role definition id maps to 'Reader' role
-    roleDefinitionId: '/providers/Microsoft.Authorization/roleDefinitionsacdd72a7-3385-48ef-bd42-f606fba81ae7'
+    roleDefinitionId: '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
   }
 }
 module attachACRtoAKS '../modules/aks-attach-acr.bicep' =  {
