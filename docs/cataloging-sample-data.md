@@ -22,10 +22,10 @@ The steps below walks you through the creation of STAC Collection and STAC Item.
 ```
 {
     "msft:expiry":"2021-04-08T18:49:29Z",
-    "token":"se=2021-04-08T18%3A49%3A29Z&sp=rl&sv=2020-02-10&sr=c&skoid=cccccccc-dddd-4444-aaaa-eeeeeeeeeeee&sktid=***&skt=2021-04-08T17%3A47%3A29Z&ske=2021-04-09T17%3A49%3A29Z&sks=b&skv=2020-02-10&sig=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb%3D"
+    "token":"se=2021-04-08T18%3A49%3A29Z&sp=rl&sv=2020-02-10&sr=c&skoid=cccccccc-****-****-aaaa-eee****ee&sktid=***&skt=2021-04-08T17%3A47%3A29Z&ske=2021-04-09T17%3A49%3A29Z&sks=b&skv=2020-02-10&sig=******bbbbbbbb****bbbbbbbbbb***b%3D"
 }
 ```
-The `token` field is the SAS token. The `msft:expiry` field specifies the time (in UTC) this token expires.
+The `token` field is the SAS token. The `msft:expiry` field specifies the time (in UTC) this token expires, which is 45 mins from the time it was first generated.
 
 We will use this token to download the sample data.
 
