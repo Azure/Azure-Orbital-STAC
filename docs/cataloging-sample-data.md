@@ -6,23 +6,36 @@ The steps below walks you through the creation of STAC Collection and STAC Item.
 
 ## Steps to Catalog Sample data
 
-1. First step in the process is the creation of the [STAC collection](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md). A STAC Collection is created by from a [json document](https://aoigeospatial.blob.core.windows.net/stac/collection_naip_test.json) that is uploaded to the appropriate container in the Storage Account.
+1. First step in the process is the creation of the [STAC collection](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md). A STAC Collection is created from a [json document](../deploy/sample-data/collection_naip_test.json) that is uploaded to the appropriate container in the Storage Account.
 
 
     ```bash
-    azcopy copy https://aoigeospatial.blob.core.windows.net/stac/collection_naip_test.json ~/data/collection_naip_test.json
+    wget https://raw.githubusercontent.com/Azure/Azure-Orbital-STAC/main/deploy/sample-data/collection_naip_test.json -P ~/data/collection_naip_test.json
     ```
 
     ```bash
     azcopy copy ~/data/collection_naip_test.json "https://<storage account>.blob.core.windows.net/staccollection/collection_naip_test.json?<SAS-token>" --recursive=true
     ```
 
-2. Once the STAC collection is created, the next steps is to create the [STAC Items](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md). Addition of the STAC Item to a STAC Collection is two step process.
+2. Generate the SAS token for getting the data from Planetary Computers using the link https://planetarycomputer.microsoft.com/api/sas/v1/token/naip. Clicking on the link will give an output like this:
+
+```
+{
+    "msft:expiry":"2021-04-08T18:49:29Z",
+    "token":"se=2021-04-08T18%3A49%3A29Z&sp=rl&sv=2020-02-10&sr=c&skoid=cccccccc-dddd-4444-aaaa-eeeeeeeeeeee&sktid=***&skt=2021-04-08T17%3A47%3A29Z&ske=2021-04-09T17%3A49%3A29Z&sks=b&skv=2020-02-10&sig=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb%3D"
+}
+```
+The `token` field is the SAS token. The `msft:expiry` field specifies the time (in UTC) this token expires.
+
+We will use this token to download the sample data.
+
+
+3. Once the STAC collection is created, the next steps is to create the [STAC Items](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md). Addition of the STAC Item to a STAC Collection is two step process.
 
     a. Upload metadata
  
     ```bash
-    azcopy copy https://aoigeospatial.blob.core.windows.net/stac/v002/wa/2015/wa_fgdc_2015/45117 ~/data/fgdc/ --recursive=true
+    azcopy copy "https://naipeuwest.blob.core.windows.net/naip/v002/wa/2015/wa_fgdc_2015/45117?<token-obtained-in-step-2>" ~/data/fgdc/ --recursive=true
     ```
 
     ```bash
@@ -32,7 +45,7 @@ The steps below walks you through the creation of STAC Collection and STAC Item.
     b. Upload raster data
 
     ```bash
-    azcopy copy https://aoigeospatial.blob.core.windows.net/stac/v002/wa/2015/wa_100cm_2015/45117 ~/data/100cm/ --recursive=true
+    azcopy copy "https://naipeuwest.blob.core.windows.net/naip/v002/wa/2015/wa_100cm_2015/45117?<token-obtained-in-step-2>" ~/data/100cm/ --recursive=true
     ```
 
     ```bash
