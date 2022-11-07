@@ -258,7 +258,7 @@ def get_incoming_message():
                             f"There was an error in this process of file {file_name_without_ext}")
                         logger.error(
                             "error", f"Error file: {file_name_without_ext} error message: {e}")
-                        receiver.complete_message(msg)
+                        receiver.abandon_message(msg)
 
 
 if __name__ == "__main__":
