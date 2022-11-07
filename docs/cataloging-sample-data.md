@@ -14,7 +14,7 @@ The steps below walks you through the creation of STAC Collection and STAC Item.
     ```
 
     ```bash
-    azcopy copy ~/data/collection_naip_test.json "https://<storage account>.blob.core.windows.net/staccollection/collection_naip_test.json?<SAS-token>" --recursive=true
+    azcopy copy ~/data/collection_naip_test.json "https://<data-storage-account>.blob.core.windows.net/staccollection/collection_naip_test.json?<SAS-token-for-data-storage-account>" --recursive=true
     ```
 
 2. Generate the SAS token for getting the data from Planetary Computers using the link https://planetarycomputer.microsoft.com/api/sas/v1/token/naip. Clicking on the link will give an output like this:
@@ -39,7 +39,7 @@ The steps below walks you through the creation of STAC Collection and STAC Item.
     ```
 
     ```bash
-    azcopy copy ~/data/fgdc/45117 "https://<storage account>.blob.core.windows.net/stacify/v002/wa/2015/wa_fgdc_2015?<SAS-token>" --recursive=true
+    azcopy copy ~/data/fgdc/45117 "https://<data-storage-account>.blob.core.windows.net/stacify/v002/wa/2015/wa_fgdc_2015?<SAS-token-for-data-storage-account>" --recursive=true
     ```
 
     b. Upload raster data
@@ -49,7 +49,7 @@ The steps below walks you through the creation of STAC Collection and STAC Item.
     ```
 
     ```bash
-    azcopy copy ~/data/100cm/45117 "https://<storage account>.blob.core.windows.net/stacify/v002/wa/2015/wa_100cm_2015?<SAS-token>" --recursive=true
+    azcopy copy ~/data/100cm/45117 "https://<data-storage-account>.blob.core.windows.net/stacify/v002/wa/2015/wa_100cm_2015?<SAS-token-for-data-storage-account>" --recursive=true
     ```
 
 ## Steps to validate Cataloged data
