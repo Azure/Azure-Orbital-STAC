@@ -82,9 +82,10 @@ kind: Service
 metadata:
   name: app-stacfastapi
   annotations:
-    service.beta.kubernetes.io/azure-dns-label-name: app-stacfastapi-${ENV_NAME}
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   type: LoadBalancer
+  loadBalancerIP: ${LB_PRIVATE_IP}
   ports:
     - name: "8082"
       port: 8082

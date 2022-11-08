@@ -8,6 +8,7 @@ ENV_CODE=${1:-${ENV_CODE}}
 LOCATION=${2:-${LOCATION}}
 JUMPBOX_PASSWORD=${3:-${JUMPBOX_PASSWORD}}
 JUMPBOX_USERNAME=${4:-${JUMPBOX_USERNAME:-"adminuser"}}
+LB_PRIVATE_IP=${5:-${LB_PRIVATE_IP:-"10.6.3.254"}}
 
 set -e
 
@@ -30,12 +31,14 @@ if [[ -z "$JUMPBOX_PASSWORD" ]]
 fi
 
 echo "Performing bicep template deployment"
+LB_PRIVATE_IP=$LB_PRIVATE_IP \
 $PRJ_ROOT/deploy/scripts/install.sh "$ENV_CODE" "$LOCATION" "$JUMPBOX_PASSWORD" "$JUMPBOX_USERNAME"
 
 echo "Building containers and Deploying to Infra"
 $PRJ_ROOT/deploy/scripts/build.sh "$ENV_CODE"
 
 echo "Performing configuration and Deploying Apps"
+LB_PRIVATE_IP=$LB_PRIVATE_IP \
 $PRJ_ROOT/deploy/scripts/configure.sh "$ENV_CODE"
 
 echo "Securing Keyvault access"
