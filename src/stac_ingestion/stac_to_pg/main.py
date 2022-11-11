@@ -112,8 +112,8 @@ def main():
                     time_to_process_file = end_time - start_time
 
                     start_time_str = start_time.strftime(
-                        "%Y-%m-%d %H:%M:%S")
-                    end_time_str = end_time.strftime("%Y-%m-%d %H:%M:%S")
+                        "%Y-%m-%d %H:%M:%S.%f")
+                    end_time_str = end_time.strftime("%Y-%m-%d %H:%M:%S.%f")
 
                     # Create a custom event for the Azure Application Insights
                     properties = {'custom_dimensions': {
