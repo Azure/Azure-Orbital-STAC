@@ -101,9 +101,9 @@ def log_time_to_complete(start_time, end_time, item_id, file_name):
     time_to_process_file = end_time - start_time
 
     start_time_str = start_time.strftime(
-        "%Y-%m-%d %H:%M:%S")
+        "%Y-%m-%d %H:%M:%S.%f")
 
-    end_time_str = end_time.strftime("%Y-%m-%d %H:%M:%S")
+    end_time_str = end_time.strftime("%Y-%m-%d %H:%M:%S.%f")
 
     properties = {'custom_dimensions': {
         'process': 'stac_generation',
