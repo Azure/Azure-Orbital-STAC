@@ -19,7 +19,7 @@ resource subscription 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2021
     defaultMessageTimeToLive: 'P14D'
     deadLetteringOnMessageExpiration: false
     deadLetteringOnFilterEvaluationExceptions: false
-    maxDeliveryCount: 2000
+    maxDeliveryCount: 2
     status: 'Active'
     enableBatchedOperations: true
     autoDeleteOnIdle: 'P14D'
