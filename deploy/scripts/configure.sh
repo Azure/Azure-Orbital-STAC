@@ -133,6 +133,9 @@ else
     kubectl create namespace ${AKS_NAMESPACE}
 fi;
 
+echo "Install KEDA"
+kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.8.0/keda-2.8.0.yaml
+
 echo "Deploying chart to Kubernetes Cluster"
 helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --namespace pgstac \
@@ -190,8 +193,4 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set stacfastapi.env.POSTGRES_USER=${PGUSER} \
     --set stacfastapi.env.PGUSER=${PGUSER} \
     --set stacfastapi.env.PGPASSWORD=${PGPASSWORD} \
-<<<<<<< HEAD
     --set stacfastapi.env.PGHOST=${PGHOST}    
-=======
-    --set stacfastapi.env.PGHOST=${PGHOST}
->>>>>>> Remove redundant stac-fastapi deployment folder

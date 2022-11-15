@@ -15,7 +15,8 @@ from _env_variables import (AZURE_LOG_CONNECTION_STRING,
                             DATA_STORAGE_PGSTAC_CONTAINER_NAME,
                             PGSTAC_SERVICE_BUS_CONNECTION_STRING,
                             PGSTAC_SERVICE_BUS_SUBSCRIPTION_NAME,
-                            PGSTAC_SERVICE_BUS_TOPIC_NAME)
+                            PGSTAC_SERVICE_BUS_TOPIC_NAME,
+                            MESSAGE_COUNT)
 
 LOCAL_FILE_PATH = './'
 
@@ -89,7 +90,7 @@ def main():
         receiver = client.get_subscription_receiver(
             topic_name=PGSTAC_SERVICE_BUS_TOPIC_NAME, subscription_name=PGSTAC_SERVICE_BUS_SUBSCRIPTION_NAME)
 
-        messages = receiver.receive_messages(max_message_count=1)
+        messages = receiver.receive_messages(max_message_count=int(MESSAGE_COUNT))
 
         with receiver:
             for msg in messages:

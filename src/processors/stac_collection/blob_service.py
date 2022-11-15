@@ -16,7 +16,9 @@ async def download_collection_json(file_path: str):
 
     try:
         async with BlobClient.from_connection_string(
-                conn_str=DATA_STORAGE_ACCOUNT_CONNECTION_STRING, container_name=STACCOLLECTION_STORAGE_CONTAINER_NAME, blob_name=json_file) as blob_client:
+                conn_str=DATA_STORAGE_ACCOUNT_CONNECTION_STRING, 
+                container_name=STACCOLLECTION_STORAGE_CONTAINER_NAME, 
+                blob_name=json_file) as blob_client:
 
             _, file_name = os.path.split(
                 blob_client.blob_name)

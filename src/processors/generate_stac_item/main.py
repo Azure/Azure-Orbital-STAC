@@ -35,11 +35,11 @@ def create_item_in_blob(state: str,
                         stac_metadata: str = None) -> str:
     """Creates a STAC Item based on metadata.
 
-    STATE is the state this NAIP tile belongs to.
-    COG_HREF is the href to the COG that is the NAIP tile.
-    FGDC_HREF is href to the text metadata file in the NAIP fgdc format.
-    DST is directory that a STAC Item JSON file will be created
-    in.
+        STATE is the state this NAIP tile belongs to.
+        COG_HREF is the href to the COG that is the NAIP tile.
+        FGDC_HREF is href to the text metadata file in the NAIP fgdc format.
+        DST is directory that a STAC Item JSON file will be created
+        in.
     """
     additional_providers = None
 
@@ -141,7 +141,7 @@ def get_incoming_message():
                                                     subscription_name=STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME)
         
         
-        messages = receiver.receive_messages(max_message_count=1)
+        messages = receiver.receive_messages(max_message_count=int(MESSAGE_COUNT))
         
         with receiver:
             
