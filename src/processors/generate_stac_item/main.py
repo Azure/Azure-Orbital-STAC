@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 import logging
 import os
 from datetime import datetime
@@ -8,7 +9,15 @@ from urllib.parse import urlparse
 
 import pystac
 from azure.servicebus import AutoLockRenewer, ServiceBusClient
+
+from opencensus.ext.azure import metrics_exporter
+from opencensus.stats import aggregation as aggregation_module
+from opencensus.stats import measure as measure_module
+from opencensus.stats import stats as stats_module
+from opencensus.stats import view as view_module
+from opencensus.tags import tag_map as tag_map_module
 from opencensus.ext.azure.log_exporter import AzureLogHandler
+
 from osgeo import gdal
 
 from _env_variables import *
@@ -23,6 +32,26 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(AzureLogHandler(
     connection_string=AZURE_LOG_CONNECTION_STRING))
+
+pod_runtime_measure = measure_module.MeasureFloat("pod_runtime",
+                            "Time for a single pod to run the code",
+                            "ms")
+    
+pod_runtime_view = view_module.View("pod runtime",
+                        "Average runtime for a pod",
+                        [],
+                        pod_runtime_measure,
+                        aggregation_module.LastValueAggregation())
+
+message_processed_measure = measure_module.MeasureInt("message_processed",
+                        "Number of messages processed by this pod",
+                        "messages")
+
+message_processed_view = view_module.View("message processed",
+                        "Number of message processed across pods",
+                        [],
+                        message_processed_measure,
+                        aggregation_module.SumAggregation())
 
 
 def create_item_in_blob(state: str, 
@@ -127,28 +156,41 @@ def log_time_to_complete(start_time,
     logger.info('action', extra=properties)
 
 
+def setupOpenCensus(view_manager):
+   
+    exporter = metrics_exporter.new_metrics_exporter(
+       connection_string=AZURE_LOG_CONNECTION_STRING)
+
+    view_manager.register_exporter(exporter)
+    
+    view_manager.register_view(pod_runtime_view)
+    view_manager.register_view(message_processed_view)
+
+    
 def get_incoming_message():
     """
     Get the incoming message from the service bus.
     """
     renewer = AutoLockRenewer()
+    
+    message_count = 0
+    
     with ServiceBusClient.from_connection_string(conn_str=STACIFY_SERVICE_BUS_CONNECTION_STRING, 
                                                  retry_total=1, 
                                                  retry_backoff_factor=10, 
                                                  retry_mode="fixed") as client:
         
-        receiver = client.get_subscription_receiver(topic_name=STACIFY_SERVICE_BUS_TOPIC_NAME, 
-                                                    subscription_name=STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME)
-        
-        
-        messages = receiver.receive_messages(max_message_count=int(MESSAGE_COUNT))
+        receiver = client.get_subscription_receiver(
+            topic_name=STACIFY_SERVICE_BUS_TOPIC_NAME, 
+            subscription_name=STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME)
         
         with receiver:
-            
-            for msg in messages:
+            for msg in receiver:
+                
+                message_count = message_count + 1;
 
                 start_time = datetime.utcnow()
-
+                
                 # register to receive message from service bus topic and
                 # load message as json
                 renewer.register(receiver, msg, max_lock_renewal_duration=4000)
@@ -280,6 +322,23 @@ def get_incoming_message():
                             "error", f"Error file: {file_name_without_ext} error message: {e}")
                         receiver.abandon_message(msg)
 
+    return message_count
 
+    
 if __name__ == "__main__":
-    get_incoming_message()
+    
+    stats = stats_module.stats
+    view_manager = stats.view_manager
+    
+    setupOpenCensus(view_manager)
+    
+    stats_recorder = stats.stats_recorder
+    mmap = stats_recorder.new_measurement_map()
+    
+    start = time.time()
+
+    processed_msg_count = get_incoming_message()
+    
+    end_ms = (time.time() - start) * 1000.0 # Seconds to milliseconds
+    mmap.measure_float_put(pod_runtime_measure, end_ms)
+    mmap.measure_int_put(message_processed_measure, processed_msg_count)
