@@ -43,6 +43,9 @@ if [[ -z "$USER_OBJ_ID" ]]
     echo "To get USER_OBJ_ID, run 'az ad signed-in-user show --query id --output tsv'"
 fi
 
+# Captures the Azure cloud endpoints/suffixes
+az cloud show > $PRJ_ROOT/deploy/cloud_endpoints.json
+
 DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
     -f $PRJ_ROOT/deploy/bicep/main.bicep \
     -p \

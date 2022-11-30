@@ -3,7 +3,7 @@
 
 param serviceBusName string
 
-resource serviceBus 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = {
+resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' existing = {
   name: serviceBusName
 }
 
