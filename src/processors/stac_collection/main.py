@@ -37,10 +37,8 @@ def incoming_messages():
         receiver = client.get_subscription_receiver(
             topic_name=STACCOLLECTION_SERVICE_BUS_TOPIC_NAME, subscription_name=STACCOLLECTION_SERVICE_BUS_SUBSCRIPTION_NAME)
 
-        messages = receiver.receive_messages(max_message_count=1)
-
         with receiver:
-            for msg in messages:
+            for msg in receiver:
 
                 if conn.closed:
                     try:

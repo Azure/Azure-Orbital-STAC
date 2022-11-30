@@ -12,8 +12,10 @@ serviceBusConnectionString: "service-bus-conn-string"
 envCode: stac
 
 processors:
-  stac-collection:
-    labels: []
+  staccollection:
+    template: processor-stac-collection
+    labels: 
+      app: app-stac-collection
     namespace: "service-bus-namespace"
     topicName: "staccollectiontopic"
     subscriptionName: "staccollectionsubscription"
@@ -21,7 +23,7 @@ processors:
     messageCount: '1'
     pollingInterval: 30
     minReplicaCount: 0
-    maxReplicaCount: 200
+    maxReplicaCount: 10
     successfulJobsHistoryLimit: 3
     failedJobsHistoryLimit: 2
     image:
@@ -43,22 +45,27 @@ processors:
       PGUSER: "user"
       PGDATABASE: "database-name"
       PGPASSWORD: "password"
-      MESSAGE_COUNT: 1
+      MESSAGE_COUNT: 10
+      PYTHONUNBUFFERED: 0
     podAnnotations: {}
     resources:
+      requests:
+        memory: "718Mi"
       limits:
         cpu: "100m"
-        memory: "512Mi"
-  stac-event-consumer:
-    labels: []
+        memory: "1024Mi"
+  staceventconsumer:
+    template: processor-stac-event-consumer
+    labels: 
+      app: app-stac-event-consumer
     namespace: "service-bus-namespace"
     topicName: "pgstactopic"
     subscriptionName: "pgstacsubscription"
     authenticationRef: "azure-servicebus-auth"
-    messageCount: '50'
+    messageCount: '10'
     pollingInterval: 30
     minReplicaCount: 0
-    maxReplicaCount: 200
+    maxReplicaCount: 60
     successfulJobsHistoryLimit: 3
     failedJobsHistoryLimit: 2
     image:
@@ -79,22 +86,27 @@ processors:
       PGUSER: "user"
       PGDATABASE: "database-name"
       PGPASSWORD: "password"
-      MESSAGE_COUNT: 200
+      MESSAGE_COUNT: 50
+      PYTHONUNBUFFERED: 0
     podAnnotations: {}
     resources:
+      requests:
+        memory: "1024Mi"
       limits:
         cpu: "100m"
-        memory: "512Mi"
-  generate-stac-json:
-    labels: []
+        memory: "1536Mi"
+  generatestacjson:
+    template: processor-generate-stac-json
+    labels:
+      app: app-generate-stac-json
     namespace: "service-bus-namespace"
     topicName: "stacifytopic"
     subscriptionName: "stacifysubscription"
     authenticationRef: "azure-servicebus-auth"
-    messageCount: '50'
+    messageCount: '10'
     pollingInterval: 30
     minReplicaCount: 0
-    maxReplicaCount: 200
+    maxReplicaCount: 60
     successfulJobsHistoryLimit: 3
     failedJobsHistoryLimit: 2
     image:
@@ -117,12 +129,15 @@ processors:
       JPG_EXTENSION: "jpg-extension"
       XML_EXTENSION: "xml-extension"
       COLLECTION_ID: "collection-id"
-      MESSAGE_COUNT: 200
+      MESSAGE_COUNT: 50
+      PYTHONUNBUFFERED: 0
     podAnnotations: {}
     resources:
+      requests:
+        memory: "1024Mi"
       limits:
         cpu: "100m"
-        memory: "512Mi"
+        memory: "1536Mi"
 
 stacfastapi:
   replicas: 1

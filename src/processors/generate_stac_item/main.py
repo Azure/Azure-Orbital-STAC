@@ -1,6 +1,6 @@
 import asyncio
 import json
-import time
+import sys
 import logging
 import os
 from datetime import datetime
@@ -9,21 +9,21 @@ from urllib.parse import urlparse
 
 import pystac
 from azure.servicebus import AutoLockRenewer, ServiceBusClient
-
 from opencensus.ext.azure import metrics_exporter
 from opencensus.stats import aggregation as aggregation_module
 from opencensus.stats import measure as measure_module
 from opencensus.stats import stats as stats_module
 from opencensus.stats import view as view_module
 from opencensus.tags import tag_map as tag_map_module
+from opencensus.tags import tag_key as tag_key_module
 from opencensus.ext.azure.log_exporter import AzureLogHandler
-
 from osgeo import gdal
 
 from _env_variables import *
-from _blob_services import *
 from _stac import create_item
 from _naip_utils import remove_file
+
+from _blob_services import *
 
 LOCAL_FILE_PATH = './'
 STACIFIED_JSON_PATH = f"https://{DATA_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{DATA_STORAGE_PGSTAC_CONTAINER_NAME}"
@@ -33,26 +33,97 @@ logger.setLevel(logging.INFO)
 logger.addHandler(AzureLogHandler(
     connection_string=AZURE_LOG_CONNECTION_STRING))
 
-pod_runtime_measure = measure_module.MeasureFloat("pod_runtime",
-                            "Time for a single pod to run the code",
-                            "ms")
+def _setup_open_census():
+    """
+        Bootstrap opencensus for sending metrics
+    """
+   
+    stats = stats_module.stats
+    view_manager = stats.view_manager
+   
+    exporter = metrics_exporter.new_metrics_exporter(
+        connection_string=AZURE_LOG_CONNECTION_STRING)
+
+    view_manager.register_exporter(exporter)
     
-pod_runtime_view = view_module.View("pod runtime",
-                        "Average runtime for a pod",
-                        [],
-                        pod_runtime_measure,
-                        aggregation_module.LastValueAggregation())
+    view_manager.register_view(message_processed_view)
+    view_manager.register_view(message_count_view)
+    view_manager.register_view(data_size_view)
+    view_manager.register_view(pod_count_view)
+    
+    stats_recorder = stats.stats_recorder
+    mmap = stats_recorder.new_measurement_map()
+    return mmap
 
-message_processed_measure = measure_module.MeasureInt("message_processed",
-                        "Number of messages processed by this pod",
-                        "messages")
+def _record_data_info(size: int, status: str):
+    """
+    Logs the data information
+    """
+    
+    pod_name = os.getenv('POD_NAME')
+    
+    mmap.measure_int_put(data_size_measure,
+                        size)
+    
+    
+    if pod_name is not None:
+        
+        tagMap = tag_map_module.TagMap()
+        
+        tagMap.insert("Pod Name", pod_name)
+        tagMap.insert("Status", status)
+        tagMap.insert("Processor", "Generate STAC Item")
+        
+        mmap.record(tagMap)
+    else:
+        mmap.record()
+    
+def _record_pod_info():
+    """
+    Logs the pod information
+    """
+    pod_name = os.getenv('POD_NAME')
+    node_name = os.getenv('NODE_NAME')
+    
+    if pod_name is not None and node_name is not None:
+        mmap.measure_int_put(pod_count_measure, 1)
+        
+        tagMap = tag_map_module.TagMap()
+        
+        tagMap.insert("Pod Name", pod_name)
+        tagMap.insert("Node Name", node_name)
+        tagMap.insert("Processor", "Generate STAC Item")
+        
+        mmap.record(tagMap)
 
-message_processed_view = view_module.View("message processed",
-                        "Number of message processed across pods",
-                        [],
-                        message_processed_measure,
-                        aggregation_module.SumAggregation())
+def _record_message(start_time, 
+                    end_time, 
+                    status):
+    """
+    Logs the time to complete a specific activity
 
+    Args:
+        start_time (_type_): time when the activity began
+        end_time (_type_): time when the activity ended
+        item_id (_type_): item id
+        file_name (_type_): file name
+    """
+    
+    time_to_process_file = end_time - start_time
+   
+    mmap.measure_float_put(message_processed_measure, 
+                           time_to_process_file.total_seconds())
+    mmap.record(tag_map_module.TagMap()
+                .insert("Processor", "Generate STAC Item"))
+    
+    mmap.measure_int_put(message_count_measure, 1)
+    
+    tagMap = tag_map_module.TagMap()
+    
+    tagMap.insert("Status", status)
+    tagMap.insert("Processor", "Generate STAC Item")
+    
+    mmap.record(tagMap)
 
 def create_item_in_blob(state: str, 
                         year: str, 
@@ -123,57 +194,12 @@ def translate_tif_to_jpeg(title: str,
     except Exception as e:
         print(f"{title}.jpg not translated. The error is: {e}")
 
-
-def log_time_to_complete(start_time, 
-                         end_time, 
-                         item_id, 
-                         file_name):
-    """
-    Logs the time to complete a specific activity
-
-    Args:
-        start_time (_type_): time when the activity began
-        end_time (_type_): time when the activity ended
-        item_id (_type_): item id
-        file_name (_type_): file name
-    """
-
-    time_to_process_file = end_time - start_time
-
-    start_time_str = start_time.strftime(
-        "%Y-%m-%d %H:%M:%S.%f")
-
-    end_time_str = end_time.strftime("%Y-%m-%d %H:%M:%S.%f")
-
-    properties = {'custom_dimensions': {
-        'process': 'stac_generation',
-        'item_id_stac_generation': item_id,
-        'start_time': start_time_str,
-        'end_time': end_time_str,
-        'process_time': time_to_process_file.total_seconds(),
-        'file_name': file_name}}
-
-    logger.info('action', extra=properties)
-
-
-def setupOpenCensus(view_manager):
-   
-    exporter = metrics_exporter.new_metrics_exporter(
-       connection_string=AZURE_LOG_CONNECTION_STRING)
-
-    view_manager.register_exporter(exporter)
-    
-    view_manager.register_view(pod_runtime_view)
-    view_manager.register_view(message_processed_view)
-
     
 def get_incoming_message():
     """
     Get the incoming message from the service bus.
     """
     renewer = AutoLockRenewer()
-    
-    message_count = 0
     
     with ServiceBusClient.from_connection_string(conn_str=STACIFY_SERVICE_BUS_CONNECTION_STRING, 
                                                  retry_total=1, 
@@ -186,74 +212,83 @@ def get_incoming_message():
         
         with receiver:
             for msg in receiver:
+                try:
                 
-                message_count = message_count + 1;
+                    start_time = datetime.utcnow()
+                    
+                    # register to receive message from service bus topic and
+                    # load message as json
+                    renewer.register(receiver, msg, max_lock_renewal_duration=4000)
+                    response = json.loads(str(msg))
+                    cog_url = response['data']['url']
 
-                start_time = datetime.utcnow()
-                
-                # register to receive message from service bus topic and
-                # load message as json
-                renewer.register(receiver, msg, max_lock_renewal_duration=4000)
-                response = json.loads(str(msg))
-                cog_url = response['data']['url']
+                    parsed_url = urlparse(cog_url)
 
-                parsed_url = urlparse(cog_url)
+                    file_name_without_ext = Path(cog_url).stem
+                    file_name = Path(cog_url).name
+                    split_url = os.path.dirname(cog_url).split('/')
 
-                file_name_without_ext = Path(cog_url).stem
-                file_name = Path(cog_url).name
-                split_url = os.path.dirname(cog_url).split('/')
+                    # retrieve attributes from folder path. folder path is expected
+                    # to be in the format:
+                    # https://storage-name.blob.core.azure.com/container/v002/wa/2015/wa_100cm_2015/45117/filename.ext
+                    # all indexes are zero-index based
+                    version = split_url[4]
+                    state = split_url[5]
+                    year = split_url[6]
+                    state_measurement_year = split_url[7]
+                    folder_number = split_url[8]
 
-                # retrieve attributes from folder path. folder path is expected
-                # to be in the format:
-                # https://storage-name.blob.core.azure.com/container/v002/wa/2015/wa_100cm_2015/45117/filename.ext
-                # all indexes are zero-index based
-                version = split_url[4]
-                state = split_url[5]
-                year = split_url[6]
-                state_measurement_year = split_url[7]
-                folder_number = split_url[8]
+                    # retrive "domain" path
+                    # example - https://storage-name.blob.core.azure.com/container
+                    domain_path = split_url[0:4]
+                    domain_path_joined = '/'.join(domain_path)
 
-                # retrive "domain" path
-                # example - https://storage-name.blob.core.azure.com/container
-                domain_path = split_url[0:4]
-                domain_path_joined = '/'.join(domain_path)
+                    split_url_joined = '/'.join(split_url[4:7])
+                    item_id = ''
 
-                split_url_joined = '/'.join(split_url[4:7])
-                item_id = ''
+                    # prepare paths for
+                    # a. az uri scheme based location
+                    # b. local path to download tif
+                    azure_raster_url = f"az://{STACIFY_STORAGE_CONTAINER_NAME}/{version}/{state}/{year}/{state_measurement_year}/{folder_number}/{file_name}"
+                    download_tif_url = f"{split_url_joined}/{state_measurement_year}/{folder_number}/{file_name}"
 
-                # prepare paths for
-                # a. az uri scheme based location
-                # b. local path to download tif
-                azure_raster_url = f"az://{STACIFY_STORAGE_CONTAINER_NAME}/{version}/{state}/{year}/{state_measurement_year}/{folder_number}/{file_name}"
-                download_tif_url = f"{split_url_joined}/{state_measurement_year}/{folder_number}/{file_name}"
+                    if file_name.endswith(".tif"):
+                        jpeg_url = os.path.splitext(
+                            cog_url)[0] + f".{JPG_EXTENSION}"
+                        jpeg_tail_path = jpeg_url.split('/')[4:-1]
+                        joined_jpeg_tail_path = '/'.join(jpeg_tail_path)
 
-                if file_name.endswith(".tif"):
-                    jpeg_url = os.path.splitext(
-                        cog_url)[0] + f".{JPG_EXTENSION}"
-                    jpeg_tail_path = jpeg_url.split('/')[4:-1]
-                    joined_jpeg_tail_path = '/'.join(jpeg_tail_path)
+                        fdgc_metadata_url = f"{domain_path_joined}/{split_url_joined}/{state}_{STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt"
+                        jpeg_url = f"{domain_path_joined}/{joined_jpeg_tail_path}/{file_name_without_ext}.{JPG_EXTENSION}"
 
-                    fdgc_metadata_url = f"{domain_path_joined}/{split_url_joined}/{state}_{STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt"
-                    jpeg_url = f"{domain_path_joined}/{joined_jpeg_tail_path}/{file_name_without_ext}.{JPG_EXTENSION}"
+                        # check if metadata file exists
+                        does_metadata_file_exist = asyncio.run(
+                            check_if_blob_exists(blob_file=f"{split_url_joined}/{state}_{STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt", container=STACIFY_STORAGE_CONTAINER_NAME))
 
-                    # check if metadata file exists
-                    does_metadata_file_exist = asyncio.run(
-                        check_if_blob_exists(blob_file=f"{split_url_joined}/{state}_{STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt", container=STACIFY_STORAGE_CONTAINER_NAME))
+                        print(
+                            f"txt checked for {split_url_joined}/{state}_{STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt is done and result is {does_metadata_file_exist}")
 
-                    print(
-                        f"txt checked for {split_url_joined}/{state}_{STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt is done and result is {does_metadata_file_exist}")
+                        # check if jpg exists
+                        does_jpeg_file_exist = asyncio.run(check_if_blob_exists(
+                            blob_file=f"{joined_jpeg_tail_path}/{file_name_without_ext}.{JPG_EXTENSION}", container=STACIFY_STORAGE_CONTAINER_NAME))
 
-                    # check if jpg exists
-                    does_jpeg_file_exist = asyncio.run(check_if_blob_exists(
-                        blob_file=f"{joined_jpeg_tail_path}/{file_name_without_ext}.{JPG_EXTENSION}", container=STACIFY_STORAGE_CONTAINER_NAME))
-
-                    print(
-                        f"jpeg checked for {joined_jpeg_tail_path}/{file_name_without_ext}.{JPG_EXTENSION} is done and result is {does_jpeg_file_exist}")
-
+                        print(
+                            f"jpeg checked for {joined_jpeg_tail_path}/{file_name_without_ext}.{JPG_EXTENSION} is done and result is {does_jpeg_file_exist}")
+                        
+                        file_size = asyncio.run(
+                            get_blob_size(download_tif_url)
+                        )
+                        
                     if not does_jpeg_file_exist:
                         try:
                             file_path, file_name = asyncio.run(
                                 download_blob(download_tif_url))
+                            
+                            try: 
+                                print(str(file_size))
+                                print(file_size)
+                            except Exception as e:
+                                print(f"error message: {e}")
 
                             translate_tif_to_jpeg(
                                 file_name_without_ext, file_name)
@@ -276,69 +311,120 @@ def get_incoming_message():
 
                         except Exception as e:
                             print(e)
-
-                    try:
+                    
+                    
                         if not does_metadata_file_exist:
                             item_id = create_item_in_blob(state=state,
-                                                          year=year,
-                                                          cog_href=azure_raster_url,
-                                                          dst=STACIFIED_JSON_PATH,
-                                                          thumbnail=jpeg_url,
-                                                          providers=None,
-                                                          cog_url=cog_url,
-                                                          )
+                                                            year=year,
+                                                            cog_href=azure_raster_url,
+                                                            dst=STACIFIED_JSON_PATH,
+                                                            thumbnail=jpeg_url,
+                                                            providers=None,
+                                                            cog_url=cog_url,
+                                                            )
 
                         else:
                             item_id = create_item_in_blob(state=state,
-                                                          year=year,
-                                                          cog_href=azure_raster_url,
-                                                          dst=STACIFIED_JSON_PATH,
-                                                          stac_metadata=fdgc_metadata_url,
-                                                          thumbnail=jpeg_url,
-                                                          providers=None,
-                                                          cog_url=cog_url,
-                                                          )
-
+                                                            year=year,
+                                                            cog_href=azure_raster_url,
+                                                            dst=STACIFIED_JSON_PATH,
+                                                            stac_metadata=fdgc_metadata_url,
+                                                            thumbnail=jpeg_url,
+                                                            providers=None,
+                                                            cog_url=cog_url,
+                                                            )
+                        
                         # upload stac item to blob
                         asyncio.run(upload_file_from_local_folder_to_storage(
                             file_name=f"{item_id}.json"))
-
+                        
                         # remove stac item from local file system
                         os.remove(f"{item_id}.json")
-
+                        
                         # stop time to calculate performance
                         end_time = datetime.utcnow()
-
+                        
                         # log time to complete to application insights
-                        log_time_to_complete(
-                            start_time, end_time, item_id, file_name)
-
+                        _record_message(
+                            start_time, end_time, "Success")
+                        
+                        _record_data_info(file_size, "Success")
+                        
                         # complete message from service bus
                         receiver.complete_message(msg)
-                    except Exception as e:
-                        print(
-                            f"There was an error in this process of file {file_name_without_ext}")
-                        logger.error(
-                            "error", f"Error file: {file_name_without_ext} error message: {e}")
-                        receiver.abandon_message(msg)
-
-    return message_count
+                        
+                except Exception as e:
+                    
+                    # todo: parameterize the max delivery count for the topic
+                    if msg.deliver_count == 2:
+                        # log time to complete to application insights
+                        _record_message(
+                            start_time, datetime.utcnow(), "Failed")
+                        _record_data_info(file_size, "Failed")
+                        
+                    print(
+                        f"There was an error in this process of file {file_name_without_ext}")
+                    logger.error(
+                        "error", f"Error file: {file_name_without_ext} error message: {e}")
+                    
+                    receiver.abandon_message(msg)
 
     
 if __name__ == "__main__":
+        
+    try:
+        
+        message_processed_measure = measure_module.MeasureFloat("message_proc_time",
+                            "Time for a single message to get processed",
+                            "ms")
     
-    stats = stats_module.stats
-    view_manager = stats.view_manager
-    
-    setupOpenCensus(view_manager)
-    
-    stats_recorder = stats.stats_recorder
-    mmap = stats_recorder.new_measurement_map()
-    
-    start = time.time()
-
-    processed_msg_count = get_incoming_message()
-    
-    end_ms = (time.time() - start) * 1000.0 # Seconds to milliseconds
-    mmap.measure_float_put(pod_runtime_measure, end_ms)
-    mmap.measure_int_put(message_processed_measure, processed_msg_count)
+        message_processed_view = view_module.View("Message Processing Time",
+                            "Average runtime for a message to be processed",
+                            [tag_key_module.TagKey("Processor")],
+                            message_processed_measure,
+                            aggregation_module.LastValueAggregation())
+        
+        message_count_measure = measure_module.MeasureInt("message_count",
+                            "Processing of a single message",
+                            "message")
+        
+        message_count_view = view_module.View("Message Count",
+                            "Count of messages processed",
+                            [tag_key_module.TagKey("Status"),
+                             tag_key_module.TagKey("Processor")],
+                            message_count_measure,
+                            aggregation_module.SumAggregation())
+        
+        data_size_measure = measure_module.MeasureInt("data_size",
+                            "Size of message being processed",
+                            "bytes")
+        
+        data_size_view = view_module.View("Data Size",
+                            "Total size of data being processed",
+                            [tag_key_module.TagKey("Pod Name"),
+                             tag_key_module.TagKey("Status"),
+                             tag_key_module.TagKey("Processor")],
+                            data_size_measure,
+                            aggregation_module.SumAggregation())
+        
+        pod_count_measure = measure_module.MeasureInt("pod_count",
+                            "Number of pod that are currently active",
+                            "pods")
+        
+        pod_count_view = view_module.View("Pods Count",
+                            "Total number of pods that are active",
+                            [tag_key_module.TagKey("Pod Name"), 
+                             tag_key_module.TagKey("Node Name"),
+                             tag_key_module.TagKey("Processor")],
+                            pod_count_measure,
+                            aggregation_module.SumAggregation())
+        
+        mmap = _setup_open_census()
+        
+        _record_pod_info()
+        
+        get_incoming_message()
+        
+    except Exception as e:
+        logger.error(
+            "error", f"error message: {e}")
