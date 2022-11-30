@@ -77,7 +77,8 @@ DST_STORAGE_ACCOUNT_SAS=$(az storage account generate-sas \
     --permissions rwdlacupiytfx \
     --expiry  $(date -d '+2 day' '+%Y-%m-%d'))
 
-regions=(al ar az ca)
+#regions=(al ar az ca)
+regions=(ca)
 
 for region in "${regions[@]}"
 do
@@ -88,7 +89,7 @@ do
       --account-name ${SRC_STORAGE_ACCOUNT_NAME} \
       --delimiter '/' | jq -r '.[].name')
 
-  while IFS= read -r line; do
+  while IFS_First= read -r line; do
     echo "...Procesing --> $line..."
     if [[ "$line" == */ ]]
     then
@@ -99,7 +100,7 @@ do
           --account-name ${SRC_STORAGE_ACCOUNT_NAME} \
           --delimiter '/' | jq -r '.[].name')
       echo "$FIRST_LEVEL_FOLDER"
-      while IFS= read -r frst_lvl_line; do
+      while IFS_Second= read -r frst_lvl_line; do
         echo ".....Procesing --> $frst_lvl_line"
         if [[ "$frst_lvl_line" == *cm_* || "$frst_lvl_line" == *_fgdc_* ]]
         then
@@ -109,20 +110,24 @@ do
               --directory-path "${frst_lvl_line::-1}" \
               --account-name ${SRC_STORAGE_ACCOUNT_NAME} \
               --delimiter '/' | jq -r '.[].name')
-          while IFS= read -r scnd_lvl_line; do
+          echo "$SECOND_LEVEL_FOLDER"
+          while read -u10 scnd_lvl_line; 
+          do
             echo ".......Procesing --> $scnd_lvl_line"
 
             if [[ "$scnd_lvl_line" == */ ]]
             then
-              scnd_lvl_line=${scnd_lvl_line::-1}
-              echo "***Copying data from 'https://${SRC_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${SRC_CONTAINER_NAME}/${scnd_lvl_line}?${SRC_STORAGE_ACCOUNT_SAS:1:-1}'" \
-                "to 'https://${DST_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${DST_CONTAINER_NAME}/${scnd_lvl_line}?${DST_STORAGE_ACCOUNT_SAS:1:-1}'***"
-              azcopy copy "https://${SRC_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${SRC_CONTAINER_NAME}/${scnd_lvl_line}?${SRC_STORAGE_ACCOUNT_SAS:1:-1}" \
-                "https://${DST_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${DST_CONTAINER_NAME}/${scnd_lvl_line%/*}?${DST_STORAGE_ACCOUNT_SAS:1:-1}" --recursive
+              scnd_lvl_line_trunc=${scnd_lvl_line::-1}
+              echo "***Copying data from 'https://${SRC_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${SRC_CONTAINER_NAME}/${scnd_lvl_line_trunc}?${SRC_STORAGE_ACCOUNT_SAS:1:-1}'" \
+                "to 'https://${DST_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${DST_CONTAINER_NAME}/${scnd_lvl_line_trunc}?${DST_STORAGE_ACCOUNT_SAS:1:-1}'***"
+              azcopy copy "https://${SRC_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${SRC_CONTAINER_NAME}/${scnd_lvl_line_trunc}?${SRC_STORAGE_ACCOUNT_SAS:1:-1}" \
+                "https://${DST_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${DST_CONTAINER_NAME}/${scnd_lvl_line_trunc%/*}?${DST_STORAGE_ACCOUNT_SAS:1:-1}" --recursive &> /dev/null
+            else 
+              echo "skipping --> $scnd_lvl_line"
             fi
-          done <<< "$SECOND_LEVEL_FOLDER"
+          done 10<<< "$SECOND_LEVEL_FOLDER"
         fi
-      done <<< "$FIRST_LEVEL_FOLDER"
+      done <<< $(echo "$FIRST_LEVEL_FOLDER" | sort -r)
     else
       echo "Oops! control is in else section"
     fi
