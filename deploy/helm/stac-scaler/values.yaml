@@ -1,0 +1,183 @@
+# Default values for stac-scaler.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+parallelism: 1
+jobCleanupTimeSeconds: 600
+activeDeadlineSeconds: 600
+
+namespace: pgstac
+serviceBusConnectionString: "service-bus-conn-string"
+envCode: stac
+
+processors:
+  staccollection:
+    template: processor-stac-collection
+    labels: 
+      app: app-stac-collection
+    namespace: "service-bus-namespace"
+    topicName: "staccollectiontopic"
+    subscriptionName: "staccollectionsubscription"
+    authenticationRef: "azure-servicebus-auth"
+    messageCount: '1'
+    pollingInterval: 30
+    minReplicaCount: 0
+    maxReplicaCount: 10
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 2
+    image:
+      repository: acr.azurecr.io
+      name: stac-collection
+      pullPolicy: Always
+      tag: "latest"
+    env:
+      STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING: "service-bus-conn-string"
+      STACCOLLECTION_SERVICE_BUS_TOPIC_NAME: "topic-name"
+      STACCOLLECTION_SERVICE_BUS_SUBSCRIPTION_NAME: "subscription-name"
+      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: "storage-conn-string"
+      DATA_STORAGE_ACCOUNT_NAME: "storage-account-name"
+      DATA_STORAGE_ACCOUNT_KEY: "storage-account-key"
+      STACCOLLECTION_STORAGE_CONTAINER_NAME: "storage-container-name"
+      AZURE_LOG_CONNECTION_STRING: "log-conn-string"
+      PGHOST: "host"
+      PGPORT: "port"
+      PGUSER: "user"
+      PGDATABASE: "database-name"
+      PGPASSWORD: "password"
+      MESSAGE_COUNT: 10
+      PYTHONUNBUFFERED: 0
+    podAnnotations: {}
+    resources:
+      requests:
+        memory: "718Mi"
+      limits:
+        cpu: "100m"
+        memory: "1024Mi"
+  staceventconsumer:
+    template: processor-stac-event-consumer
+    labels: 
+      app: app-stac-event-consumer
+    namespace: "service-bus-namespace"
+    topicName: "pgstactopic"
+    subscriptionName: "pgstacsubscription"
+    authenticationRef: "azure-servicebus-auth"
+    messageCount: '10'
+    pollingInterval: 30
+    minReplicaCount: 0
+    maxReplicaCount: 60
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 2
+    image:
+      repository: acr.azurecr.io
+      name: stac-event-consumer
+      pullPolicy: Always
+      tag: "latest"
+    env:
+      PGSTAC_SERVICE_BUS_CONNECTION_STRING: "service-bus-conn-string"
+      PGSTAC_SERVICE_BUS_TOPIC_NAME: "service-bus-topic-name"
+      PGSTAC_SERVICE_BUS_SUBSCRIPTION_NAME: "service-bus-subscription-name"
+      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: "storage-account-conn-string"
+      GENERATED_STAC_STORAGE_CONTAINER_NAME: "storage-account-container-name"
+      AZURE_LOG_CONNECTION_STRING: "azure-app-insights-conn-string"
+      DATA_STORAGE_PGSTAC_CONTAINER_NAME: "storage-account-pgstac-container-name"
+      PGHOST: "host"
+      PGPORT: "port"
+      PGUSER: "user"
+      PGDATABASE: "database-name"
+      PGPASSWORD: "password"
+      MESSAGE_COUNT: 50
+      PYTHONUNBUFFERED: 0
+    podAnnotations: {}
+    resources:
+      requests:
+        memory: "1024Mi"
+      limits:
+        cpu: "100m"
+        memory: "1536Mi"
+  generatestacjson:
+    template: processor-generate-stac-json
+    labels:
+      app: app-generate-stac-json
+    namespace: "service-bus-namespace"
+    topicName: "stacifytopic"
+    subscriptionName: "stacifysubscription"
+    authenticationRef: "azure-servicebus-auth"
+    messageCount: '10'
+    pollingInterval: 30
+    minReplicaCount: 0
+    maxReplicaCount: 60
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 2
+    image:
+      repository: acr.azurecr.io
+      name: generate-stac-json
+      pullPolicy: Always
+      tag: "latest"
+    env:
+      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: "storage-account-conn-string"
+      DATA_STORAGE_ACCOUNT_NAME: "storage-account-name"
+      DATA_STORAGE_ACCOUNT_KEY: "storage-account-key"
+      STACIFY_STORAGE_CONTAINER_NAME: "storage-account-container-name"
+      STACIFY_SERVICE_BUS_CONNECTION_STRING: "service-bus-conn-string"
+      STACIFY_SERVICE_BUS_TOPIC_NAME: "service-bus-topic-name"
+      STACIFY_SERVICE_BUS_SUBSCRIPTION_NAME: "service-bus-subscription-name"
+      GENERATED_STAC_STORAGE_CONTAINER_NAME: "storage-account-stac-container-name"
+      AZURE_LOG_CONNECTION_STRING: "azure-app-insights-conn-string"
+      DATA_STORAGE_PGSTAC_CONTAINER_NAME: "storage-account-data-pgstac-container-name"
+      STAC_METADATA_TYPE_NAME: "stac-metadata-type-name"
+      JPG_EXTENSION: "jpg-extension"
+      XML_EXTENSION: "xml-extension"
+      COLLECTION_ID: "collection-id"
+      MESSAGE_COUNT: 50
+      PYTHONUNBUFFERED: 0
+    podAnnotations: {}
+    resources:
+      requests:
+        memory: "1024Mi"
+      limits:
+        cpu: "100m"
+        memory: "1536Mi"
+
+stacfastapi:
+  replicas: 1
+  privateIp: 10.6.3.15
+  labels:
+    app: app-stacfastapi
+  image:
+    repository: acr.azurecr.io
+    name: stac-fastapi
+    pullPolicy: Always
+    tag: "latest"
+  env:
+    APP_HOST: 0.0.0.0
+    APP_PORT: "8082"
+    DB_MAX_CONN_SIZE: "1"
+    DB_MIN_CONN_SIZE: "1"
+    ENVIRONMENT: local
+    GDAL_DISABLE_READDIR_ON_OPEN: EMPTY_DIR
+    GDAL_HTTP_MERGE_CONSECUTIVE_RANGES: "YES"
+    POSTGRES_DBNAME: postgres
+    POSTGRES_HOST_READER: "host"
+    POSTGRES_HOST_WRITER: "host"
+    POSTGRES_PASS: "password"
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: "user"
+    RELOAD: "false"
+    USE_API_HYDRATE: "false"
+    VSI_CACHE: "TRUE"
+    WEB_CONCURRENCY: "10"
+    PGUSER: "user"
+    PGPASSWORD: "password"
+    PGHOST: "host"
+    PGDATABASE: "postgres"
+  resources:
+    requests:
+      memory: "2.5G"
+      cpu: "1000m"
+    limits:
+      memory: "8G"
+      cpu: "8"
+  ports:
+    - containerPort: 8082
+      protocol: TCP

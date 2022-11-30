@@ -1,5 +1,5 @@
 import itertools
-import os
+import os, sys
 import re
 from datetime import timedelta
 from typing import Final, Optional, Pattern
@@ -20,9 +20,12 @@ from _env_variables import (DATA_STORAGE_ACCOUNT_CONNECTION_STRING,
                             DATA_STORAGE_ACCOUNT_KEY,
                             DATA_STORAGE_ACCOUNT_NAME, STAC_BANDS,
                             USDA_PROVIDER, COLLECTION_ID)
-from _generate_sas import get_sas_token
+
 from _grid import GridExtension
 from _naip_utils import parse_fgdc_metadata
+
+from _generate_sas import get_sas_token
+
 
 # Generate sas token for metadata url
 # TODO: This is a temporary solution until we can pass headers

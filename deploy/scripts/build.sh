@@ -20,9 +20,9 @@ PROCESSING_RESOURCE_GROUP=${PROCESSING_RESOURCE_GROUP:-"${ENV_CODE}-processing-r
 ACR_NAME=$(az acr list -g ${PROCESSING_RESOURCE_GROUP} \
     --query "[?tags.environment && tags.environment == '$ENV_NAME'].name" -otsv)
 
-az acr build --registry $ACR_NAME --image stac-event-consumer ${PRJ_ROOT}/src/stac_ingestion/stac_to_pg/
-az acr build --registry $ACR_NAME --image generate-stac-json ${PRJ_ROOT}/src/stac_ingestion/generate_stac_item/
-az acr build --registry $ACR_NAME --image stac-collection ${PRJ_ROOT}/src/stac_ingestion/stac_collection/
+az acr build --registry $ACR_NAME --image stac-event-consumer ${PRJ_ROOT}/src/processors/stac_to_pg/
+az acr build --registry $ACR_NAME --image generate-stac-json ${PRJ_ROOT}/src/processors/generate_stac_item/
+az acr build --registry $ACR_NAME --image stac-collection ${PRJ_ROOT}/src/processors/stac_collection/
 
 # build stac-fastapi from https://github.com/stac-utils/stac-fastapi/archive/refs/tags/${STAC_FASTAPI_VERSION}.tar.gz
 STAC_FASTAPI_SRC_DIR=${STAC_FASTAPI_SRC_DIR:-"${PRJ_ROOT}/src/stac_fastapi_k8s/src"}

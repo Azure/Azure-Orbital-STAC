@@ -60,20 +60,38 @@ async def upload_blob(file_path: str, file_name: str) -> None:
         with open(file_name, "rb") as blob_data:
             await blob.upload_blob(data=blob_data)
             logger.info(f"{file_path}/{file_name} uploaded")
+            
+async def get_blob_size(file_path: str) -> int:
+    """
+    Get the size of the blob in Storage Account (in bytes)
+    """
+    
+    async with BlobClient.from_connection_string(
+            conn_str=DATA_STORAGE_ACCOUNT_CONNECTION_STRING, 
+            container_name=STACIFY_STORAGE_CONTAINER_NAME, 
+            blob_name=file_path) as blob:
+        
+        blob_size = (await blob.get_blob_properties()).size
+        
+    return blob_size
 
 
 async def download_blob(file_path: str) -> Tuple[str, str]:
     """
     Downloads a blob from the storage account
     """
+    
+    
     async with BlobClient.from_connection_string(
-            conn_str=DATA_STORAGE_ACCOUNT_CONNECTION_STRING, container_name=STACIFY_STORAGE_CONTAINER_NAME, blob_name=file_path) as blob:
+            conn_str=DATA_STORAGE_ACCOUNT_CONNECTION_STRING, 
+            container_name=STACIFY_STORAGE_CONTAINER_NAME, 
+            blob_name=file_path) as blob:
 
         file_path, file_name = os.path.split(
             blob.blob_name)
         downloaded_file_path = os.path.join(
             LOCAL_FILE_PATH, file_name)
-
+        
         with open(downloaded_file_path, "wb") as blob_data:
             stream = await blob.download_blob()
             data = await stream.readall()

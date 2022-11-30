@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-app-stacfastapi
+  namespace: {{ $.Values.namespace }}
+spec:
+  replicas: {{ .Values.stacfastapi.replicas }}
+  selector:
+    matchLabels:
+      app: app-stacfastapi
+  template:
+    metadata:
+      labels:
+        {{- toYaml .Values.stacfastapi.labels | nindent 8 }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - args:
+            - bash
+            - -c
+            - ./scripts/wait-for-it.sh {{ .Values.stacfastapi.env.PGHOST }}:{{ .Values.stacfastapi.env.POSTGRES_PORT }} && pypgstac pgready && pypgstac migrate && python -m stac_fastapi.pgstac.app
+          image: "{{ .Values.stacfastapi.image.repository }}/{{ .Values.stacfastapi.image.name }}:{{ .Values.stacfastapi.image.tag }}"
+          imagePullPolicy: {{ .Values.stacfastapi.image.pullPolicy }}
+          name: stacfastapi-pgstac
+          env:
+            {{- range $envKey, $envValue := .Values.stacfastapi.env }}
+            - name: "{{ $envKey }}"
+              value: "{{ $envValue }}"
+            {{- end }}
+          ports:
+            {{- toYaml .Values.stacfastapi.ports | nindent 12 }}
+          resources:
+            {{- toYaml .Values.stacfastapi.resources | nindent 12 }}
+      restartPolicy: Always

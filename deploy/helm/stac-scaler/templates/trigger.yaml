@@ -1,0 +1,9 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: azure-servicebus-auth
+spec:
+  secretTargetRef:
+    - key: connection
+      name: queue-policy-secret
+      parameter: connection
