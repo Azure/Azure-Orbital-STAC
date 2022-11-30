@@ -44,7 +44,7 @@ if [[ -z "$USER_OBJ_ID" ]]
 fi
 
 # Captures the Azure cloud endpoints/suffixes
-az cloud show > $PRJ_ROOT/deploy/cloud_endpoints.json
+az cloud show -o json > $PRJ_ROOT/deploy/cloud_endpoints.json
 
 DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
     -f $PRJ_ROOT/deploy/bicep/main.bicep \
