@@ -1,5 +1,7 @@
 #cloud-config
 package_upgrade: true
+packages:
+  - jq
 runcmd:
   - sudo curl -L https://aka.ms/downloadazcopy-v10-linux --output /tmp/downloadazcopy-v10-linux
   - sudo mkdir -p /tmp/downloadazcopy
