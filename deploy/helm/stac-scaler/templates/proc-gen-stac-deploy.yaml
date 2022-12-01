@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor-generate-stac-json
+  namespace: pgstac
+{{- with .Values.processors.generatestacjson }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{ toYaml .labels | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{ toYaml .labels | nindent 8 }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: generate-stac-json
+          image: "{{ .image.repository }}/{{ .image.name }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          resources:
+              {{- toYaml .resources | nindent 16 }}
+          env:
+            {{- range $envKey, $envValue := .env }}
+            - name: "{{ $envKey }}"
+              value: "{{ $envValue }}"
+            {{- end }}
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+      restartPolicy: Always
+{{- end }}
