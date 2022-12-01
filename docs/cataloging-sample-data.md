@@ -10,7 +10,7 @@ The steps below walks you through the creation of STAC Collection and STAC Item.
 
 
     ```bash
-    wget https://raw.githubusercontent.com/Azure/Azure-Orbital-STAC/main/deploy/sample-data/collection_naip_test.json -P ~/data/collection_naip_test.json
+    wget https://raw.githubusercontent.com/Azure/Azure-Orbital-STAC/main/deploy/sample-data/collection_naip_test.json -P ~/data
     ```
 
     ```bash
