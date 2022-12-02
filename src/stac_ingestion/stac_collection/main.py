@@ -3,7 +3,7 @@ import json
 import logging
 import os
 
-import psycopg2
+import psycopg
 from azure.servicebus import ServiceBusClient
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 
@@ -28,7 +28,7 @@ def incoming_messages():
     conn_string = "host={0} user={1} dbname={2} password={3}".format(
         PGHOST, PGUSER, PGDATABASE, PGPASSWORD)
     try:
-        conn = psycopg2.connect(conn_string)
+        conn = psycopg.connect(conn_string)
         logging.info("Connection established")
     except Exception as e:
         logging.error(f"Error connecting to database. Details: {e}")
@@ -42,12 +42,11 @@ def incoming_messages():
 
                 if conn.closed:
                     try:
-                        conn = psycopg2.connect(conn_string)
+                        conn = psycopg.connect(conn_string)
                         logging.info("Re-connection established")
                     except Exception as e:
                         logging.error(f"Error re-connecting to database. Details: {e}")
 
-                cursor = conn.cursor()
                 response = json.loads(str(msg))
                 file_url = response['data']['url']
 
@@ -58,8 +57,8 @@ def incoming_messages():
                     with open('./' + collection_json, 'r') as f:
                         data = json.dumps(json.load(f))
                         try:
-                            cursor.callproc(
-                                'pgstac.create_collection', [data])
+                            conn.execute(
+                                'SELECT pgstac.create_collection(%s)', [data])
                             print('Added collection to database')
                         except Exception as e:
                             print(e)
@@ -67,8 +66,8 @@ def incoming_messages():
                             logger.exception(
                                 f"Error adding collection to database. Error: {e}")
                             print("Rolling back...")
-
-                        conn.commit()
+                        else:
+                            conn.commit()
 
                         os.remove(collection_json)
                         receiver.complete_message(msg)

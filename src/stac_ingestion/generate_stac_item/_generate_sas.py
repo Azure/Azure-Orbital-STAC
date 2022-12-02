@@ -1,7 +1,6 @@
 from azure.storage.blob import ResourceTypes, AccountSasPermissions, generate_account_sas
 from azure.storage.blob import BlobServiceClient
 from datetime import datetime, timedelta
-import os
 
 from _env_variables import DATA_STORAGE_ACCOUNT_CONNECTION_STRING
 
