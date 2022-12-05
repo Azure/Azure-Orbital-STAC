@@ -4,7 +4,7 @@ The script requires following input
 
 - `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
-- `jumpboxPassword` through which users will SSH into Azure VM. The supplied password must be between 6-72 characters long 
+- `jumpboxPassword` through which users will SSH into Azure VM. The supplied password must be between 6-72 characters long
 and must satisfy at least 3 out of 4 of the following:
   - Lowercase characters
   - Uppercase characters

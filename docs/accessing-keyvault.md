@@ -17,7 +17,7 @@ Following are the steps to read the secret from jumpbox
     This command will provide a token and URL login to azure cli
 
 - Set azure subscription
-    
+
     ```bash
     az account set -s <subscription-id>
     ```
