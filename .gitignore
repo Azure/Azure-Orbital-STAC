@@ -144,3 +144,6 @@ workflow/.DS_Store
 
 # zipped package
 package.zip
+
+# Interim file that contains cloud endpoints & suffixes
+deploy/cloud_endpoints.json

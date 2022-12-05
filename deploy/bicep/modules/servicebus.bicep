@@ -7,7 +7,7 @@ param location string = resourceGroup().location
 param sku string = 'Premium'
 param skuCapacity int = 1
 
-resource servicebus 'Microsoft.ServiceBus/namespaces@2021-11-01' = {
+resource servicebus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   name: name
   location: location
   sku: {

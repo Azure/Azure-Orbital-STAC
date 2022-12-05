@@ -8,7 +8,7 @@ param resourceName string
 
 param roleAssignmentId string = guid(principalId, roleDefinitionId, resourceName)
 
-resource existingResource 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = {
+resource existingResource 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' existing = {
   name: resourceName
 }
 
