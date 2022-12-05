@@ -1,9 +1,6 @@
-<div align='center'>
-    <img width="300" height="200" src="./giphy.gif">
-    <h1>STAC INGESTION</h1>
-</div>
+# STAC INGESTION
 
-### What do these services do?
+## What do these services do?
 
 This service consists of 4 separate applications for processing a STAC items:
 
@@ -11,23 +8,28 @@ This service consists of 4 separate applications for processing a STAC items:
 2. generate_stac_item, will process your assets and generate a stac item.
 3. stac_to_pg, will add your stac items to postgres.
 
+### [stac_collection](/src/stac_ingestion/stac_collection/README.md)
 
-## [stac_collection](/src/stac_ingestion/stac_collection/README.md)
 The stac_collection service adds your [stac collection](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) to postgres. To get started, please checkout the [README](/src/stac_ingestion/stac_collection/README.md) for more information on how to get started.
 
-## [generate_stac_item](/src/stac_ingestion/generate_stac_item/README.md)
+### [generate_stac_item](/src/stac_ingestion/generate_stac_item/README.md)
+
 The generate_stac_item service generates a [stac item](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md) by processing the assets you provide such as a COG, JPEG, metadata file(optional), and additional data such as the state, and date.
 
-### the process
+## The Process
+
 1. Before a stac item can be processed, a [collection](https://github.com/radiantearth/stac-spec/tree/master/collection-spec) must be added to postgres. Please go to the stac_collection [README](/src/stac_ingestion/stac_collection/README.md) for directions on how to add your collection.
 
-## [stac to postgres (stac_to_pg)](/src/stac_ingestion/stac_to_pg/)
+### [stac to postgres (stac_to_pg)](/src/stac_ingestion/stac_to_pg/)
+
 - Adds stac item to postgres via [pypgstac](https://github.com/stac-utils/pgstac).
 
-## [Architecture](#architecture)
+### [Architecture](#architecture)
+
 ![architecture](/docs/architecture.png)
 
 ## Deployment
+
 For details on deployment, please go to the deployment folder [here](/deploy/README.md)
 
 ## Mock Collection Data
