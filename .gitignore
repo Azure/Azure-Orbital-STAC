@@ -144,3 +144,4 @@ workflow/.DS_Store
 
 # zipped package
 package.zip
+.vscode/settings.json

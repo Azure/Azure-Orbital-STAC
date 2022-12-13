@@ -5,7 +5,7 @@ metadata:
   namespace: pgstac
 {{- with .Values.processors.staceventconsumer }}
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       {{ toYaml .labels | nindent 6 }}
@@ -20,6 +20,7 @@ spec:
         - name: stac-event-consumer
           image: "{{ .image.repository }}/{{ .image.name }}:{{ .image.tag }}"
           imagePullPolicy: {{ .image.pullPolicy }}
+          command: ['stac', 'processor', 'run', '--name', 'ingest_stac_item']
           resources:
               {{- toYaml .resources | nindent 16 }}
           env:
