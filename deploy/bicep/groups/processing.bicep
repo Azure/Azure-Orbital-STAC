@@ -34,6 +34,7 @@ param aksUserAgentPools array = [
     count: 8
   }
 ]
+param aksNodePoolMaxPods int = 10
 param apiManagementServiceName string =''
 param apiManagementSku string = 'Premium'
 @allowed([
@@ -66,6 +67,7 @@ param jumpboxSshPort int = 22
 param userManagedIdentityIdForJumpboxStateCheck string
 param azureBastionSubnetID string
 param azureBastionName string = ''
+
 var namingPrefix = '${environmentCode}-${projectName}'
 var namingSuffix = substring(uniqueString(guid('${subscription().subscriptionId}${namingPrefix}${environmentTag}${location}')), 0, 10)
 var acrNameVar = empty(acrName) ? 'acr${namingSuffix}' : acrName
@@ -443,6 +445,7 @@ module addUserAgentPools '../modules/aks-add-nodepool.bicep' = [ for (config, in
     clusterName: aksClusterNameVar
     agentPoolName: config.name
     count: config.count
+    maxPods: aksNodePoolMaxPods
     nodeLable: {
       env: config.name
     }

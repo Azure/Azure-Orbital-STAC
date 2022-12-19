@@ -7,6 +7,7 @@ param agentPoolMode string = 'User'
 param count int = 3
 param vmSize string = 'Standard_D2_v5'
 param enableAutoScaling bool = true
+param maxPods int = 10
 param minCount int = 1
 param maxCount int = 32
 
@@ -26,7 +27,7 @@ resource aksNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2022
     vnetSubnetID: (empty(vnetSubnetID) ? json('null') : vnetSubnetID)
     enableAutoScaling: enableAutoScaling
     scaleDownMode: 'Delete'
-    maxPods: 10
+    maxPods: maxPods
     minCount: minCount
     maxCount: maxCount
   }
