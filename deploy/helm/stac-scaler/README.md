@@ -44,7 +44,7 @@ This section of the document will go over all the possible values you can overri
 | parallelism | int | `1` | Number of pods to that can run in parallelism as any time. |
 | jobCleanupTimeSeconds | int | `1` | Time to clean up job afer they are completed. |
 | activeDeadlineSeconds | int | `1` | Time to clean up the job after a specific time out is reached. |
-| namespace | string | `pgstac` | Namespace in Kubernetes cluster to create jobs. |
+| deploymentNamespace | string | `pgstac` | Namespace in Kubernetes cluster to create jobs. |
 | serviceBusConnectionString | string | `nil` | Connection String of your Service Bus. |
 | processor | object | `{}` | Defines the properties of each processor that will process your input file(s) which can be either metadata in the form of JSON file or raster data in COG format. |
 
@@ -55,7 +55,7 @@ A `processor` entry must have values as described below. Each `processor` entry 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | labels | array | `[]` | An array of labels to be appended to the jobs and their pods. |
-| namespace | string | `nil` | Namespace created in the Service Bus that contains the Queues, Topics and Subscriptions. |
+| topicNamespace | string | `nil` | Namespace created in the Service Bus that contains the Queues, Topics and Subscriptions. |
 | topicName | string | `nil` | Name of the topic to listen for scaling the jobs. |
 | subscriptionName | string | `nil` | Name of the subscription to subscribe to listen for messages for scaling the jobs. |
 | authenticationRef | string | `azure-servicebus-auth` | Name of the TriggerAuthentication in Kubernetes to use for authenticate against the Service Bus and listen to the message in the topic. |
@@ -82,26 +82,26 @@ parallelism: 1
 ttlSecondsAfterFinished: 600
 activeDeadlineSeconds: 600
 
-namespace: pgstac
+deploymentNamespace: pgstac
 serviceBusConnectionString: "service-bus-conn-string"
 
 processors:
   stac-collection:
-    namespace: "service-bus-namespace"
+    topicNamespace: "service-bus-namespace"
     image:
       repository: my-acr.azurecr.io
     env:
       ENV_VAR_A_KEY_NAME : "env-var-a-value"
   stac-event-consumer:
     labels: []
-    namespace: "service-bus-namespace"
+    topicNamespace: "service-bus-namespace"
     image:
       repository: my-acr.azurecr.io
     env:
       ENV_VAR_A_KEY_NAME : "env-var-a-value"
   generate-stac-json:
     labels: []
-    namespace: "service-bus-namespace"
+    topicNamespace: "service-bus-namespace"
     image:
       repository: my-acr.azurecr.io
     env:

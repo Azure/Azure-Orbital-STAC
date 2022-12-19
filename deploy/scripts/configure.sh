@@ -138,10 +138,10 @@ kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.8.0/keda-
 
 echo "Deploying chart to Kubernetes Cluster"
 helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
-    --namespace pgstac \
+    --deploymentNamespace pgstac \
     --set serviceBusConnectionString=${SERVICE_BUS_CONNECTION_STRING} \
     --set envCode=${ENV_CODE} \
-    --set processors.staccollection.namespace=${SERVICE_BUS_NAMESPACE} \
+    --set processors.staccollection.topicNamespace=${SERVICE_BUS_NAMESPACE} \
     --set processors.staccollection.image.repository=${ACR_DNS} \
     --set processors.staccollection.env.SERVICE_BUS_CONNECTION_STRING=${SERVICE_BUS_CONNECTION_STRING} \
     --set processors.staccollection.env.TOPIC_NAME=${STACCOLLECTION_SERVICE_BUS_TOPIC_NAME} \

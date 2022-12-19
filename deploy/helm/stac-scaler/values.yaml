@@ -7,7 +7,7 @@ parallelism: 1
 jobCleanupTimeSeconds: 600
 activeDeadlineSeconds: 600
 
-namespace: pgstac
+deploymentNamespace: pgstac
 serviceBusConnectionString: "service-bus-conn-string"
 envCode: stac
 
