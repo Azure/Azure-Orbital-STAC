@@ -45,7 +45,6 @@ This section of the document will go over all the possible values you can overri
 | jobCleanupTimeSeconds | int | `1` | Time to clean up job afer they are completed. |
 | activeDeadlineSeconds | int | `1` | Time to clean up the job after a specific time out is reached. |
 | deploymentNamespace | string | `pgstac` | Namespace in Kubernetes cluster to create jobs. |
-| serviceBusConnectionString | string | `nil` | Connection String of your Service Bus. |
 | processor | object | `{}` | Defines the properties of each processor that will process your input file(s) which can be either metadata in the form of JSON file or raster data in COG format. |
 
 ### Processor
@@ -83,7 +82,6 @@ ttlSecondsAfterFinished: 600
 activeDeadlineSeconds: 600
 
 deploymentNamespace: pgstac
-serviceBusConnectionString: "service-bus-conn-string"
 
 processors:
   stac-collection:

@@ -8,7 +8,6 @@ jobCleanupTimeSeconds: 600
 activeDeadlineSeconds: 600
 
 deploymentNamespace: pgstac
-serviceBusConnectionString: "service-bus-conn-string"
 envCode: stac
 
 processors:
@@ -22,19 +21,19 @@ processors:
       pullPolicy: Always
       tag: "latest"
     env:
-      SERVICE_BUS_CONNECTION_STRING: "service-bus-conn-string"
-      TOPIC_NAME: "topic-name"
-      SUBSCRIPTION_NAME: "subscription-name"
-      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: "storage-conn-string"
-      DATA_STORAGE_ACCOUNT_NAME: "storage-account-name"
-      DATA_STORAGE_ACCOUNT_KEY: "storage-account-key"
-      STACCOLLECTION_STORAGE_CONTAINER_NAME: "storage-container-name"
-      AZURE_LOG_CONNECTION_STRING: "log-conn-string"
-      PGHOST: "host"
-      PGPORT: "port"
-      PGUSER: "user"
-      PGDATABASE: "database-name"
-      PGPASSWORD: "password"
+      SERVICE_BUS_CONNECTION_STRING: ""
+      TOPIC_NAME: "staccollection"
+      SUBSCRIPTION_NAME: "staccollectiontopic"
+      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: ""
+      DATA_STORAGE_ACCOUNT_NAME: ""
+      DATA_STORAGE_ACCOUNT_KEY: ""
+      STACCOLLECTION_STORAGE_CONTAINER_NAME: ""
+      AZURE_LOG_CONNECTION_STRING: ""
+      PGHOST: ""
+      PGPORT: "5432"
+      PGUSER: ""
+      PGDATABASE: ""
+      PGPASSWORD: ""
       WORKING_DIR: "/app"
       PYTHONUNBUFFERED: 0
     podAnnotations: {}
@@ -54,18 +53,18 @@ processors:
       pullPolicy: Always
       tag: "latest"
     env:
-      SERVICE_BUS_CONNECTION_STRING: "service-bus-conn-string"
-      TOPIC_NAME: "service-bus-topic-name"
-      SUBSCRIPTION_NAME: "service-bus-subscription-name"
-      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: "storage-account-conn-string"
-      GENERATED_STAC_STORAGE_CONTAINER_NAME: "storage-account-container-name"
-      AZURE_LOG_CONNECTION_STRING: "azure-app-insights-conn-string"
-      DATA_STORAGE_PGSTAC_CONTAINER_NAME: "storage-account-pgstac-container-name"
-      PGHOST: "host"
-      PGPORT: "port"
-      PGUSER: "user"
-      PGDATABASE: "database-name"
-      PGPASSWORD: "password"
+      SERVICE_BUS_CONNECTION_STRING: ""
+      TOPIC_NAME: "pgstactopic"
+      SUBSCRIPTION_NAME: "pgstacsubscription"
+      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: ""
+      GENERATED_STAC_STORAGE_CONTAINER_NAME: ""
+      AZURE_LOG_CONNECTION_STRING: ""
+      DATA_STORAGE_PGSTAC_CONTAINER_NAME: ""
+      PGHOST: ""
+      PGPORT: "5432"
+      PGUSER: ""
+      PGDATABASE: ""
+      PGPASSWORD: ""
       MESSAGE_COUNT: 50
       WORKING_DIR: "/app"
       PYTHONUNBUFFERED: 0
@@ -86,20 +85,20 @@ processors:
       pullPolicy: Always
       tag: "latest"
     env:
-      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: "storage-account-conn-string"
-      DATA_STORAGE_ACCOUNT_NAME: "storage-account-name"
-      DATA_STORAGE_ACCOUNT_KEY: "storage-account-key"
-      STACIFY_STORAGE_CONTAINER_NAME: "storage-account-container-name"
-      SERVICE_BUS_CONNECTION_STRING: "service-bus-conn-string"
-      TOPIC_NAME: "service-bus-topic-name"
-      SUBSCRIPTION_NAME: "service-bus-subscription-name"
-      GENERATED_STAC_STORAGE_CONTAINER_NAME: "storage-account-stac-container-name"
-      AZURE_LOG_CONNECTION_STRING: "azure-app-insights-conn-string"
-      DATA_STORAGE_PGSTAC_CONTAINER_NAME: "storage-account-data-pgstac-container-name"
-      STAC_METADATA_TYPE_NAME: "stac-metadata-type-name"
-      JPG_EXTENSION: "jpg-extension"
-      XML_EXTENSION: "xml-extension"
-      COLLECTION_ID: "collection-id"
+      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: ""
+      DATA_STORAGE_ACCOUNT_NAME: ""
+      DATA_STORAGE_ACCOUNT_KEY: ""
+      STACIFY_STORAGE_CONTAINER_NAME: ""
+      SERVICE_BUS_CONNECTION_STRING: ""
+      TOPIC_NAME: "stacify"
+      SUBSCRIPTION_NAME: "stacifytopic"
+      GENERATED_STAC_STORAGE_CONTAINER_NAME: ""
+      AZURE_LOG_CONNECTION_STRING: ""
+      DATA_STORAGE_PGSTAC_CONTAINER_NAME: ""
+      STAC_METADATA_TYPE_NAME: ""
+      JPG_EXTENSION: "200.jpg"
+      XML_EXTENSION: "aux.xml"
+      COLLECTION_ID: "naip"
       MESSAGE_COUNT: 50
       WORKING_DIR: "/app"
       PYTHONUNBUFFERED: 0
@@ -130,18 +129,18 @@ stacfastapi:
     GDAL_DISABLE_READDIR_ON_OPEN: EMPTY_DIR
     GDAL_HTTP_MERGE_CONSECUTIVE_RANGES: "YES"
     POSTGRES_DBNAME: postgres
-    POSTGRES_HOST_READER: "host"
-    POSTGRES_HOST_WRITER: "host"
-    POSTGRES_PASS: "password"
+    POSTGRES_HOST_READER: ""
+    POSTGRES_HOST_WRITER: ""
+    POSTGRES_PASS: ""
     POSTGRES_PORT: "5432"
-    POSTGRES_USER: "user"
+    POSTGRES_USER: ""
     RELOAD: "false"
     USE_API_HYDRATE: "false"
     VSI_CACHE: "TRUE"
     WEB_CONCURRENCY: "10"
-    PGUSER: "user"
-    PGPASSWORD: "password"
-    PGHOST: "host"
+    PGUSER: ""
+    PGPASSWORD: ""
+    PGHOST: ""
     PGDATABASE: "postgres"
     PYTHONUNBUFFERED: 0
   resources:
