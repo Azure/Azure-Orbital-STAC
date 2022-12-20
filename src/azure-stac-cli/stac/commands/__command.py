@@ -8,7 +8,7 @@ import sys
 from abc import ABCMeta, abstractmethod
 
 
-class BaseCommand():
+class BaseCommand(metaclass=ABCMeta):
     
     def __init__(self):
         return None

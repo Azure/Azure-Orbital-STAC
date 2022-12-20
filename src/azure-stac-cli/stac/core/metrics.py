@@ -6,7 +6,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class Metrics(object):
+class Metrics(object, metaclass=ABCMeta):
     
     CONNECTION_STRING = ''
     MMAP = None

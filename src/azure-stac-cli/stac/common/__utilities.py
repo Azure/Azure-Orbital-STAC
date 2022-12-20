@@ -18,18 +18,14 @@ def convert_json_to_ndjson(file_path: str):
     
     ndjson_name = Path(file_path).stem + ".ndjson"
     
-    file_content = ''
-
     try:
         with open(file_path, "r") as file:
             
             data = json.load(file)
             
-            file_content = json.dumps(data, separators=(',',':'))
-
         with open(ndjson_name, 'w') as outfile:
             
-            outfile.write(f'{file_content}\n')
+            json.dump(data, outfile, separators=(',',':'))
 
     except Exception as e:
         

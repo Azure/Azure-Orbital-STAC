@@ -16,7 +16,7 @@ processors:
     labels: 
       app: app-stac-collection
     image:
-      repository: acr.azurecr.io
+      repository: "" # format: acr.azurecr.io
       name: stac-cli
       pullPolicy: Always
       tag: "latest"
@@ -48,7 +48,7 @@ processors:
     labels: 
       app: app-stac-event-consumer
     image:
-      repository: acr.azurecr.io
+      repository: "" # format: acr.azurecr.io
       name: stac-cli
       pullPolicy: Always
       tag: "latest"
@@ -80,7 +80,7 @@ processors:
     labels:
       app: app-generate-stac-json
     image:
-      repository: acr.azurecr.io
+      repository: "" # format: acr.azurecr.io
       name: stac-cli
       pullPolicy: Always
       tag: "latest"
@@ -116,7 +116,7 @@ stacfastapi:
   labels:
     app: app-stacfastapi
   image:
-    repository: acr.azurecr.io
+    repository: "" # format: acr.azurecr.io
     name: stac-fastapi
     pullPolicy: Always
     tag: "latest"

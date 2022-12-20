@@ -11,7 +11,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-class BaseProcessor():
+class BaseProcessor(metaclass=ABCMeta):
     
     PROCESSOR_NAME = '' # required, name of the processor
     VERSION = '1.0' # optional, processor version
