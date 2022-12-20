@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: deployment-app-stacfastapi
-  namespace: {{ $.Values.deploymentNamespace }}
+  namespace: {{ .Values.deploymentNamespace }}
 spec:
   replicas: {{ .Values.stacfastapi.replicas }}
   selector:
