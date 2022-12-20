@@ -34,9 +34,10 @@ DATA_STORAGE_ACCOUNT_NAME=$(az storage account list \
 DATA_STORAGE_ACCOUNT_KEY=$(az storage account keys list \
     --account-name ${DATA_STORAGE_ACCOUNT_NAME} --resource-group ${DATA_RESOURCE_GROUP} \
     --query "[0].value" -o tsv)
-STORAGE_ACCOUNT_ENDPOINT_SUFFIX=$(az cloud show --query suffixes.storageEndpoint --output tsv)
 
-DATA_STORAGE_ACCOUNT_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=$STORAGE_ACCOUNT_ENDPOINT_SUFFIX;AccountName=$DATA_STORAGE_ACCOUNT_NAME;AccountKey=$DATA_STORAGE_ACCOUNT_KEY"
+DATA_STORAGE_ACCOUNT_CONNECTION_STRING=$(az storage account show-connection-string \
+    --resource-group $DATA_RESOURCE_GROUP \
+    --name $DATA_STORAGE_ACCOUNT_NAME)
 
 AKS_RESOURCE_GROUP=${AKS_RESOURCE_GROUP:-${PROCESSING_RESOURCE_GROUP}}
 AKS_CLUSTER_NAME=$(az aks list -g ${PROCESSING_RESOURCE_GROUP} \
