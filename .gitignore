@@ -144,5 +144,6 @@ workflow/.DS_Store
 
 # zipped package
 package.zip
-.vscode/
-.vscode/launch.json
+
+# Interim file that contains cloud endpoints & suffixes
+deploy/cloud_endpoints.json

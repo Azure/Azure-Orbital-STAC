@@ -23,9 +23,10 @@ param postgresAdminLoginPass string = ''
 // Parameters with default values for Keyvault
 param keyvaultName string = ''
 
+param cloudEndpoints object = loadJsonContent('../cloud_endpoints.json')
 
 param utcValue string = utcNow()
-param pgPrivateDNSZoneName string = 'privatelink.postgres.database.azure.com'
+param pgPrivateDNSZoneName string = 'privatelink${cloudEndpoints.suffixes.postgresqlServerEndpoint}'
 
 @description('Jumpbox administrator username')
 param jumpboxAdminUsername string = 'adminuser'

@@ -1,0 +1,4 @@
+azure_servicebus == 7.8.1
+azure_storage_blob == 12.14.1
+opencensus_ext_azure == 1.1.7
+pypgstac[psycopg] == 0.6.10

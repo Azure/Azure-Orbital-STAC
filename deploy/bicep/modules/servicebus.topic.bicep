@@ -8,7 +8,7 @@ param auhorizationRuleName string
 param serviceBusSku string = 'Standard'
 param maxMessageSizeInKilobytes int = toLower(serviceBusSku)=='premium'?1024:256
 
-resource servicebus 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = {
+resource servicebus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' existing = {
   name: serviceBusNamespace
 }
 

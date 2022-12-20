@@ -1,0 +1,10 @@
+GDAL == 3.5.3
+Shapely == 1.8.5.post1
+azure_servicebus == 7.8.1
+azure_storage_blob == 12.14.1
+opencensus_ext_azure == 1.1.7
+pystac == 1.6.1
+python_dateutil == 2.8.2
+python_dotenv == 0.21.0
+rasterio == 1.3.4
+stactools == 0.4.2

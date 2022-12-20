@@ -21,7 +21,7 @@ param dataSubnetAddressPrefix string = '10.6.2.0/24'
 param aksSubnetAddressPrefix string = '10.6.3.0/24'
 param apimSubnetAddressPrefix string = '10.6.4.0/24'
 param bastionSubnetAddressPrefix string = '10.6.250.0/24'
-param pgPrivateDNSZoneName string = 'privatelink.postgres.database.azure.com'
+param pgPrivateDNSZoneName string
 param blobPrivateDNSZoneName string =''
 
 var blobPrivateDNSZoneNameVar = empty(blobPrivateDNSZoneName) ? 'privatelink.blob.${environment().suffixes.storage}' : blobPrivateDNSZoneName

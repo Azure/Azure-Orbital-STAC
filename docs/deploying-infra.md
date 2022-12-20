@@ -4,7 +4,7 @@ The script requires following input
 
 - `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
-- `jumpboxPassword` through which users will SSH into Azure VM. The supplied password must be between 6-72 characters long 
+- `jumpboxPassword` through which users will SSH into Azure VM. The supplied password must be between 6-72 characters long
 and must satisfy at least 3 out of 4 of the following:
   - Lowercase characters
   - Uppercase characters
@@ -21,7 +21,39 @@ No | Step | Duration (approx.) | Required / Optional
 
 ## Deployment & Configurations
 
-Before executing the script, user needs to login to azure as shown below and set the correct subscription in which they want to provision the resources.
+STAC solution is supported on multiple Azure clouds. If you work across different regions or use [Azure Stack](https://learn.microsoft.com/azure-stack/user/?view=azs-2206), you may need to use more than one cloud.
+
+To get the active cloud and a list of all the available clouds:
+
+```azurecli
+az cloud list --output table
+```
+
+```output
+IsActive    Name               Profile
+----------  -----------------  ---------
+True        AzureCloud         latest
+False       AzureChinaCloud    latest
+False       AzureUSGovernment  latest
+False       AzureGermanCloud   latest
+```
+The currently active cloud has `True` in the `IsActive` column. Only one cloud can be active at any time.
+
+To switch to one of the national clouds Ex: AzureUSGovernment
+
+```azurecli
+az cloud set --name AzureUSGovernment
+```
+
+```output
+Switched active cloud to 'AzureUSGovernment'.
+Active subscription switched to <'subscription name' (subscription id)>.
+```
+
+**NOTE**
+If your authentication for the activated cloud has expired, you need to re-authenticate before performing any other CLI tasks. If this is your first time switching to the new cloud, you also need to set the active subscription.
+
+(Optional) Login to azure as shown below and set the correct subscription in which you want to provision the resources. 
 
 ```azurecli
 az login

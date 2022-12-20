@@ -6,7 +6,7 @@ This deployment includes a Jumpbox (Azure Virtual Machine) that will serve as th
 - Copying data from and to Storage Accounts from public subnets
 - Access secrets from Key Vault in private subnets
 
-If you have an existing Virtual Network with an existing Jumpbox or an On-premise network connected via S2S VPN or Express route, you may use any device connected to those network to perform the activities listed above. 
+If you have an existing Virtual Network with an existing Jumpbox or an On-premise network connected via S2S VPN or Express route, you may use any device connected to those network to perform the activities listed above.
 
 Follow the steps below to SSH into the Jumpbox using Bastion:
 
