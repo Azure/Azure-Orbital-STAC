@@ -53,16 +53,11 @@ A `processor` entry must have values as described below. Each `processor` entry 
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| template | string | `nil` | Name of the k8s deployment template to be scaled |
 | labels | array | `[]` | An array of labels to be appended to the jobs and their pods. |
 | topicNamespace | string | `nil` | Namespace created in the Service Bus that contains the Queues, Topics and Subscriptions. |
 | topicName | string | `nil` | Name of the topic to listen for scaling the jobs. |
 | subscriptionName | string | `nil` | Name of the subscription to subscribe to listen for messages for scaling the jobs. |
-| authenticationRef | string | `azure-servicebus-auth` | Name of the TriggerAuthentication in Kubernetes to use for authenticate against the Service Bus and listen to the message in the topic. |
-| pollingInterval | int | `30` | Number of seconds between polls for scaling the jobs. |
-| minReplicaCount | int | `1` | Minimum number of jobs to create during each scaling cycle. |
-| maxReplicaCount | int | `10` | Maximum number of jobs to create during each scaling cycle. |
-| successfulJobsHistoryLimit | int | `3` | Maximum number of jobs to retain after they have successfully completed. |
-| failedJobsHistoryLimit | int | `2` | Maximum number of jobs to retain after they have failed without completion. |
 | image.repository | string | `nil` | Name of the Azure Container Registry. This needs to be the full login server name with suffix such as `azurecr.io`. |
 | image.name | string | `nil` | Name of the image in the Container Registry to use for the jobs created during scaling. |
 | image.tag | string | `latest` | Name of the image tag in the Container Registry to use for hte jobs created during scaling. |
@@ -71,37 +66,3 @@ A `processor` entry must have values as described below. Each `processor` entry 
 | podAnnotations | object | `{}` | Define set of arbitrary non-identifying metadata to pods. |
 | resources.limits.cpu | string | `100m` | CPU specifications for the pod. |
 | resources.limits.memory | string | `512Mi` | Memory specifications for the pod. |
-
-The following is a minimal set of required values expected in the `values-custom.yaml`:
-
-```json
-
-replicaCount: 1
-parallelism: 1
-ttlSecondsAfterFinished: 600
-activeDeadlineSeconds: 600
-
-deploymentNamespace: pgstac
-
-processors:
-  stac-collection:
-    topicNamespace: "service-bus-namespace"
-    image:
-      repository: my-acr.azurecr.io
-    env:
-      ENV_VAR_A_KEY_NAME : "env-var-a-value"
-  stac-event-consumer:
-    labels: []
-    topicNamespace: "service-bus-namespace"
-    image:
-      repository: my-acr.azurecr.io
-    env:
-      ENV_VAR_A_KEY_NAME : "env-var-a-value"
-  generate-stac-json:
-    labels: []
-    topicNamespace: "service-bus-namespace"
-    image:
-      repository: my-acr.azurecr.io
-    env:
-      ENV_VAR_A_KEY_NAME : "env-var-a-value"
-```
