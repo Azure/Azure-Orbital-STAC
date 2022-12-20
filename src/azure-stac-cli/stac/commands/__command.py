@@ -15,8 +15,15 @@ class BaseCommand():
     
     @abstractmethod
     def list_sub_commands(self):
+        """ Gets a list of Commands for the Command Group. Each Class is treated as a Command 
+        Group and the commands under them are considered sub-commands.
+        :abstract
+        """
         raise NotImplementedError
     
     @abstractmethod
     def show_help(self):
+        """ Gets the help text for the Command Group. 
+        :abstract
+        """
         raise NotImplementedError
