@@ -23,9 +23,9 @@ def convert_json_to_ndjson(file_path: str):
             
             data = json.load(file)
             
-        with open(ndjson_name, 'w') as outfile:
-            
-            json.dump(data, outfile, separators=(',',':'))
+            with open(ndjson_name, 'w') as outfile:
+                
+                json.dump(data, outfile, separators=(',',':'))
 
     except Exception as e:
         
