@@ -19,9 +19,16 @@ VNET_RESOURCE_GROUP=${VNET_RESOURCE_GROUP:-"${ENV_CODE}-vnet-rg"}
 DATA_RESOURCE_GROUP=${DATA_RESOURCE_GROUP:-"${ENV_CODE}-data-rg"}
 PROCESSING_RESOURCE_GROUP=${PROCESSING_RESOURCE_GROUP:-"${ENV_CODE}-processing-rg"}
 
+APIM_SERVICE_NAME=$(az apim list --resource-group $PROCESSING_RESOURCE_GROUP --query "[0].value" -o tsv)
+
+APIM_STAC_LOADBALANCER_URL=$(az apim api list --resource-group $PROCESSING_RESOURCE_GROUP \
+    --service-name $APIM_SERVICE_NAME --filter-display-name fast-stac-api)
+
 SUBSCRIPTION=$(az account show --query id -o tsv)
 AZURE_APP_INSIGHTS=$(az resource list -g $MONITORING_RESOURCE_GROUP --resource-type "Microsoft.Insights/components" \
     --query "[?tags.environment && tags.environment == '$ENV_NAME'].name" -o tsv)
+
+LOADBALANCER_IP=$(echo "$x" | awk -F/ '{print $3}' | awk -F: '{print $1}')
 
 AZURE_LOG_CONNECTION_STRING=$(az resource show \
     -g $MONITORING_RESOURCE_GROUP \
@@ -175,6 +182,7 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set processors.generatestacjson.env.DATA_STORAGE_PGSTAC_CONTAINER_NAME=${DATA_STORAGE_PGSTAC_CONTAINER_NAME} \
     --set processors.generatestacjson.env.STAC_METADATA_TYPE_NAME=${STAC_METADATA_TYPE_NAME} \
     --set stacfastapi.image.repository=${ACR_DNS} \
+    --set stacfastapi.privateIp=${LOADBALANCER_IP} \
     --set stacfastapi.env.POSTGRES_HOST_READER=${PGHOST} \
     --set stacfastapi.env.POSTGRES_HOST_WRITER=${PGHOST} \
     --set stacfastapi.env.POSTGRES_PASS=${PGPASSWORD} \
