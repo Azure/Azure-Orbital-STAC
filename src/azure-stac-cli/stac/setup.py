@@ -9,13 +9,12 @@ DEPENDENCIES= [
     'knack',
     'azure-servicebus==7.8.1',
     'azure-storage-blob==12.14.1',
-    'psycopg[binary]==3.1.4',
     'pystac==1.6.1',
     'python_dateutil==2.8.2',
     'python_dotenv==0.21.0',
     'rasterio==1.3.4',
     'stactools==0.4.2',
-    'psycopg2-binary==2.9.5',
+    'psycopg[binary]==3.1.7',
     'pypgstac[psycopg]==0.6.11'
 ],
 

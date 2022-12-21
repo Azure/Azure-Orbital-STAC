@@ -44,7 +44,7 @@ class StacCol2Postgres(BaseProcessor):
         import os
         import json
         import asyncio
-        import psycopg2
+        import psycopg
         from stac.common.__blob_service import download_blob_async
         
         # call parent method to bootstrap the required metrics
@@ -60,7 +60,7 @@ class StacCol2Postgres(BaseProcessor):
         conn_string = "host={0} user={1} dbname={2} password={3}".format(
             self.PGHOST, self.PGUSER, self.PGDATABASE, self.PGPASSWORD)
         try:
-            conn = psycopg2.connect()
+            conn = psycopg.connect()
             
         except Exception as e:
             
@@ -74,7 +74,7 @@ class StacCol2Postgres(BaseProcessor):
                 try:
                     # todo: make sure to assert that kwargs has conn_string
                     # before you use it
-                    conn = psycopg2.connect(conn_string)
+                    conn = psycopg.connect(conn_string)
                     
                 except Exception as e:
                     
