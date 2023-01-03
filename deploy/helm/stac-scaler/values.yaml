@@ -7,6 +7,8 @@ parallelism: 1
 jobCleanupTimeSeconds: 600
 activeDeadlineSeconds: 600
 
+# repository: myacr.azurecr.io
+
 deploymentNamespace: pgstac
 envCode: stac
 
@@ -16,7 +18,6 @@ processors:
     labels: 
       app: app-stac-collection
     image:
-      repository: "" # format: acr.azurecr.io
       name: stac-cli
       pullPolicy: Always
       tag: "latest"
@@ -48,7 +49,6 @@ processors:
     labels: 
       app: app-stac-event-consumer
     image:
-      repository: "" # format: acr.azurecr.io
       name: stac-cli
       pullPolicy: Always
       tag: "latest"
@@ -80,7 +80,6 @@ processors:
     labels:
       app: app-generate-stac-json
     image:
-      repository: "" # format: acr.azurecr.io
       name: stac-cli
       pullPolicy: Always
       tag: "latest"
@@ -116,7 +115,6 @@ stacfastapi:
   labels:
     app: app-stacfastapi
   image:
-    repository: "" # format: acr.azurecr.io
     name: stac-fastapi
     pullPolicy: Always
     tag: "latest"

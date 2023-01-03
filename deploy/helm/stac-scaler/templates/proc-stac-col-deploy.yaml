@@ -18,7 +18,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: stac-collection
-          image: "{{ .image.repository }}/{{ .image.name }}:{{ .image.tag }}"
+          image: "{{ $.Values.repository }}/{{ .image.name }}:{{ .image.tag }}"
           imagePullPolicy: {{ .image.pullPolicy }}
           command: ['stac', 'processor', 'run', '--name', 'ingest_stac_collection']
           resources:

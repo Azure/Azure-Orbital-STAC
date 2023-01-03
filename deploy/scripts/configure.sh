@@ -19,16 +19,17 @@ VNET_RESOURCE_GROUP=${VNET_RESOURCE_GROUP:-"${ENV_CODE}-vnet-rg"}
 DATA_RESOURCE_GROUP=${DATA_RESOURCE_GROUP:-"${ENV_CODE}-data-rg"}
 PROCESSING_RESOURCE_GROUP=${PROCESSING_RESOURCE_GROUP:-"${ENV_CODE}-processing-rg"}
 
-APIM_SERVICE_NAME=$(az apim list --resource-group $PROCESSING_RESOURCE_GROUP --query "[0].value" -o tsv)
+APIM_SERVICE_NAME=$(az apim list --resource-group $PROCESSING_RESOURCE_GROUP --query "[0].name" -o tsv)
 
 APIM_STAC_LOADBALANCER_URL=$(az apim api list --resource-group $PROCESSING_RESOURCE_GROUP \
-    --service-name $APIM_SERVICE_NAME --filter-display-name fast-stac-api)
+    --service-name $APIM_SERVICE_NAME --filter-display-name fast-stac-api \
+    | jq -r ".[0].serviceUrl")
+
+LOADBALANCER_IP=$(echo "$APIM_STAC_LOADBALANCER_URL" | awk -F/ '{print $3}' | awk -F: '{print $1}')
 
 SUBSCRIPTION=$(az account show --query id -o tsv)
 AZURE_APP_INSIGHTS=$(az resource list -g $MONITORING_RESOURCE_GROUP --resource-type "Microsoft.Insights/components" \
     --query "[?tags.environment && tags.environment == '$ENV_NAME'].name" -o tsv)
-
-LOADBALANCER_IP=$(echo "$x" | awk -F/ '{print $3}' | awk -F: '{print $1}')
 
 AZURE_LOG_CONNECTION_STRING=$(az resource show \
     -g $MONITORING_RESOURCE_GROUP \
@@ -44,7 +45,8 @@ DATA_STORAGE_ACCOUNT_KEY=$(az storage account keys list \
 
 DATA_STORAGE_ACCOUNT_CONNECTION_STRING=$(az storage account show-connection-string \
     --resource-group $DATA_RESOURCE_GROUP \
-    --name $DATA_STORAGE_ACCOUNT_NAME)
+    --name $DATA_STORAGE_ACCOUNT_NAME \
+    | jq -r ".connectionString")
 
 AKS_RESOURCE_GROUP=${AKS_RESOURCE_GROUP:-${PROCESSING_RESOURCE_GROUP}}
 AKS_CLUSTER_NAME=$(az aks list -g ${PROCESSING_RESOURCE_GROUP} \
@@ -145,10 +147,11 @@ echo "Install KEDA"
 kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.8.0/keda-2.8.0.yaml
 
 echo "Deploying chart to Kubernetes Cluster"
+
 helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set envCode=${ENV_CODE} \
+    --set repository=${ACR_DNS} \
     --set processors.staccollection.topicNamespace=${SERVICE_BUS_NAMESPACE} \
-    --set processors.staccollection.image.repository=${ACR_DNS} \
     --set processors.staccollection.env.SERVICE_BUS_CONNECTION_STRING=${SERVICE_BUS_CONNECTION_STRING} \
     --set processors.staccollection.env.DATA_STORAGE_ACCOUNT_CONNECTION_STRING=${DATA_STORAGE_ACCOUNT_CONNECTION_STRING} \
     --set processors.staccollection.env.DATA_STORAGE_ACCOUNT_NAME=${DATA_STORAGE_ACCOUNT_NAME} \
@@ -160,7 +163,6 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set processors.staccollection.env.PGDATABASE=${PGDATABASE} \
     --set processors.staccollection.env.PGPASSWORD=${PGPASSWORD} \
     --set processors.staceventconsumer.namespace=${SERVICE_BUS_NAMESPACE} \
-    --set processors.staceventconsumer.image.repository=${ACR_DNS} \
     --set processors.staceventconsumer.env.SERVICE_BUS_CONNECTION_STRING=${SERVICE_BUS_CONNECTION_STRING} \
     --set processors.staceventconsumer.env.DATA_STORAGE_ACCOUNT_CONNECTION_STRING=${DATA_STORAGE_ACCOUNT_CONNECTION_STRING} \
     --set processors.staceventconsumer.env.GENERATED_STAC_STORAGE_CONTAINER_NAME=${GENERATED_STAC_STORAGE_CONTAINER_NAME} \
@@ -171,7 +173,6 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set processors.staceventconsumer.env.PGDATABASE=${PGDATABASE} \
     --set processors.staceventconsumer.env.PGPASSWORD=${PGPASSWORD} \
     --set processors.generatestacjson.namespace=${SERVICE_BUS_NAMESPACE} \
-    --set processors.generatestacjson.image.repository=${ACR_DNS} \
     --set processors.generatestacjson.env.DATA_STORAGE_ACCOUNT_CONNECTION_STRING=${DATA_STORAGE_ACCOUNT_CONNECTION_STRING} \
     --set processors.generatestacjson.env.DATA_STORAGE_ACCOUNT_NAME=${DATA_STORAGE_ACCOUNT_NAME} \
     --set processors.generatestacjson.env.DATA_STORAGE_ACCOUNT_KEY=${DATA_STORAGE_ACCOUNT_KEY} \

@@ -20,7 +20,7 @@ spec:
             - bash
             - -c
             - ./scripts/wait-for-it.sh {{ .Values.stacfastapi.env.PGHOST }}:{{ .Values.stacfastapi.env.POSTGRES_PORT }} && pypgstac pgready && pypgstac migrate && python -m stac_fastapi.pgstac.app
-          image: "{{ .Values.stacfastapi.image.repository }}/{{ .Values.stacfastapi.image.name }}:{{ .Values.stacfastapi.image.tag }}"
+          image: "{{ .Values.repository }}/{{ .Values.stacfastapi.image.name }}:{{ .Values.stacfastapi.image.tag }}"
           imagePullPolicy: {{ .Values.stacfastapi.image.pullPolicy }}
           name: stacfastapi-pgstac
           env:

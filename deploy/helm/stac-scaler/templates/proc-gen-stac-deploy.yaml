@@ -18,7 +18,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: generate-stac-json
-          image: "{{ .image.repository }}/{{ .image.name }}:{{ .image.tag }}"
+          image: "{{ $.Values.repository }}/{{ .image.name }}:{{ .image.tag }}"
           imagePullPolicy: {{ .image.pullPolicy }}
           command: ['stac', 'processor', 'run', '--name', 'extract_stac_from_naip']
           resources:

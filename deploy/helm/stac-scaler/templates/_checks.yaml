@@ -1,0 +1,7 @@
+################################
+    Container related checks
+################################
+
+{{- if .Values.repository }}
+ {{ required "The image repository must be specified" }}
+{{- end }}
