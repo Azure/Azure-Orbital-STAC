@@ -144,7 +144,7 @@ else
 fi;
 
 echo "Install KEDA"
-kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.8.0/keda-2.8.0.yaml
+kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.9.1/keda-2.9.1.yaml
 
 echo "Deploying chart to Kubernetes Cluster"
 
