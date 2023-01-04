@@ -1,0 +1,153 @@
+# Default values for stac-scaler.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+parallelism: 1
+jobCleanupTimeSeconds: 600
+activeDeadlineSeconds: 600
+
+# repository: myacr.azurecr.io
+
+deploymentNamespace: pgstac
+envCode: stac
+
+processors:
+  staccollection:
+    template: processor-stac-collection
+    labels: 
+      app: app-stac-collection
+    image:
+      name: stac-cli
+      pullPolicy: Always
+      tag: "latest"
+    env:
+      SERVICE_BUS_CONNECTION_STRING: ""
+      TOPIC_NAME: "staccollectiontopic"
+      SUBSCRIPTION_NAME: "staccollectionsubscription"
+      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: ""
+      DATA_STORAGE_ACCOUNT_NAME: ""
+      DATA_STORAGE_ACCOUNT_KEY: ""
+      STACCOLLECTION_STORAGE_CONTAINER_NAME: ""
+      AZURE_LOG_CONNECTION_STRING: ""
+      PGHOST: ""
+      PGPORT: "5432"
+      PGUSER: ""
+      PGDATABASE: ""
+      PGPASSWORD: ""
+      WORKING_DIR: "/app"
+      PYTHONUNBUFFERED: 0
+    podAnnotations: {}
+    resources:
+      requests:
+        memory: "718Mi"
+      limits:
+        cpu: "100m"
+        memory: "1024Mi"
+  staceventconsumer:
+    template: processor-stac-event-consumer
+    labels: 
+      app: app-stac-event-consumer
+    image:
+      name: stac-cli
+      pullPolicy: Always
+      tag: "latest"
+    env:
+      SERVICE_BUS_CONNECTION_STRING: ""
+      TOPIC_NAME: "pgstactopic"
+      SUBSCRIPTION_NAME: "pgstacsubscription"
+      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: ""
+      GENERATED_STAC_STORAGE_CONTAINER_NAME: ""
+      AZURE_LOG_CONNECTION_STRING: ""
+      DATA_STORAGE_PGSTAC_CONTAINER_NAME: ""
+      PGHOST: ""
+      PGPORT: "5432"
+      PGUSER: ""
+      PGDATABASE: ""
+      PGPASSWORD: ""
+      MESSAGE_COUNT: 50
+      WORKING_DIR: "/app"
+      PYTHONUNBUFFERED: 0
+    podAnnotations: {}
+    resources:
+      requests:
+        memory: "1024Mi"
+      limits:
+        cpu: "100m"
+        memory: "1536Mi"
+  generatestacjson:
+    template: processor-generate-stac-json
+    labels:
+      app: app-generate-stac-json
+    image:
+      name: stac-cli
+      pullPolicy: Always
+      tag: "latest"
+    env:
+      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: ""
+      DATA_STORAGE_ACCOUNT_NAME: ""
+      DATA_STORAGE_ACCOUNT_KEY: ""
+      STACIFY_STORAGE_CONTAINER_NAME: ""
+      SERVICE_BUS_CONNECTION_STRING: ""
+      TOPIC_NAME: "stacifytopic"
+      SUBSCRIPTION_NAME: "stacifysubscription"
+      GENERATED_STAC_STORAGE_CONTAINER_NAME: ""
+      AZURE_LOG_CONNECTION_STRING: ""
+      DATA_STORAGE_PGSTAC_CONTAINER_NAME: ""
+      STAC_METADATA_TYPE_NAME: ""
+      JPG_EXTENSION: "200.jpg"
+      XML_EXTENSION: "aux.xml"
+      COLLECTION_ID: "naip"
+      MESSAGE_COUNT: 50
+      WORKING_DIR: "/app"
+      PYTHONUNBUFFERED: 0
+    podAnnotations: {}
+    resources:
+      requests:
+        memory: "1024Mi"
+      limits:
+        cpu: "100m"
+        memory: "1536Mi"
+
+stacfastapi:
+  replicas: 1
+  # privateIp: "" # 10.6.3.15
+  labels:
+    app: app-stacfastapi
+  image:
+    name: stac-fastapi
+    pullPolicy: Always
+    tag: "latest"
+  env:
+    APP_HOST: 0.0.0.0
+    APP_PORT: "8082"
+    DB_MAX_CONN_SIZE: "1"
+    DB_MIN_CONN_SIZE: "1"
+    ENVIRONMENT: local
+    GDAL_DISABLE_READDIR_ON_OPEN: EMPTY_DIR
+    GDAL_HTTP_MERGE_CONSECUTIVE_RANGES: "YES"
+    POSTGRES_DBNAME: postgres
+    POSTGRES_HOST_READER: ""
+    POSTGRES_HOST_WRITER: ""
+    POSTGRES_PASS: ""
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: ""
+    RELOAD: "false"
+    USE_API_HYDRATE: "false"
+    VSI_CACHE: "TRUE"
+    WEB_CONCURRENCY: "10"
+    PGUSER: ""
+    PGPASSWORD: ""
+    PGHOST: ""
+    PGDATABASE: "postgres"
+    PYTHONUNBUFFERED: 0
+  resources:
+    requests:
+      memory: "2.5G"
+      cpu: "1000m"
+    limits:
+      memory: "8G"
+      cpu: "8"
+  ports:
+    - containerPort: 8082
+      protocol: TCP

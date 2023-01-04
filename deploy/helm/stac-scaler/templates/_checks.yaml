@@ -1,0 +1,5 @@
+################################
+    Container related checks
+################################
+
+{{ required "The image repository must be specified" .Values.repository }}

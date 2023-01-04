@@ -186,7 +186,7 @@ module storageAccountCredentials '../modules/storage.credentials.to.keyvault.bic
     storageAccountName: storageAccountNameVar
     keyVaultName: keyvaultNameVar
     keyVaultResourceGroup: resourceGroupNameVar
-    secretNamePrefix: 'stac'
+    secretNamePrefix: environmentCode
   }
   dependsOn: [
     keyVault

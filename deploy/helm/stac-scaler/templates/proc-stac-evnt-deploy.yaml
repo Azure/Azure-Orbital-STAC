@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor-stac-event-consumer
+  namespace: {{ .Values.deploymentNamespace }}
+{{- with .Values.processors.staceventconsumer }}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      {{ toYaml .labels | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{ toYaml .labels | nindent 8 }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: stac-event-consumer
+          image: "{{ $.Values.repository }}/{{ .image.name }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          command: ['stac', 'processor', 'run', '--name', 'ingest_stac_item']
+          resources:
+              {{- toYaml .resources | nindent 16 }}
+          env:
+            {{- range $envKey, $envValue := .env }}
+            - name: "{{ $envKey }}"
+              value: "{{ $envValue }}"
+            {{- end }}
+      restartPolicy: Always
+{{- end }}

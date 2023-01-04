@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor-generate-stac-json
+  namespace: {{ .Values.deploymentNamespace }}
+{{- with .Values.processors.generatestacjson }}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      {{ toYaml .labels | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{ toYaml .labels | nindent 8 }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: generate-stac-json
+          image: "{{ $.Values.repository }}/{{ .image.name }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          command: ['stac', 'processor', 'run', '--name', 'extract_stac_from_naip']
+          resources:
+              {{- toYaml .resources | nindent 16 }}
+          env:
+            {{- range $envKey, $envValue := .env }}
+            - name: "{{ $envKey }}"
+              value: "{{ $envValue }}"
+            {{- end }}
+      restartPolicy: Always
+{{- end }}
