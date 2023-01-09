@@ -46,7 +46,6 @@ var processingResourceGroupName = '${environmentCode}-processing-rg'
 var projectName = 'stac'
 var namingPrefix = '${environmentCode}-${projectName}'
 
-param configurePodIdentity bool = false
 param loadBalancerPrivateIP string = '10.6.3.254'
 
 // This parameter is a placeholder to retain current work we have for public access
@@ -121,6 +120,8 @@ module monitoringModule 'groups/monitoring.bicep' = {
   params: {
     projectName: projectName
     location: location
+    keyVaultName: keyvaultNameVar
+    keyVaultResourceGroupName: dataRg.name
     environmentCode: environmentCode
     environmentTag: environment
   }
@@ -213,11 +214,24 @@ module processingModule 'groups/processing.bicep' = {
     jumpboxAdminUsername: jumpboxAdminUsername
     jumpboxAdminPasswordOrKey: jumpboxAdminPassword
     loadBalancerPrivateIP: loadBalancerPrivateIP
-    configurePodIdentity: configurePodIdentity
     storageAccountNameForApim: dataModule.outputs.storageAccountName
     storageAccountResourceGroupName: dataRg.name
     apimSubnetId: networkingModule.outputs.apimSubnetId
     azureBastionSubnetID: networkingModule.outputs.bastionSubnetId
+  }
+  dependsOn: [
+    dataModule
+  ]
+}
+
+module appinsightsSecrets 'modules/appinsights.credentials.to.keyvault.bicep' = {
+  name : '${namingPrefix}-appinsights-secrets'
+  scope: resourceGroup(monitoringRg.name)
+  params: {
+    environmentName: environment
+    applicationInsightsName: '${namingPrefix}-appinsights'
+    keyVaultName: dataModule.outputs.keyVaultName
+    keyVaultResourceGroup: dataResourceGroupName
   }
   dependsOn: [
     dataModule

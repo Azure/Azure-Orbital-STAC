@@ -284,20 +284,19 @@ module servicebusTopics '../modules/servicebus.topic.bicep' = [for (topic, index
   ]
 }]
 
-module servicebusTopicsConnectionString '../modules/servicebus.topic.credential.to.keyvault.bicep' = [for (topic, index) in serviceBusTopicsConfig:  {
-  name: '${namingPrefix}-topic-connection-string-${index}'
+module servicebusTopicsConnectionString '../modules/servicebus.topic.credential.to.keyvault.bicep' = {
+  name: '${namingPrefix}-svcbus-connection-string'
   params: {
     environmentName: environmentTag
-    authorizationRuleId: servicebusTopics[index].outputs.authorizationRuleId
-    authorizationRuleName: servicebusTopics[index].outputs.authorizationRuleName
+    authorizationRuleId: servicebus.outputs.authorizationRuleId
     keyVaultName: keyvaultNameVar
     keyVaultResourceGroup: resourceGroupNameVar
   }
   dependsOn: [
     keyVault
-    servicebusTopics
+    servicebus
   ]
-}]
+}
 
 module servicebusTopicsDefaultSubscription '../modules/servicebus.topic.subscription.bicep' = [for (topic, index) in serviceBusTopicsConfig: {
   name: '${namingPrefix}-topics-sub-${index}'
@@ -349,3 +348,4 @@ module eventGridServiceBusTopicsSubscription '../modules/eventgrid.serviceBus.su
 }
 
 output storageAccountName string = storageAccountNameVar
+output keyVaultName string = keyvaultNameVar

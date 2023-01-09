@@ -20,4 +20,4 @@ resource akvSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   tags: {
     environment: environmentName    
   }
-} 
+}

@@ -18,6 +18,12 @@ MONITORING_RESOURCE_GROUP=${MONITORING_RESOURCE_GROUP:-"${ENV_CODE}-monitoring-r
 VNET_RESOURCE_GROUP=${VNET_RESOURCE_GROUP:-"${ENV_CODE}-vnet-rg"}
 DATA_RESOURCE_GROUP=${DATA_RESOURCE_GROUP:-"${ENV_CODE}-data-rg"}
 PROCESSING_RESOURCE_GROUP=${PROCESSING_RESOURCE_GROUP:-"${ENV_CODE}-processing-rg"}
+UAMI=${UAMI:-"${ENV_CODE}-stacaks-mi"}
+
+AKS_NAMESPACE=${AKS_NAMESPACE:-"pgstac"}
+ENV_LABEL=${ENV_LABEL:-"stacpool"} # aks agent pool name to deploy kubectl deployment yaml files
+AKS_SERVICE_ACCOUNT_NAME=${AKS_SERVICE_ACCOUNT_NAME:-'stac-svc-acct'}
+FEDERATED_IDENTITY_NAME="stacaksfederatedidentity"
 
 APIM_SERVICE_NAME=$(az apim list --resource-group $PROCESSING_RESOURCE_GROUP --query "[0].name" -o tsv)
 
@@ -53,6 +59,20 @@ AKS_CLUSTER_NAME=$(az aks list -g ${PROCESSING_RESOURCE_GROUP} \
     --query "[?tags.type && tags.type == 'k8s'].name" -otsv)
 ACR_DNS=$(az acr list -g ${PROCESSING_RESOURCE_GROUP} \
     --query "[?tags.environment && tags.environment == '$ENV_NAME'].loginServer" -otsv)
+AKS_OIDC_ISSUER="$(az aks show --resource-group ${PROCESSING_RESOURCE_GROUP} \
+    --name ${AKS_CLUSTER_NAME} --query "oidcIssuerProfile.issuerUrl" -o tsv)"
+
+USER_ASSIGNED_CLIENT_ID="$(az identity show -g ${PROCESSING_RESOURCE_GROUP} \
+    --name $UAMI --query 'clientId' -o tsv)"
+IDENTITY_TENANT=$(az aks show --name ${AKS_CLUSTER_NAME} \
+    --resource-group ${PROCESSING_RESOURCE_GROUP} --query identity.tenantId -o tsv)
+
+az identity federated-credential create --name ${FEDERATED_IDENTITY_NAME} \
+    --identity-name $UAMI \
+    --resource-group ${PROCESSING_RESOURCE_GROUP} \
+    --issuer ${AKS_OIDC_ISSUER} \
+    --subject system:serviceaccount:${AKS_NAMESPACE}:${AKS_SERVICE_ACCOUNT_NAME}
+
 SERVICE_BUS_NAMESPACE=$(az servicebus namespace list \
     -g ${DATA_RESOURCE_GROUP} --query "[?tags.environment && tags.environment == '$ENV_NAME'].name" -otsv)
 
@@ -121,8 +141,7 @@ STACCOLLECTION_SERVICE_BUS_CONNECTION_STRING=$(az servicebus topic authorization
     --name ${STACCOLLECTION_SERVICE_BUS_AUTH_POLICY_NAME} \
     --query "primaryConnectionString" -otsv)
 
-AKS_NAMESPACE=${AKS_NAMESPACE:-"pgstac"}
-ENV_LABEL=${ENV_LABEL:-"stacpool"} # aks agent pool name to deploy kubectl deployment yaml files
+
 set +a
 export -p
 
@@ -151,43 +170,32 @@ echo "Deploying chart to Kubernetes Cluster"
 helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set envCode=${ENV_CODE} \
     --set repository=${ACR_DNS} \
+    --set userAssignedClientId=${USER_ASSIGNED_CLIENT_ID} \
+    --set serviceAccountName=${AKS_SERVICE_ACCOUNT_NAME} \
+    --set keyVaultName=${KEY_VAULT_NAME} \
+    --set tenantId=${IDENTITY_TENANT} \
     --set processors.staccollection.topicNamespace=${SERVICE_BUS_NAMESPACE} \
-    --set processors.staccollection.env.SERVICE_BUS_CONNECTION_STRING=${SERVICE_BUS_CONNECTION_STRING} \
-    --set processors.staccollection.env.DATA_STORAGE_ACCOUNT_CONNECTION_STRING=${DATA_STORAGE_ACCOUNT_CONNECTION_STRING} \
     --set processors.staccollection.env.DATA_STORAGE_ACCOUNT_NAME=${DATA_STORAGE_ACCOUNT_NAME} \
-    --set processors.staccollection.env.DATA_STORAGE_ACCOUNT_KEY=${DATA_STORAGE_ACCOUNT_KEY} \
     --set processors.staccollection.env.STACCOLLECTION_STORAGE_CONTAINER_NAME=${STACCOLLECTION_STORAGE_CONTAINER_NAME} \
-    --set processors.staccollection.env.AZURE_LOG_CONNECTION_STRING=${AZURE_LOG_CONNECTION_STRING} \
     --set processors.staccollection.env.PGHOST=${PGHOST} \
     --set processors.staccollection.env.PGUSER=${PGUSER} \
     --set processors.staccollection.env.PGDATABASE=${PGDATABASE} \
-    --set processors.staccollection.env.PGPASSWORD=${PGPASSWORD} \
     --set processors.staceventconsumer.namespace=${SERVICE_BUS_NAMESPACE} \
-    --set processors.staceventconsumer.env.SERVICE_BUS_CONNECTION_STRING=${SERVICE_BUS_CONNECTION_STRING} \
-    --set processors.staceventconsumer.env.DATA_STORAGE_ACCOUNT_CONNECTION_STRING=${DATA_STORAGE_ACCOUNT_CONNECTION_STRING} \
     --set processors.staceventconsumer.env.GENERATED_STAC_STORAGE_CONTAINER_NAME=${GENERATED_STAC_STORAGE_CONTAINER_NAME} \
-    --set processors.staceventconsumer.env.AZURE_LOG_CONNECTION_STRING=${AZURE_LOG_CONNECTION_STRING} \
     --set processors.staceventconsumer.env.DATA_STORAGE_PGSTAC_CONTAINER_NAME=${DATA_STORAGE_PGSTAC_CONTAINER_NAME} \
     --set processors.staceventconsumer.env.PGHOST=${PGHOST} \
     --set processors.staceventconsumer.env.PGUSER=${PGUSER} \
     --set processors.staceventconsumer.env.PGDATABASE=${PGDATABASE} \
-    --set processors.staceventconsumer.env.PGPASSWORD=${PGPASSWORD} \
     --set processors.generatestacjson.namespace=${SERVICE_BUS_NAMESPACE} \
-    --set processors.generatestacjson.env.DATA_STORAGE_ACCOUNT_CONNECTION_STRING=${DATA_STORAGE_ACCOUNT_CONNECTION_STRING} \
     --set processors.generatestacjson.env.DATA_STORAGE_ACCOUNT_NAME=${DATA_STORAGE_ACCOUNT_NAME} \
-    --set processors.generatestacjson.env.DATA_STORAGE_ACCOUNT_KEY=${DATA_STORAGE_ACCOUNT_KEY} \
     --set processors.generatestacjson.env.STACIFY_STORAGE_CONTAINER_NAME=${STACIFY_STORAGE_CONTAINER_NAME} \
-    --set processors.generatestacjson.env.SERVICE_BUS_CONNECTION_STRING=${SERVICE_BUS_CONNECTION_STRING} \
     --set processors.generatestacjson.env.GENERATED_STAC_STORAGE_CONTAINER_NAME=${GENERATED_STAC_STORAGE_CONTAINER_NAME} \
-    --set processors.generatestacjson.env.AZURE_LOG_CONNECTION_STRING=${AZURE_LOG_CONNECTION_STRING} \
     --set processors.generatestacjson.env.DATA_STORAGE_PGSTAC_CONTAINER_NAME=${DATA_STORAGE_PGSTAC_CONTAINER_NAME} \
     --set processors.generatestacjson.env.STAC_METADATA_TYPE_NAME=${STAC_METADATA_TYPE_NAME} \
     --set stacfastapi.image.repository=${ACR_DNS} \
     --set stacfastapi.privateIp=${LOADBALANCER_IP} \
     --set stacfastapi.env.POSTGRES_HOST_READER=${PGHOST} \
     --set stacfastapi.env.POSTGRES_HOST_WRITER=${PGHOST} \
-    --set stacfastapi.env.POSTGRES_PASS=${PGPASSWORD} \
     --set stacfastapi.env.POSTGRES_USER=${PGUSER} \
     --set stacfastapi.env.PGUSER=${PGUSER} \
-    --set stacfastapi.env.PGPASSWORD=${PGPASSWORD} \
     --set stacfastapi.env.PGHOST=${PGHOST}    

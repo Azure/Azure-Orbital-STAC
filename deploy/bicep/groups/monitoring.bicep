@@ -7,6 +7,9 @@ param environmentTag string
 param projectName string
 param location string
 
+param keyVaultName string
+param keyVaultResourceGroupName string
+
 // Parameters with default values for Monitoring
 var namingPrefix = '${environmentCode}-${projectName}'
 
@@ -32,6 +35,8 @@ module appinsights '../modules/appinsights.bicep' = {
   ]
 }
 
+
+
 output workspaceId string = workspace.outputs.workspaceId
-output appinsightsId string = appinsights.outputs.Id
+output appinsightsId string = appinsights.outputs.id
 output appInsightsInstrumentationKey string = appinsights.outputs.instrumentationKey

@@ -10,15 +10,10 @@ param networkPlugin string = 'azure'
 param networkMode string = 'transparent'
 param logAnalyticsWorkspaceResourceID string = ''
 param vnetSubnetID string = ''
+param clientId string = ''
+param kubernetesVersion string = '1.25.4'
 
-param managedIdentityName string = ''
-param managedIdentityId string = ''
-param managedIdentityClientId string = ''
-param managedIdentityPrincipalId string = ''
-param podIdentityNamespace string = '${managedIdentityName}-pod-identity-ns'
-param podIdentityName string = '${managedIdentityName}-pod-identity'
-
-resource aks 'Microsoft.ContainerService/managedClusters@2022-01-01' = {
+resource aks 'Microsoft.ContainerService/managedClusters@2022-09-02-preview' = {
   name: clusterName
   location: location
   tags: {
@@ -30,7 +25,11 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-01-01' = {
   }
   properties: {
     dnsPrefix: clusterName
+    kubernetesVersion: kubernetesVersion
     enableRBAC: true
+    oidcIssuerProfile: {
+      enabled: true
+    }
     agentPoolProfiles: [
       {
         name: 'default'
@@ -50,28 +49,22 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-01-01' = {
           logAnalyticsWorkspaceResourceID: logAnalyticsWorkspaceResourceID
         }
       }
+      azureKeyvaultSecretsProvider: {
+        enabled: true
+        identity: {
+          clientId: clientId
+        }
+      }
     }
     networkProfile: {
       networkPlugin: networkPlugin
       networkMode: networkMode
     }
-    // Currently pod identity configuration works by default only with user-managed identity
-    // For using with system managed identity use the module aks-cluster-with-pod-identity.bicep
-    podIdentityProfile: {
-      enabled: empty(managedIdentityName)?false:true
-      allowNetworkPluginKubenet: networkPlugin=='kubenet'?true:false
-      userAssignedIdentities: empty(managedIdentityName)?[]:[
-        {
-          identity: {
-            clientId: managedIdentityClientId
-            objectId: managedIdentityPrincipalId
-            resourceId: managedIdentityId
-          }
-          name: podIdentityName
-          namespace: podIdentityNamespace
-        }
-      ]
-    }  
+    securityProfile: {
+      workloadIdentity: {
+        enabled: true
+      }
+    }
   }
 }
 

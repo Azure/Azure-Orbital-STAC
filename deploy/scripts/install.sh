@@ -43,6 +43,8 @@ if [[ -z "$USER_OBJ_ID" ]]
     echo "To get USER_OBJ_ID, run 'az ad signed-in-user show --query id --output tsv'"
 fi
 
+az feature register --namespace "Microsoft.ContainerService" --name "EnableWorkloadIdentityPreview"
+
 # Captures the Azure cloud endpoints/suffixes
 az cloud show -o json > $PRJ_ROOT/deploy/cloud_endpoints.json
 
@@ -55,7 +57,6 @@ DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
     jumpboxAdminUsername=$JUMPBOX_USERNAME \
     jumpboxAdminPassword=$JUMPBOX_PASSWORD \
     loadBalancerPrivateIP=$LB_PRIVATE_IP \
-    configurePodIdentity=$CONFIGURE_POD_IDENTITY \
     enablePublicAccess=$ENABLE_PUBLIC_ACCESS \
     owner_aad_object_id=$USER_OBJ_ID"
 $DEPLOYMENT_SCRIPT
