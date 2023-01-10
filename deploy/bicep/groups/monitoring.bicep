@@ -33,5 +33,5 @@ module appinsights '../modules/appinsights.bicep' = {
 }
 
 output workspaceId string = workspace.outputs.workspaceId
-output appinsightsId string = appinsights.outputs.Id
+output appinsightsId string = appinsights.outputs.id
 output appInsightsInstrumentationKey string = appinsights.outputs.instrumentationKey

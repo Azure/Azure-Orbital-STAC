@@ -4,10 +4,10 @@
 param vnetName string
 param userManagedIdentityId string
 param location string = resourceGroup().location
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 
 module callCLIScript 'cliscript.bicep'= {
-  name: 'callCLIScript${utcValue}'
+  name: 'callCLIScript${randomSuffix}'
   params: {
     userManagedIdentityId: userManagedIdentityId
     location: location

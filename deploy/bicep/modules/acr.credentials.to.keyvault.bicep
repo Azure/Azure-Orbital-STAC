@@ -8,14 +8,14 @@ param keyVaultResourceGroup string = resourceGroup().name
 param containerRegistryLoginServerSecretName string = 'RegistryServer'
 param containerRegistryUsernameSecretName string = 'RegistryUserName'
 param containerRegistryPasswordSecretName string = 'RegistryPassword'
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 
 resource containerRepository 'Microsoft.ContainerRegistry/registries@2021-12-01-preview' existing = {
   name: acrName
 } 
 
 module acrLoginServerNameSecret './akv.secrets.bicep' = {
-  name: 'acr-login-server-name-${utcValue}'
+  name: 'acr-login-server-name-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName
@@ -26,7 +26,7 @@ module acrLoginServerNameSecret './akv.secrets.bicep' = {
 }
 
 module acrUsernameSecret './akv.secrets.bicep' = {
-  name: 'acr-username-${utcValue}'
+  name: 'acr-username-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName
@@ -37,7 +37,7 @@ module acrUsernameSecret './akv.secrets.bicep' = {
 }
 
 module acrPasswordSecret './akv.secrets.bicep' = {
-  name: 'acr-password-${utcValue}'
+  name: 'acr-password-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName

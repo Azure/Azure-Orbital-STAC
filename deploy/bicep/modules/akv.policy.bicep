@@ -3,7 +3,7 @@
 
 param keyVaultName string 
 param policyOps string
-param objIdForPolicy string = ''  
+param objIdForPolicy string 
 param certPermission array = [
   'Get'
   'List'

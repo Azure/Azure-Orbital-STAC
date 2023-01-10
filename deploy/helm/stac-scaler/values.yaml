@@ -2,6 +2,8 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+cloudName: AzurePublicCloud
+
 replicaCount: 1
 parallelism: 1
 jobCleanupTimeSeconds: 600
@@ -22,19 +24,14 @@ processors:
       pullPolicy: Always
       tag: "latest"
     env:
-      SERVICE_BUS_CONNECTION_STRING: ""
       TOPIC_NAME: "staccollectiontopic"
       SUBSCRIPTION_NAME: "staccollectionsubscription"
-      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: ""
       DATA_STORAGE_ACCOUNT_NAME: ""
-      DATA_STORAGE_ACCOUNT_KEY: ""
       STACCOLLECTION_STORAGE_CONTAINER_NAME: ""
-      AZURE_LOG_CONNECTION_STRING: ""
       PGHOST: ""
       PGPORT: "5432"
       PGUSER: ""
       PGDATABASE: ""
-      PGPASSWORD: ""
       WORKING_DIR: "/app"
       PYTHONUNBUFFERED: 0
     podAnnotations: {}
@@ -53,18 +50,14 @@ processors:
       pullPolicy: Always
       tag: "latest"
     env:
-      SERVICE_BUS_CONNECTION_STRING: ""
       TOPIC_NAME: "pgstactopic"
       SUBSCRIPTION_NAME: "pgstacsubscription"
-      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: ""
       GENERATED_STAC_STORAGE_CONTAINER_NAME: ""
-      AZURE_LOG_CONNECTION_STRING: ""
       DATA_STORAGE_PGSTAC_CONTAINER_NAME: ""
       PGHOST: ""
       PGPORT: "5432"
       PGUSER: ""
       PGDATABASE: ""
-      PGPASSWORD: ""
       MESSAGE_COUNT: 50
       WORKING_DIR: "/app"
       PYTHONUNBUFFERED: 0
@@ -84,15 +77,11 @@ processors:
       pullPolicy: Always
       tag: "latest"
     env:
-      DATA_STORAGE_ACCOUNT_CONNECTION_STRING: ""
       DATA_STORAGE_ACCOUNT_NAME: ""
-      DATA_STORAGE_ACCOUNT_KEY: ""
       STACIFY_STORAGE_CONTAINER_NAME: ""
-      SERVICE_BUS_CONNECTION_STRING: ""
       TOPIC_NAME: "stacifytopic"
       SUBSCRIPTION_NAME: "stacifysubscription"
       GENERATED_STAC_STORAGE_CONTAINER_NAME: ""
-      AZURE_LOG_CONNECTION_STRING: ""
       DATA_STORAGE_PGSTAC_CONTAINER_NAME: ""
       STAC_METADATA_TYPE_NAME: ""
       JPG_EXTENSION: "200.jpg"
@@ -129,7 +118,6 @@ stacfastapi:
     POSTGRES_DBNAME: postgres
     POSTGRES_HOST_READER: ""
     POSTGRES_HOST_WRITER: ""
-    POSTGRES_PASS: ""
     POSTGRES_PORT: "5432"
     POSTGRES_USER: ""
     RELOAD: "false"
@@ -137,7 +125,6 @@ stacfastapi:
     VSI_CACHE: "TRUE"
     WEB_CONCURRENCY: "10"
     PGUSER: ""
-    PGPASSWORD: ""
     PGHOST: ""
     PGDATABASE: "postgres"
     PYTHONUNBUFFERED: 0
