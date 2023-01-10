@@ -12,8 +12,16 @@ The deployment script uses following tools, please follow the links provided to 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - [helm](https://helm.sh/)
 - [wget](https://www.jcchouinard.com/wget/)
+
 - The scripts are executed on bash shell, so if using a computer with windows based operating system, install a [WSL](https://docs.microsoft.com/windows/wsl/about) environment to execute the script.
 - The bicep templates have been written to adhere to the syntax and rules for bicep version >= 0.8.2. Please check your bicep version using `az bicep version` or `bicep --version` if you run into bicep related errors.
+
+>[!NOTE]
+The solution uses Azure AD workload identity (preview). Please ensure the following additional pre-requisites are also satisfied:
+- az cli version 2.40.0 or later
+- Installed the latest version of the aks-preview extension, version 0.5.102 or later. 
+- Existing Azure Subscription with EnableWorkloadIdentityPreview feature enabled
+- Existing AKS cluster with enable-oidc-issuer and enable-workload-identity enabled
 
 #### RBAC requirement
 
