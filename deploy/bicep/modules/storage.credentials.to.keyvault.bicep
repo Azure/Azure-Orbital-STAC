@@ -6,7 +6,7 @@ param storageAccountName string
 param keyVaultName string
 param keyVaultResourceGroup string
 param secretNamePrefix string = 'Geospatial'
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 
 var storageAccountKeySecretNameVar = 'StorageAccountKey'
 var storageAccountConnStrSecretNameVar = 'StorageAccountConnectionString'
@@ -16,7 +16,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing 
 } 
 
 module storageAccountKeySecret './akv.secrets.bicep' = {
-  name: '${toLower(secretNamePrefix)}-storage-account-key-${utcValue}'
+  name: '${toLower(secretNamePrefix)}-storage-account-key-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName
@@ -27,7 +27,7 @@ module storageAccountKeySecret './akv.secrets.bicep' = {
 }
 
 module storageAccountConnStrSecret './akv.secrets.bicep' = {
-  name: '${toLower(secretNamePrefix)}-storage-account-connstr-${utcValue}'
+  name: '${toLower(secretNamePrefix)}-storage-account-connstr-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName

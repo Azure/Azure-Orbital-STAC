@@ -6,14 +6,14 @@ param applicationInsightsName string
 param keyVaultName string
 param keyVaultResourceGroup string = resourceGroup().name
 param connectionStringSecretName string = 'AppInsightsConnectionString'
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
   name: applicationInsightsName
 } 
 
 module acrLoginServerNameSecret './akv.secrets.bicep' = {
-  name: 'appinsights-connstr-${utcValue}'
+  name: 'appinsights-connstr-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName

@@ -6,10 +6,10 @@ param authorizationRuleId string
 param keyVaultName string
 param secretName string = 'ServiceBusConnectionString'
 param keyVaultResourceGroup string = resourceGroup().name
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 
 module connectionString './akv.secrets.bicep' = {
-  name: '${toLower(environmentName)}-${secretName}-connstr-${utcValue}'
+  name: '${toLower(environmentName)}-${secretName}-connstr-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName

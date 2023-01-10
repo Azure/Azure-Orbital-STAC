@@ -7,7 +7,7 @@ param userManagedIdentityId string = ''
 param userManagedIdentityName string = ''
 param userManagedIdentityResourcegroupName string = ''
 param location string = resourceGroup().location
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 
 resource queryuserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = if (empty(userManagedIdentityId)) {
   scope: resourceGroup(userManagedIdentityResourcegroupName)
@@ -27,7 +27,7 @@ resource runAZCLIInlineWithOutput 'Microsoft.Resources/deploymentScripts@2020-10
     }
   }
   properties: {
-    forceUpdateTag: utcValue
+    forceUpdateTag: randomSuffix
     azCliVersion: '2.28.0'
     environmentVariables: environmentVariables
     scriptContent: scriptContent

@@ -25,7 +25,7 @@ param keyvaultName string = ''
 
 param cloudEndpoints object = loadJsonContent('../cloud_endpoints.json')
 
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 param pgPrivateDNSZoneName string = 'privatelink${cloudEndpoints.suffixes.postgresqlServerEndpoint}'
 
 @description('Jumpbox administrator username')
@@ -147,7 +147,7 @@ module uamiRoleAssignment 'modules/resourcegroup.role-assignment.bicep' = [ for 
 }]
 
 module checkVnetExists 'modules/vnet.exists.bicep' = {
-  name : '${namingPrefix}-checkVnetExists${utcValue}'
+  name : '${namingPrefix}-checkVnetExists${randomSuffix}'
   scope: resourceGroup(vnetRg.name)
   params: {
     userManagedIdentityId: uami.outputs.uamiId
