@@ -25,6 +25,7 @@ ENV_LABEL=${ENV_LABEL:-"stacpool"} # aks agent pool name to deploy kubectl deplo
 AKS_SERVICE_ACCOUNT_NAME=${AKS_SERVICE_ACCOUNT_NAME:-'stac-svc-acct'}
 FEDERATED_IDENTITY_NAME="stacaksfederatedidentity"
 
+
 APIM_SERVICE_NAME=$(az apim list --resource-group $PROCESSING_RESOURCE_GROUP --query "[0].name" -o tsv)
 
 APIM_STAC_LOADBALANCER_URL=$(az apim api list --resource-group $PROCESSING_RESOURCE_GROUP \

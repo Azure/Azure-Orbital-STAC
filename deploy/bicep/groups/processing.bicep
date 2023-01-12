@@ -12,6 +12,7 @@ param keyVaultResourceGroupName string
 param logAnalyticsWorkspaceResourceID string
 param acrName string = ''
 param acrSku string = 'Standard'
+param kubernetesVersion string
 param storageAccountNameForApim string
 param storageAccountResourceGroupName string
 param loadBalancerPrivateIP string = '10.6.3.254'
@@ -408,6 +409,7 @@ module aksCluster '../modules/aks-cluster.bicep' =  {
     vmSize: aksVmSize
     networkPlugin: 'kubenet'
     vnetSubnetID: vnetSubnetID
+    kubernetesVersion: kubernetesVersion
     clientId: aksManagedIdentity.outputs.uamiClientId
   }
   dependsOn: [

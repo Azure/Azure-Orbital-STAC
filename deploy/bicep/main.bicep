@@ -23,6 +23,9 @@ param postgresAdminLoginPass string = ''
 // Parameters with default values for Keyvault
 param keyvaultName string = ''
 
+@description('Kubernetes Version')
+param kubernetesVersion string = '1.22.0'
+
 param cloudEndpoints object = loadJsonContent('../cloud_endpoints.json')
 
 param randomSuffix string = uniqueString(subscription().id)
@@ -120,8 +123,6 @@ module monitoringModule 'groups/monitoring.bicep' = {
   params: {
     projectName: projectName
     location: location
-    keyVaultName: keyvaultNameVar
-    keyVaultResourceGroupName: dataRg.name
     environmentCode: environmentCode
     environmentTag: environment
   }
@@ -205,6 +206,7 @@ module processingModule 'groups/processing.bicep' = {
     environmentTag: environment
     keyVaultName: keyvaultNameVar
     keyVaultResourceGroupName: dataRg.name
+    kubernetesVersion: kubernetesVersion
     logAnalyticsWorkspaceResourceID: monitoringModule.outputs.workspaceId
     vnetResourceGroup: vnetResourceGroupName
     vnetName: vnetNameVar
