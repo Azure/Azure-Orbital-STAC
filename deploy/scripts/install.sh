@@ -36,7 +36,6 @@ CONFIGURE_POD_IDENTITY=${7:-${CONFIGURE_POD_IDENTITY:-"false"}}
 ENABLE_PUBLIC_ACCESS=${8:-${ENABLE_PUBLIC_ACCESS:-"false"}}
 USER_OBJ_ID=${USER_OBJ_ID:-"$(az ad signed-in-user show --query id --output tsv 2> /dev/null || echo '')"}
 LB_PRIVATE_IP=${LB_PRIVATE_IP:-"10.6.3.254"}
-MIN_AKS_VERSION_REQUIRED=${MIN_AKS_VERSION_REQUIRED:-"1.22.0"}
 
 if [[ -z "$USER_OBJ_ID" ]]
   then
@@ -49,21 +48,8 @@ az feature register --namespace "Microsoft.ContainerService" --name "EnableWorkl
 # Captures the Azure cloud endpoints/suffixes
 az cloud show -o json > $PRJ_ROOT/deploy/cloud_endpoints.json
 
-AKS_VERSION=$(az aks get-versions -l $LOCATION | jq -r '.orchestrators[].orchestratorVersion' | sort -rV | head -n1)
-
-if [ "${AKS_VERSION}" != "${MIN_AKS_VERSION_REQUIRED}" ]
-  then 
-
-  # Instead of directly comparing versions - sort and get the least version number
-  LEAST_AKS_VERSION=$(echo -e "$MIN_AKS_VERSION_REQUIRED\n$AKS_VERSION" | sort -V | head -n1)
-
-  if [ "$LEAST_AKS_VERSION" == "$AKS_VERSION"  ]
-    then
-    echo "You need at least Kubernetes Version ${MIN_AKS_VERSION_REQUIRED} in ${LOCATION} region"
-    exit 1
-  fi
-  
-fi
+# Minimum required version of Kubernetes is 1.22.0. We assume all regions have atleast 1.22.0 or later version
+AKS_VERSION=$(az aks get-versions -l $LOCATION --query 'orchestrators[?!isPreview].orchestratorVersion' -otsv | sort -rV | head -n1)
 
 DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
     -f $PRJ_ROOT/deploy/bicep/main.bicep \
