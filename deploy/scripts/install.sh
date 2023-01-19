@@ -43,8 +43,13 @@ if [[ -z "$USER_OBJ_ID" ]]
     echo "To get USER_OBJ_ID, run 'az ad signed-in-user show --query id --output tsv'"
 fi
 
+az feature register --namespace "Microsoft.ContainerService" --name "EnableWorkloadIdentityPreview"
+
 # Captures the Azure cloud endpoints/suffixes
 az cloud show -o json > $PRJ_ROOT/deploy/cloud_endpoints.json
+
+# Minimum required version of Kubernetes is 1.22.0. We assume all regions have atleast 1.22.0 or later version
+AKS_VERSION=$(az aks get-versions -l $LOCATION --query 'orchestrators[?!isPreview].orchestratorVersion' -otsv | sort -rV | head -n1)
 
 DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
     -f $PRJ_ROOT/deploy/bicep/main.bicep \
@@ -52,10 +57,11 @@ DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
     location=$LOCATION \
     environmentCode=$ENV_CODE \
     environment=$ENV_TAG \
+    kubernetesVersion=$AKS_VERSION \
     jumpboxAdminUsername=$JUMPBOX_USERNAME \
     jumpboxAdminPassword=$JUMPBOX_PASSWORD \
     loadBalancerPrivateIP=$LB_PRIVATE_IP \
-    configurePodIdentity=$CONFIGURE_POD_IDENTITY \
     enablePublicAccess=$ENABLE_PUBLIC_ACCESS \
     owner_aad_object_id=$USER_OBJ_ID"
+
 $DEPLOYMENT_SCRIPT

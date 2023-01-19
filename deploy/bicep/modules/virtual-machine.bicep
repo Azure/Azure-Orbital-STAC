@@ -46,7 +46,7 @@ param enablePublicAccess bool = false
 
 param sshPort int = 22
 
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 
 param userManagedIdentityIdForVMStateCheck string
 
@@ -147,7 +147,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
 }
 
 module checkVmProvisioningState '../modules/vm.check.provisioningstate.bicep' = {
-  name : '${vmName}-checkVmProvisioningState-${utcValue}'
+  name : '${vmName}-checkVmProvisioningState-${randomSuffix}'
   params: {
     userManagedIdentityId: userManagedIdentityIdForVMStateCheck
     vmName: vmName
@@ -163,7 +163,7 @@ module jumpboxSshAccess '../modules/vm.run-command.bicep' = if (sshPort != 22) {
   params: {
     environmentName: environmentName
     vmName: vmName
-    runCommandName: '${vmName}-grant-ssh-access-command-${utcValue}'
+    runCommandName: '${vmName}-grant-ssh-access-command-${randomSuffix}'
     location: location
     script: checkVmProvisioningState.outputs.vmSucceeded?sshCommand:'vm-did-not-work'
     runAsUser: 'root'

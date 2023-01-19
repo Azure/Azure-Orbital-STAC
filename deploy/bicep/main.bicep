@@ -23,9 +23,12 @@ param postgresAdminLoginPass string = ''
 // Parameters with default values for Keyvault
 param keyvaultName string = ''
 
+@description('Kubernetes Version')
+param kubernetesVersion string = '1.22.0'
+
 param cloudEndpoints object = loadJsonContent('../cloud_endpoints.json')
 
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 param pgPrivateDNSZoneName string = 'privatelink${cloudEndpoints.suffixes.postgresqlServerEndpoint}'
 
 @description('Jumpbox administrator username')
@@ -46,7 +49,6 @@ var processingResourceGroupName = '${environmentCode}-processing-rg'
 var projectName = 'stac'
 var namingPrefix = '${environmentCode}-${projectName}'
 
-param configurePodIdentity bool = false
 param loadBalancerPrivateIP string = '10.6.3.254'
 
 // This parameter is a placeholder to retain current work we have for public access
@@ -146,7 +148,7 @@ module uamiRoleAssignment 'modules/resourcegroup.role-assignment.bicep' = [ for 
 }]
 
 module checkVnetExists 'modules/vnet.exists.bicep' = {
-  name : '${namingPrefix}-checkVnetExists${utcValue}'
+  name : '${namingPrefix}-checkVnetExists${randomSuffix}'
   scope: resourceGroup(vnetRg.name)
   params: {
     userManagedIdentityId: uami.outputs.uamiId
@@ -204,6 +206,7 @@ module processingModule 'groups/processing.bicep' = {
     environmentTag: environment
     keyVaultName: keyvaultNameVar
     keyVaultResourceGroupName: dataRg.name
+    kubernetesVersion: kubernetesVersion
     logAnalyticsWorkspaceResourceID: monitoringModule.outputs.workspaceId
     vnetResourceGroup: vnetResourceGroupName
     vnetName: vnetNameVar
@@ -213,11 +216,24 @@ module processingModule 'groups/processing.bicep' = {
     jumpboxAdminUsername: jumpboxAdminUsername
     jumpboxAdminPasswordOrKey: jumpboxAdminPassword
     loadBalancerPrivateIP: loadBalancerPrivateIP
-    configurePodIdentity: configurePodIdentity
     storageAccountNameForApim: dataModule.outputs.storageAccountName
     storageAccountResourceGroupName: dataRg.name
     apimSubnetId: networkingModule.outputs.apimSubnetId
     azureBastionSubnetID: networkingModule.outputs.bastionSubnetId
+  }
+  dependsOn: [
+    dataModule
+  ]
+}
+
+module appinsightsSecrets 'modules/appinsights.credentials.to.keyvault.bicep' = {
+  name : '${namingPrefix}-appinsights-secrets'
+  scope: resourceGroup(monitoringRg.name)
+  params: {
+    environmentName: environment
+    applicationInsightsName: '${namingPrefix}-appinsights'
+    keyVaultName: dataModule.outputs.keyVaultName
+    keyVaultResourceGroup: dataResourceGroupName
   }
   dependsOn: [
     dataModule

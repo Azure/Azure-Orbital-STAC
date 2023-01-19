@@ -12,6 +12,7 @@ param keyVaultResourceGroupName string
 param logAnalyticsWorkspaceResourceID string
 param acrName string = ''
 param acrSku string = 'Standard'
+param kubernetesVersion string
 param storageAccountNameForApim string
 param storageAccountResourceGroupName string
 param loadBalancerPrivateIP string = '10.6.3.254'
@@ -49,8 +50,7 @@ param apimSubnetId string = ''
 param jumpboxVmName string = ''
 param jumpboxVmSize string = 'Standard_D2s_v5'
 
-param configurePodIdentity bool = false
-param podIdentityMiName string = ''
+param aksManagedIdentityName string = ''
 
 @description('Type of authentication to use on the Jumpbox Virtual Machine. SSH key is recommended.')
 @allowed([
@@ -72,7 +72,7 @@ var namingPrefix = '${environmentCode}-${projectName}'
 var namingSuffix = substring(uniqueString(guid('${subscription().subscriptionId}${namingPrefix}${environmentTag}${location}')), 0, 10)
 var acrNameVar = empty(acrName) ? 'acr${namingSuffix}' : acrName
 var aksClusterNameVar = empty(aksClusterName) ? 'aks${namingSuffix}' : aksClusterName
-var podIdentityMiNameVar = empty(podIdentityMiName) ? '${namingPrefix}aks-pod-identity-mi' : podIdentityMiName
+var aksManagedIdentityNameVar = empty(aksManagedIdentityName) ? '${namingPrefix}aks-mi' : aksManagedIdentityName
 var apiManagementServiceNameVar =  empty(apiManagementServiceName) ? 'apim-${namingSuffix}' : apiManagementServiceName
 var jumpboxVmNameVar = empty(jumpboxVmName) ? 'jbox${namingSuffix}' : jumpboxVmName
 var jumpboxAdminPasswordOrKeyVar = empty(jumpboxAdminPasswordOrKey) && jumpboxAuthenticationType == 'password' ?'${base64(uniqueString(guid(namingPrefix)))}' : jumpboxAdminPasswordOrKey
@@ -376,16 +376,30 @@ module acrCredentials '../modules/acr.credentials.to.keyvault.bicep' = {
   ]
 }
 
-module podIdentityManagedIdentity '../modules/managed.identity.user.bicep' = if (configurePodIdentity) {
-  name: '${namingPrefix}-aks-pod-identity'
+module aksManagedIdentity '../modules/managed.identity.user.bicep' = {
+  name: '${namingPrefix}-aks-managed-identity'
   params: {
     environmentName: environmentTag
     location: location
-    uamiName: podIdentityMiNameVar
+    uamiName: aksManagedIdentityNameVar
   }
 }
 
-module aksCluster '../modules/aks-cluster-with-pod-identity.bicep' =  {
+module akvPolicyForMI '../modules/akv.policy.bicep' = {
+  name: '${namingPrefix}-aks-policy-for-mi'
+  scope: resourceGroup(keyVaultResourceGroupName)
+  params: {
+    keyVaultName: keyVaultName
+    policyOps: 'add'
+    objIdForPolicy: aksManagedIdentity.outputs.uamiClientId
+    secretPermission: [
+      'Get'
+      'List'
+    ]
+  }
+}
+
+module aksCluster '../modules/aks-cluster.bicep' =  {
   name: '${namingPrefix}-aks'
   params: {
     environmentName: environmentTag
@@ -395,15 +409,12 @@ module aksCluster '../modules/aks-cluster-with-pod-identity.bicep' =  {
     vmSize: aksVmSize
     networkPlugin: 'kubenet'
     vnetSubnetID: vnetSubnetID
-    managedIdentityName: configurePodIdentity?podIdentityMiNameVar:''
-    managedIdentityResourcegroupName: configurePodIdentity?resourceGroupName:''
-    managedIdentityId: configurePodIdentity?podIdentityManagedIdentity.outputs.uamiId:''
-    managedIdentityClientId: configurePodIdentity?podIdentityManagedIdentity.outputs.uamiClientId:''
-    managedIdentityPrincipalId: configurePodIdentity?podIdentityManagedIdentity.outputs.uamiPrincipalId:''
+    kubernetesVersion: kubernetesVersion
+    clientId: aksManagedIdentity.outputs.uamiClientId
   }
   dependsOn: [
     acr
-    podIdentityManagedIdentity
+    aksManagedIdentity
   ]
 }
 

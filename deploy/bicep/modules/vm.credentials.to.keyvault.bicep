@@ -16,11 +16,11 @@ param vmPasswordSecretName string = '${vmName}-Password'
 param vmPassword string
 param vmSshConnectionStringSecretName string = '${vmName}-SshConnectionString'
 param vmSshConnectionString string = 'ssh -p ${vmSshPort} ${vmUsername}@${vmHostname}'
-param utcValue string = utcNow()
+param randomSuffix string = uniqueString(subscription().id)
 
 
 module vmHostNameSecret './akv.secrets.bicep' = {
-  name: 'vm-host-name-${utcValue}'
+  name: 'vm-host-name-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName
@@ -31,7 +31,7 @@ module vmHostNameSecret './akv.secrets.bicep' = {
 }
 
 module vmSshPortSecret './akv.secrets.bicep' = {
-  name: 'vm-ssh-port-${utcValue}'
+  name: 'vm-ssh-port-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName
@@ -42,7 +42,7 @@ module vmSshPortSecret './akv.secrets.bicep' = {
 }
 
 module vmUsernameSecret './akv.secrets.bicep' = {
-  name: 'vm-username-${utcValue}'
+  name: 'vm-username-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName
@@ -53,7 +53,7 @@ module vmUsernameSecret './akv.secrets.bicep' = {
 }
 
 module vmPasswordSecret './akv.secrets.bicep' = {
-  name: 'vm-password-${utcValue}'
+  name: 'vm-password-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName
@@ -64,7 +64,7 @@ module vmPasswordSecret './akv.secrets.bicep' = {
 }
 
 module vmSshConnectionStringSecret './akv.secrets.bicep' = {
-  name: 'vm-ssh-connection-string-${utcValue}'
+  name: 'vm-ssh-connection-string-${randomSuffix}'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     environmentName: environmentName
