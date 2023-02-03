@@ -36,7 +36,15 @@ mkdir -p $STAC_FASTAPI_SRC_DIR
 git clone https://github.com/stac-utils/stac-fastapi $STAC_FASTAPI_SRC_DIR/stac-fastapi
 CURRENT_WORKING_DIRECTORY="$(pwd)"
 cd $STAC_FASTAPI_SRC_DIR/stac-fastapi
-git reset --hard 926698034f836ed4db13e03c9c33257c4a86020a
+git reset --hard da012a635b1c0185d40595db11c76ac9f110d796
 cd $CURRENT_WORKING_DIRECTORY
+
+# This is temporary fix until we find a better solution for this fix
+# issue - pypgstac cmdline for ingesting the STAC collection and item are 
+# at 0.6.11 and the database (postgresql) is getting bootstrapped to 0.6.13.
+# These two versions need to match. This fix holds these versions to 0.6.11.
+sed -i 's/0.6.12/0.6.11/' $STAC_FASTAPI_SRC_DIR/stac-fastapi/docker-compose.yml
+sed -i 's/0.6.\*/0.6.11/' $STAC_FASTAPI_SRC_DIR/stac-fastapi/stac_fastapi/pgstac/setup.py
+
 az acr build --registry $ACR_NAME --image stac-fastapi ${STAC_FASTAPI_SRC_DIR}/stac-fastapi
 rm -rf ${STAC_FASTAPI_SRC_DIR}
