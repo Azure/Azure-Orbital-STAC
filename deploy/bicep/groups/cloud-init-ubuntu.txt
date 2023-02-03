@@ -7,6 +7,6 @@ runcmd:
   - sudo mkdir -p /tmp/downloadazcopy
   - sudo tar -xf /tmp/downloadazcopy-v10-linux --directory /tmp/downloadazcopy
   - sudo rm -f /usr/bin/azcopy
-  - sudo cp /tmp/downloadazcopy/azcopy_linux_amd64_*/azcopy /usr/bin/
+  - sh -c "sudo cp /tmp/downloadazcopy/azcopy_linux_amd64_*/azcopy /usr/bin/"
   - sudo chmod 755 /usr/bin/azcopy
   - curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
