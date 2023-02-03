@@ -102,7 +102,7 @@ class StacCol2Postgres(BaseProcessor):
                     data = json.dumps(json.load(f))
                     
                     # send the json for ingestion to PostgreSQL
-                    cursor.callproc('pgstac.create_collection', [data])
+                    cursor.execute('SELECT pgstac.create_collection(%s)', [data])
 
                     conn.commit()
 

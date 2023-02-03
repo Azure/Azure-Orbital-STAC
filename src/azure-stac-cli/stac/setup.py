@@ -15,7 +15,8 @@ DEPENDENCIES= [
     'rasterio==1.3.4',
     'stactools==0.4.2',
     'psycopg[binary]==3.1.7',
-    'pypgstac[psycopg]==0.6.11'
+    'pypgstac[psycopg]==0.6.11',
+    'charset-normalizer<3.0,>=2.0'
 ],
 
 setup(

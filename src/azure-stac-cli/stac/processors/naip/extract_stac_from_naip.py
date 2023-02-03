@@ -246,8 +246,12 @@ class ExtractStac4mNaip(BaseProcessor):
                     
                     try:
                         # todo: fix this - takes 3 arguments; not one
-                        file_path, file_name = asyncio.run(
-                            download_blob_async(download_tif_url))
+                        asyncio.run(
+                            download_blob_async(conn_str=self.CONNECTION_STRING,
+                                                container_name=self.SRC_CONTAINER_NAME,
+                                                file_path=download_tif_url,
+                                                destination_path='./'))
+                        
                         
                         self.__translate_tif_to_jpeg(
                             file_name_without_ext, file_name)
@@ -259,7 +263,7 @@ class ExtractStac4mNaip(BaseProcessor):
                             asyncio.run(upload_blob_async(
                                 conn_string=self.CONNECTION_STRING,
                                 container_name=self.SRC_CONTAINER_NAME,
-                                file_path=file_path, 
+                                file_path='./', 
                                 file_name=file_to_upload))
 
                     except Exception as e:

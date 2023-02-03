@@ -391,7 +391,7 @@ module akvPolicyForMI '../modules/akv.policy.bicep' = {
   params: {
     keyVaultName: keyVaultName
     policyOps: 'add'
-    objIdForPolicy: aksManagedIdentity.outputs.uamiClientId
+    objIdForPolicy: aksManagedIdentity.outputs.uamiPrincipalId
     secretPermission: [
       'Get'
       'List'
