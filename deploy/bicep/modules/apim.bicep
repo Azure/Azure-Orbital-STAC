@@ -55,6 +55,13 @@ param virtualNetworkType string = 'None'
 ])
 param publicNetworkAccess string = 'Enabled'
 
+@allowed([
+  'stv1'
+  'stv2'
+])
+param platformVersion string = 'stv2'
+
+
 param subnetId string = ''
 param dnsLabelPrefix string = toLower('${apiManagementServiceName}-${uniqueString(resourceGroup().id)}')
 
@@ -85,8 +92,8 @@ resource apiManagementService 'Microsoft.ApiManagement/service@2021-12-01-previe
     virtualNetworkConfiguration: empty(subnetId)?null:{
       subnetResourceId: subnetId
     }
-    publicIpAddressId: publicIp.outputs.id
-    publicNetworkAccess: publicNetworkAccess
+    publicIpAddressId: platformVersion == 'stv2' ? publicIp.outputs.id: null
+    publicNetworkAccess: platformVersion == 'stv1' ? 'Enabled': publicNetworkAccess
   }
   dependsOn:[
     publicIp

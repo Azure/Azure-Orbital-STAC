@@ -37,6 +37,12 @@ param jumpboxAdminUsername string = 'adminuser'
 @secure()
 param jumpboxAdminPassword string
 
+@description('Disable private endpoint for PostgreSQL')
+param privateEndpointDisabled bool = false
+
+@description('Platform Version for API Management Service')
+param apimPlatformVersion string = 'stv2'
+
 // Guid to role definitions to be used during role
 // assignments including the below roles definitions:
 // Contributor
@@ -193,6 +199,7 @@ module dataModule 'groups/data.bicep' = {
     pgPrivateDNSZoneId: networkingModule.outputs.pgPrivateDNSZoneId
     storageAccountPrivateDNSZoneName: networkingModule.outputs.storageAccountPrivateDNSZoneName
     logAnalyticsWorkspaceResourceID: monitoringModule.outputs.workspaceId
+    privateEndpointDisabled: privateEndpointDisabled
   }
 }
 
@@ -220,6 +227,7 @@ module processingModule 'groups/processing.bicep' = {
     storageAccountResourceGroupName: dataRg.name
     apimSubnetId: networkingModule.outputs.apimSubnetId
     azureBastionSubnetID: networkingModule.outputs.bastionSubnetId
+    apimPlatformVersion: apimPlatformVersion
   }
   dependsOn: [
     dataModule

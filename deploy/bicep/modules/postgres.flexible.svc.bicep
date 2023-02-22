@@ -15,6 +15,7 @@ param availabilityZone string = '1'
 param version string = '13'
 param delegatedSubnetResourceId string = ''
 param privateDnsZoneArmResourceId string = ''
+param privateEndpointDisabled bool = false
 
 resource serverName_resource 'Microsoft.DBforPostgreSQL/flexibleServers@2021-06-01' = {
   name: serverName
@@ -27,7 +28,7 @@ resource serverName_resource 'Microsoft.DBforPostgreSQL/flexibleServers@2021-06-
     version: version
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
-    network: {
+    network: privateEndpointDisabled ? null: {
       delegatedSubnetResourceId: (empty(delegatedSubnetResourceId) ? json('null') : delegatedSubnetResourceId)
       privateDnsZoneArmResourceId: (empty(privateDnsZoneArmResourceId) ? json('null') : privateDnsZoneArmResourceId)
     }
