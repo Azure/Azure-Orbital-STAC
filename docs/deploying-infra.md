@@ -62,7 +62,7 @@ az account set -s <subscription_id>
 
 For end-to-end deployment, you can either choose to run the `setup.sh` script that will take care of deploying all the services, building the docker images and configuring the variables or run the scripts individually as shown below.
 
-Note: For US Government Cloud, 
+Note: For Sovereign Clouds, 
 
 * set `APIM_PLATFORM_VERSION` to 'stv1' as 'stv2' is not supported. 
 * set `POSTGRES_PRIVATE_ENDPOINT_DISABLED` to true as Private EndPoint for PostgreSQL are not supported.
