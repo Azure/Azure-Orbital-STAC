@@ -45,6 +45,11 @@ param apiManagementSku string = 'Premium'
 ])
 param apiVirtualNetworkType string = 'External'
 param apimSubnetId string = ''
+@allowed([
+  'stv1'
+  'stv2'
+])
+param apimPlatformVersion string = 'stv2'
 
 // Parameters for jumpbox
 param jumpboxVmName string = ''
@@ -476,6 +481,7 @@ module apim '../modules/apim.bicep' ={
     location: location
     virtualNetworkType: apiVirtualNetworkType
     subnetId: apimSubnetId
+    platformVersion: apimPlatformVersion
   }
 }
 

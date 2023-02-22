@@ -36,6 +36,8 @@ CONFIGURE_POD_IDENTITY=${7:-${CONFIGURE_POD_IDENTITY:-"false"}}
 ENABLE_PUBLIC_ACCESS=${8:-${ENABLE_PUBLIC_ACCESS:-"false"}}
 USER_OBJ_ID=${USER_OBJ_ID:-"$(az ad signed-in-user show --query id --output tsv 2> /dev/null || echo '')"}
 LB_PRIVATE_IP=${LB_PRIVATE_IP:-"10.6.3.254"}
+APIM_PLATFORM_VERSION=${APIM_PLATFORM_VERSION:-'stv2'}
+POSTGRES_PRIVATE_ENDPOINT_DISABLED=${POSTGRES_PRIVATE_ENDPOINT_DISABLED:-false}
 
 if [[ -z "$USER_OBJ_ID" ]]
   then
@@ -62,6 +64,8 @@ DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
     jumpboxAdminPassword=$JUMPBOX_PASSWORD \
     loadBalancerPrivateIP=$LB_PRIVATE_IP \
     enablePublicAccess=$ENABLE_PUBLIC_ACCESS \
+    apimPlatformVersion=$APIM_PLATFORM_VERSION \
+    privateEndpointDisabled=$POSTGRES_PRIVATE_ENDPOINT_DISABLED \
     owner_aad_object_id=$USER_OBJ_ID"
 
 $DEPLOYMENT_SCRIPT

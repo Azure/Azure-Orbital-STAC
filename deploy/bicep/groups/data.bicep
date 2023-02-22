@@ -41,6 +41,7 @@ param keyvaultSoftDeleteRetentionInDays int = 7
 param pgHaMode string = 'Disabled'
 param pgDelegatedSubnetId string
 param pgPrivateDNSZoneId string
+param privateEndpointDisabled bool
 
 // Parameters for storage account
 param storageAccountName string = ''
@@ -218,6 +219,7 @@ module pgServer '../modules/postgres.flexible.svc.bicep' = {
     serverName: pgserverNameVar
     delegatedSubnetResourceId: pgDelegatedSubnetId
     privateDnsZoneArmResourceId: pgPrivateDNSZoneId
+    privateEndpointDisabled: privateEndpointDisabled
     haMode: pgHaMode
   }
 }
