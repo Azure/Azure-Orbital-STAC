@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from typing import Optional
 from core.processor import BaseProcessor
 from stac.core.metrics import sendmetrics
+from psycopg import Connection
 
 class StacCol2Postgres(BaseProcessor):
     
@@ -54,31 +56,23 @@ class StacCol2Postgres(BaseProcessor):
         self.__get_envvars()
         
         # Database connector
-        conn = ''
+        conn: Optional[Connection] = None
         
         # Construct connection string
         conn_string = "host={0} user={1} dbname={2} password={3}".format(
             self.PGHOST, self.PGUSER, self.PGDATABASE, self.PGPASSWORD)
         try:
-            conn = psycopg.connect()
-            
+            conn = psycopg.connect()            
         except Exception as e:
-            
             pass
         
         for msg in self.begin_listening():
             
             # Is connection closed? if so, open a new connection 
-            if conn.closed:
-                
-                try:
-                    # todo: make sure to assert that kwargs has conn_string
-                    # before you use it
-                    conn = psycopg.connect(conn_string)
-                    
-                except Exception as e:
-                    
-                     pass
+            if conn is None or conn.closed:
+                # todo: make sure to assert that kwargs has conn_string
+                # before you use it
+                conn = psycopg.connect(conn_string)
 
             cursor = conn.cursor()
             

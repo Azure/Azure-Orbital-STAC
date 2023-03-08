@@ -82,6 +82,7 @@ var apiManagementServiceNameVar =  empty(apiManagementServiceName) ? 'apim-${nam
 var jumpboxVmNameVar = empty(jumpboxVmName) ? 'jbox${namingSuffix}' : jumpboxVmName
 var jumpboxAdminPasswordOrKeyVar = empty(jumpboxAdminPasswordOrKey) && jumpboxAuthenticationType == 'password' ?'${base64(uniqueString(guid(namingPrefix)))}' : jumpboxAdminPasswordOrKey
 var bastionNameVar = empty(azureBastionName)? 'bastion${namingSuffix}' : azureBastionName
+var apimStorageAccountBlobServiceUrl = 'https://${storageAccountNameForApim}.blob.${environment().suffixes.storage}'
 
 var apiOperationConfigs = [
   {
@@ -89,7 +90,7 @@ var apiOperationConfigs = [
       displayName: 'blobStore'
       apiRevision: '1'
       subscriptionRequired: true
-      serviceUrl: 'https://${storageAccountNameForApim}.blob.${environment().suffixes.storage}'
+      serviceUrl: apimStorageAccountBlobServiceUrl
       path: 'blobstore'
       protocols: [
         'https'
@@ -97,76 +98,56 @@ var apiOperationConfigs = [
       isCurrent: true
     }
     policy: {
-      value: '<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <base />\r\n    <set-header name="x-ms-version" exists-action="override">\r\n      <value>2017-11-09</value>\r\n    </set-header>\r\n    <set-header name="x-ms-blob-type" exists-action="override">\r\n      <value>BlockBlob</value>\r\n    </set-header>\r\n    <authentication-managed-identity resource="https://storage.azure.com" />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>'
-      format: 'xml'
+      value: '''
+      <!--
+        IMPORTANT:
+        - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.
+        - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.
+        - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.
+        - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.
+        - To remove a policy, delete the corresponding policy statement from the policy document.
+        - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.
+        - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.
+        - Policies are applied in the order of their appearance, from the top down.
+        - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.
+      -->
+      <policies>
+        <inbound>
+          <base />
+          <set-header name="x-ms-version" exists-action="override">
+            <value>2017-11-09</value>
+          </set-header>
+          <set-header name="x-ms-blob-type" exists-action="override">
+            <value>BlockBlob</value>
+          </set-header>
+          <authentication-managed-identity resource="https://storage.azure.com" />
+        </inbound>
+        <backend>
+          <base />
+        </backend>
+        <outbound>
+          <base />
+        </outbound>
+        <on-error>
+          <base />
+        </on-error>
+      </policies>
+      '''
+      format: 'rawxml'
     }
     operations: [
-      {
-        name: 'get-blob'
-        policy: {}
-        properties: {
-          displayName: 'get blob'
-          method: 'GET'
-          urlTemplate: '/'
-          templateParameters: []
-          description: 'get blob'
-          responses: [
-            {
-              statusCode: 200
-              description: 'null'
-              representations: []
-              headers: []
-            }
-          ]
-        }
-      }
       {
         name: 'getblob'
         policy: {}
         properties: {
-          displayName: 'getBlob'
+          displayName: 'Get Blob'
           method: 'GET'
-          urlTemplate: '/{container}/{blob}'
-          templateParameters: [
-            {
-              name: 'container'
-              required: true
-              values: []
-              typeName: 'container-blob-GetRequest'
-            }
-            {
-              name: 'blob'
-              required: true
-              values: []
-              typeName: 'container-blob-GetRequest-1'
-            }
-          ]
+          urlTemplate: '/*'
+          templateParameters: []
           description: 'getBlob'
           responses: [
             {
               statusCode: 200
-              description: 'null'
-              representations: []
-              headers: []
-            }
-          ]
-        }
-      }
-      {
-        name: 'redirect-blob'
-        policy: {}
-        properties: {
-          displayName: 'redirect blob'
-          method: 'GET'
-          urlTemplate: '/redirectblob'
-          templateParameters: []
-          description: 'redirect-blob'
-          responses: [
-            {
-              statusCode: 200
-              description: 'null'
-              representations: []
-              headers: []
             }
           ]
         }
@@ -186,15 +167,52 @@ var apiOperationConfigs = [
       isCurrent: true
     }
     policy: {
-      value: '<policies>\r\n  <inbound>\r\n    <base />\r\n    <set-header name="requestURL" exists-action="override">\r\n      <value>@((string)context.Request.OriginalUrl.Path.Trim(\'/\').Substring(context.Api.Path.Trim(\'/\').Length))</value>\r\n    </set-header>\r\n    <set-header name="Accept-Encoding" exists-action="override">\r\n      <value>*</value>\r\n    </set-header>\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>'
-      format: 'xml'
+      value: '''
+      <policies>
+        <inbound>
+          <base />
+          <set-header name="requestURL" exists-action="override">
+            <value>@((string)context.Request.OriginalUrl.Path.Trim('/').Substring(context.Api.Path.Trim('/').Length))</value>
+          </set-header>
+          <set-header name="Accept-Encoding" exists-action="override">
+            <value>*</value>
+          </set-header>
+        </inbound>
+        <backend>
+          <base />
+        </backend>
+        <outbound>
+          <!-- 
+            Rewrite storage account URLs to go through the blobstore proxy.
+            This assumes the blob-storage-url named value has been set to the
+            blob service endpoint for the storage account.
+          -->
+          <find-and-replace from="{{blob-storage-url}}" to="@{
+              // Get the Gateway URL by taking the scheme/host/port (if non-standard)
+              // of the APIM service, but leave off any path and/or query.
+              var url = context.Request.OriginalUrl;
+              var port = (url.Port == 80 || url.Port == 443) ? "" : (":" + url.Port);
+              return url.Scheme + "://" + url.Host + port + "/blobstore";
+          }" />
+          <!--
+              Rewrite any URLs in the body that reference the internal service.
+          -->
+          <redirect-content-urls />
+          <base />
+        </outbound>
+        <on-error>
+          <base />
+        </on-error>
+      </policies>
+      '''
+      format: 'rawxml'
     }
     operations: [
       {
         name: 'queryables'
         policy: {}
         properties: {
-          displayName: '/queryables'
+          displayName: 'Queryables'
           method: 'GET'
           urlTemplate: '/queryables'
           templateParameters: []
@@ -206,7 +224,7 @@ var apiOperationConfigs = [
         name: 'conformance-classes'
         policy: {}
         properties: {
-          displayName: '/conformance'
+          displayName: 'Conformance'
           method: 'GET'
           urlTemplate: '/conformance'
           templateParameters: []
@@ -215,12 +233,9 @@ var apiOperationConfigs = [
       }
       {
         name: 'get-search'
-        policy: {
-          value: '<!--\r\nfast-stac-api: /search\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <choose>\r\n      <when condition="@(context.Response.StatusCode == 200)">\r\n        <return-response>\r\n          <set-header name="Content-Type" exists-action="override">\r\n            <value>application/geo+json</value>\r\n          </set-header>\r\n          <set-header name="Accept" exists-action="override">\r\n            <value>application/geo+json</value>\r\n          </set-header>\r\n          <set-body>@{\r\n                        try\r\n                            {\r\n                            JObject body = null;\r\n                            var str = "";\r\n                            var apimURL = context.Api.ServiceUrl.ToString().LastIndexOf("/") == -1 ?\r\n                            context.Api.ServiceUrl.ToString() : context.Api.ServiceUrl.ToString().Substring(0,\r\n                            context.Api.ServiceUrl.ToString().LastIndexOf("/"));\r\n                            var name = context.Request.OriginalUrl.ToString();\r\n                            Uri nameURI = new Uri(name);\r\n                            string originalURL = "https://" + nameURI.Authority;\r\n                            string blobStoreName = "blobstore";\r\n                            string blobStoreRoute = "/redirectblob";\r\n  \r\n                                body = context.Response.Body.As&lt;JObject&gt;(preserveContent: true);\r\n\r\n                                foreach (var item in body["features"])\r\n                                {\r\n\r\n                                    if(item.SelectToken("assets.visual.href") != null)\r\n                                    {\r\n                                        try\r\n                                        {\r\n                                            Uri assetUri = new Uri(item["assets"]["visual"]["href"].ToString());\r\n                                            item["assets"]["visual"]["href"] =  originalURL + "/" + blobStoreName + blobStoreRoute + "?path=" + assetUri.AbsolutePath;\r\n                                        }\r\n                                        catch (System.Exception)\r\n                                        {\r\n                                            // Do nothing\r\n                                        }\r\n                                    }\r\n\r\n                                    if(item.SelectToken("assets.image.href") != null)\r\n                                    {\r\n                                        Uri assetUri = new Uri(item["assets"]["image"]["href"].ToString());\r\n                                        item["assets"]["image"]["href"] = originalURL + "/" + blobStoreName + blobStoreRoute + "?path="\r\n                                        + assetUri.AbsolutePath;\r\n                                    }\r\n\r\n\r\n                                    if(item.SelectToken("assets.thumbnail.href") != null)\r\n                                    {\r\n                                        Uri assetUri = new Uri(item["assets"]["thumbnail"]["href"].ToString());\r\n                                        item["assets"]["thumbnail"]["href"] = originalURL + "/" + blobStoreName + blobStoreRoute + "?path="\r\n                                        + assetUri.AbsolutePath;\r\n                                    }\r\n\r\n\r\n\r\n                                     if(item.SelectToken("assets.metadata.href") != null) \r\n                                     {\r\n                                        Uri metadataUri = new Uri(item["assets"]["metadata"]["href"].ToString());\r\n                                        item["assets"]["metadata"]["href"] = originalURL + "/" + blobStoreName + blobStoreRoute +\r\n                                        "?path="\r\n                                        + metadataUri.AbsolutePath;\r\n                                     }\r\n                                }\r\n\r\n                                return body.ToString();\r\n                            }\r\n                             catch (Exception e) {\r\n                            return context.Response.Body.As&lt;string&gt;(preserveContent: true);\r\n                        }\r\n                        }</set-body>\r\n        </return-response>\r\n      </when>\r\n    </choose>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>'
-          format: 'xml'
-        }
+        policy: {}
         properties: {
-          displayName: '/search'
+          displayName: 'Search Catalog (GET)'
           method: 'GET'
           urlTemplate: '/search'
           templateParameters: []
@@ -231,16 +246,8 @@ var apiOperationConfigs = [
               representations: [
                 {
                   contentType: 'application/json'
-                  examples: {
-                    default: {
-                      value: {
-                      }
-                    }
-                  }
-                  typeName: 'getsearch'
                 }
               ]
-              headers: []
             }
           ]
         }
@@ -249,17 +256,41 @@ var apiOperationConfigs = [
         name: 'post-search'
         policy: {}
         properties: {
-          displayName: '/search'
+          displayName: 'Search Catalog (POST)'
           method: 'POST'
           urlTemplate: '/search'
           templateParameters: []
-          description: '        """Cross catalog search (POST).\n\n        Called with `POST /search`.\n\n        Args:\n            search_request: search request parameters.\n\n        Returns:\n            ItemCollection containing items which match the search criteria.\n        """'
+          description: '''Cross catalog search (POST).
+          Called with `POST /search`.
+            Args:
+              search_request: search request parameters.
+            Returns:
+              ItemCollection containing items which match the search criteria.
+          '''
           responses: [
             {
               statusCode: 200
-              description: 'null'
-              representations: []
-              headers: []
+            }
+          ]
+        }
+      }
+      {
+        name: 'get-collections'
+        policy: {}
+        properties: {
+          displayName: 'List Collections'
+          method: 'GET'
+          urlTemplate: '/collections'
+          templateParameters: []
+          description: '''Get all collections.
+          Called with `GET /collections`.
+            Args: 
+            Returns:
+              Collection.
+          '''
+          responses: [
+            {
+              statusCode: 200
             }
           ]
         }
@@ -268,88 +299,113 @@ var apiOperationConfigs = [
         name: 'get-collection-by-id'
         policy: {}
         properties: {
-          displayName: '/collections/{collection_id}'
+          displayName: 'Get Collection'
           method: 'GET'
           urlTemplate: '/collections/{collection_id}'
           templateParameters: [
             {
               name: 'collection_id'
               required: true
-              values: []
-              typeName: 'Collections-collection_id-GetRequest'
             }
           ]
-          description: 'Get collection by id.\nCalled with `GET /collections/{collection_id}`.\nArgs: collection_id: ID of the collection.\nReturns:  Collection.'
+          description: '''Get collection by id.
+          Called with `GET /collections/{collection_id}`.
+            Args:
+              collection_id: ID of the collection.
+            Returns:
+              Collection.
+          '''
           responses: [
             {
               statusCode: 200
-              description: 'null'
-              representations: []
-              headers: []
+            }
+          ]
+        }
+      }
+      {
+        name: 'get-collection-queryables'
+        policy: {}
+        properties: {
+          displayName: 'Collection Queryables'
+          method: 'GET'
+          urlTemplate: '/collections/{collection_id}/queryables'
+          templateParameters: [
+            {
+              name: 'collection_id'
+              required: true
+            }
+          ]
+          description: '''Get collection queryables.
+          Called with `GET /collections/{collection_id}/querables`.
+            Args:
+              collection_id: ID of the collection.
+            Returns:
+              Qyeryables.
+          '''
+          responses: [
+            {
+              statusCode: 200
             }
           ]
         }
       }
       {
         name: 'collections-collection-id-items'
-        policy: {
-          value: '<!--\r\nfast-stac-api: /collections/{collection_id}/items\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <choose>\r\n      <when condition="@(context.Response.StatusCode == 200)">\r\n        <return-response>\r\n          <set-header name="Content-Type" exists-action="override">\r\n            <value>application/geo+json</value>\r\n          </set-header>\r\n          <set-header name="Accept" exists-action="override">\r\n            <value>application/geo+json</value>\r\n          </set-header>\r\n          <set-body>@{\r\n                        try\r\n                            {\r\n                            JObject body = null;\r\n                            var str = "";\r\n                            var apimURL = context.Api.ServiceUrl.ToString().LastIndexOf("/") == -1 ?\r\n                            context.Api.ServiceUrl.ToString() : context.Api.ServiceUrl.ToString().Substring(0,\r\n                            context.Api.ServiceUrl.ToString().LastIndexOf("/"));\r\n                            var name = context.Request.OriginalUrl.ToString();\r\n                            Uri nameURI = new Uri(name);\r\n                            string originalURL = "https://" + nameURI.Authority;\r\n                            string blobStoreName = "blobstore";\r\n                            string blobStoreRoute = "/redirectblob";\r\n  \r\n                                body = context.Response.Body.As&lt;JObject&gt;(preserveContent: true);\r\n\r\n                                foreach (var item in body["features"])\r\n                                {\r\n\r\n                                    if(item.SelectToken("assets.visual.href") != null)\r\n                                    {\r\n                                        try\r\n                                        {\r\n                                            Uri assetUri = new Uri(item["assets"]["visual"]["href"].ToString());\r\n                                            item["assets"]["visual"]["href"] =  originalURL + "/" + blobStoreName + blobStoreRoute + "?path=" + assetUri.AbsolutePath;\r\n                                        }\r\n                                        catch (System.Exception)\r\n                                        {\r\n                                            // Do nothing\r\n                                        }\r\n                                    }\r\n\r\n                                    if(item.SelectToken("assets.image.href") != null)\r\n                                    {\r\n                                        Uri assetUri = new Uri(item["assets"]["image"]["href"].ToString());\r\n                                        item["assets"]["image"]["href"] = originalURL + "/" + blobStoreName + blobStoreRoute + "?path="\r\n                                        + assetUri.AbsolutePath;\r\n                                    }\r\n\r\n\r\n                                    if(item.SelectToken("assets.thumbnail.href") != null)\r\n                                    {\r\n                                        Uri assetUri = new Uri(item["assets"]["thumbnail"]["href"].ToString());\r\n                                        item["assets"]["thumbnail"]["href"] = originalURL + "/" + blobStoreName + blobStoreRoute + "?path="\r\n                                        + assetUri.AbsolutePath;\r\n                                    }\r\n\r\n\r\n\r\n                                     if(item.SelectToken("assets.metadata.href") != null) \r\n                                     {\r\n                                        Uri metadataUri = new Uri(item["assets"]["metadata"]["href"].ToString());\r\n                                        item["assets"]["metadata"]["href"] = originalURL + "/" + blobStoreName + blobStoreRoute +\r\n                                        "?path="\r\n                                        + metadataUri.AbsolutePath;\r\n                                     }\r\n                                }\r\n\r\n                                return body.ToString();\r\n                            }\r\n                             catch (Exception e) {\r\n                            return context.Response.Body.As&lt;string&gt;(preserveContent: true);\r\n                        }\r\n                        }</set-body>\r\n        </return-response>\r\n      </when>\r\n    </choose>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>'
-          format: 'xml'
-        }
+        policy: {}
         properties: {
-          displayName: '/collections/{collection_id}/items'
+          displayName: 'List Items in Collection'
           method: 'GET'
           urlTemplate: '/collections/{collection_id}/items'
           templateParameters: [
             {
               name: 'collection_id'
               required: true
-              values: []
-              typeName: 'Collections-collection_id-ItemsGetRequest'
             }
           ]
-          description: '        """Get all items from a specific collection.\n\n        Called with `GET /collections/{collection_id}/items`\n\n        Args:\n            collection_id: id of the collection.\n            limit: number of items to return.\n            token: pagination token.\n\n        Returns:\n            An ItemCollection.\n        """'
+          description: '''Get all items from a specific collection.
+          Called with `GET /collections/{collection_id}/items`
+            Args:
+              collection_id: id of the collection.
+              limit: number of items to return.
+              token: pagination token.
+            Returns:
+              An ItemCollection.
+          '''
           responses: [
             {
               statusCode: 200
-              description: 'null'
-              representations: []
-              headers: []
             }
           ]
         }
       }
       {
         name: 'collections-collection-id-items-item-id'
-        policy: {
-          value: '<!--\r\nfast-stac-api: /collections/{collection_id}/items/{item_id}\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <choose>\r\n      <when condition="@(context.Response.StatusCode == 200)">\r\n        <return-response>\r\n          <set-header name="Content-Type" exists-action="override">\r\n            <value>application/geo+json</value>\r\n          </set-header>\r\n          <set-header name="Accept" exists-action="override">\r\n            <value>application/geo+json</value>\r\n          </set-header>\r\n          <set-body>@{\r\n                            var body = context.Response.Body.As&lt;string&gt;(preserveContent: true);\r\n                            var str = "";\r\n                            var apimURL = context.Api.ServiceUrl.ToString().LastIndexOf("/") == -1 ?\r\n                            context.Api.ServiceUrl.ToString() : context.Api.ServiceUrl.ToString().Substring(0,\r\n                            context.Api.ServiceUrl.ToString().LastIndexOf("/"));\r\n                            var name = context.Request.OriginalUrl.ToString();\r\n                            Uri nameURI = new Uri(name);\r\n                            string originalURL = "https://" + nameURI.Authority;\r\n                            string blobStoreName = "blobstore";\r\n                            string blobStoreRoute = "/redirectblob";\r\n                            JObject jsonObject = JObject.Parse(body);\r\n\r\n                            foreach (var item in jsonObject)\r\n                            {\r\n                               if(item.Key == "assets") {\r\n\r\n                                    if(jsonObject.SelectToken("assets.visual.href") != null) {\r\n                                        Uri assetUri = new Uri(jsonObject["assets"]["visual"]["href"].ToString());\r\n                                        jsonObject["assets"]["visual"]["href"] =  originalURL + "/" + blobStoreName + blobStoreRoute + "?path=" + assetUri.AbsolutePath;\r\n                                    }\r\n\r\n                                    if(jsonObject.SelectToken("assets.image.href") != null) {\r\n                                        Uri assetUri = new Uri(jsonObject["assets"]["image"]["href"].ToString());\r\n                                        jsonObject["assets"]["image"]["href"] = originalURL + "/" + blobStoreName + blobStoreRoute + "?path="\r\n                                        + assetUri.AbsolutePath;\r\n                                    }\r\n\r\n\r\n                                    if(jsonObject.SelectToken("assets.thumbnail.href") != null) {\r\n                                        Uri thumbnailUri = new Uri(jsonObject["assets"]["thumbnail"]["href"].ToString());\r\n                                        jsonObject["assets"]["thumbnail"]["href"] = originalURL + "/" + blobStoreName + blobStoreRoute +\r\n                                        "?path=" + thumbnailUri.AbsolutePath;\r\n                                    }\r\n\r\n                                    if(jsonObject.SelectToken("assets.metadata.href") != null) {\r\n                                        Uri metadataUri = new Uri(jsonObject["assets"]["metadata"]["href"].ToString());\r\n                                        jsonObject["assets"]["metadata"]["href"] = originalURL + "/" + blobStoreName + blobStoreRoute +\r\n                                        "?path=" + metadataUri.AbsolutePath;\r\n                                    }\r\n                               }\r\n                            }\r\n                            return jsonObject.ToString();\r\n                        }</set-body>\r\n        </return-response>\r\n      </when>\r\n    </choose>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>'
-          format: 'xml'
-        }
+        policy: {}
         properties: {
-          displayName: '/collections/{collection_id}/items/{item_id}'
+          displayName: 'Get Item'
           method: 'GET'
           urlTemplate: '/collections/{collection_id}/items/{item_id}'
           templateParameters: [
             {
               name: 'collection_id'
               required: true
-              values: []
-              typeName: 'Collections-collection_id-Items-item_id-GetRequest'
             }
             {
               name: 'item_id'
               required: true
-              values: []
-              typeName: 'Collections-collection_id-Items-item_id-GetRequest-1'
             }
           ]
-          description: '        """Get item by id.\n\n        Called with `GET /collections/{collection_id}/items/{item_id}`.\n\n        Args:\n            item_id: ID of the item.\n            collection_id: ID of the collection the item is in.\n\n        Returns:\n            Item.\n        """'
+          description: '''Get item by id.
+          Called with `GET /collections/{collection_id}/items/{item_id}`.
+            Args:
+              item_id: ID of the item.
+              collection_id: ID of the collection the item is in.
+            Returns:
+              Item.
+          '''
           responses: [
             {
               statusCode: 200
-              description: 'null'
-              representations: []
-              headers: []
             }
           ]
         }
@@ -488,13 +544,12 @@ module apim '../modules/apim.bicep' ={
 module apimApis '../modules/apim.api.bicep' = [ for (config, index) in apiOperationConfigs: {
   name: '${namingPrefix}-apim-api-${index}'
   params: {
-    parentResourceName: apiManagementServiceNameVar
+    parentResourceName: apim.outputs.name
     apiName: config.properties.displayName
     properties: config.properties
     policy: config.policy
   }
   dependsOn: [
-    apim
     apimMSIStorageRoleAssignment
   ]
 }]
@@ -502,7 +557,7 @@ module apimApis '../modules/apim.api.bicep' = [ for (config, index) in apiOperat
 module apimApiOperations '../modules/apim.api.operations.bicep' = [ for (config, index) in apiOperationConfigs: {
   name: '${namingPrefix}-apim-api-operations-${index}'
   params: {
-    apiManagementName: apiManagementServiceNameVar
+    apiManagementName: apim.outputs.name
     apiName: config.properties.displayName
     operations: config.operations
   }
@@ -510,6 +565,16 @@ module apimApiOperations '../modules/apim.api.operations.bicep' = [ for (config,
     apimApis
   ]
 }]
+
+module apimNamedValues '../modules/apim.namedValues.bicep' = {
+  name: '${namingPrefix}-apim-namedValues'
+  params: {
+    apiManagementServiceName: apim.outputs.name
+    name: 'blob-storage-url'
+    value: apimStorageAccountBlobServiceUrl
+  }
+}
+
 module apimMSIStorageRoleAssignment '../modules/storage-role-assignment.bicep' = [ for (role, index) in apimMISRoles: {
   name: '${namingPrefix}-api-storageRole-${index}'
   scope: resourceGroup(storageAccountResourceGroupName)

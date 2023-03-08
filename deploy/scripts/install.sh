@@ -6,29 +6,30 @@
 set -ex
 PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/../..; pwd)"
 
+# Setup required parameters
+ENV_CODE=${1:-${ENV_CODE}}
+LOCATION=${2:-${LOCATION}}
+JUMPBOX_PASSWORD=${3:-${JUMPBOX_PASSWORD}}
 
-if [[ -z "$1" ]]
+if [[ -z "$ENV_CODE" ]]
   then
     echo "Environment Code value not supplied"
     exit 1
 fi
 
-if [[ -z "$2" ]]
+if [[ -z "$LOCATION" ]]
   then
     echo "Location value not supplied"
     exit 1
 fi
 
-if [[ -z "$3" ]]
+if [[ -z "$JUMPBOX_PASSWORD" ]]
   then
     echo "Jumpbox Password not supplied"
     exit 1
 fi
 
 # Setup parameters
-ENV_CODE=${1:-${ENV_CODE}}
-LOCATION=${2:-${LOCATION}}
-JUMPBOX_PASSWORD=${3:-${JUMPBOX_PASSWORD}}
 JUMPBOX_USERNAME=${4:-${JUMPBOX_USERNAME:-"adminuser"}}
 ENV_TAG=${5:-${ENV_TAG:-"stac-${ENV_CODE}"}}
 DEPLOYMENT_NAME=${6:-${DEPLOYMENT_NAME:-"${ENV_TAG}-deploy"}}
