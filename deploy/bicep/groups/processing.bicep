@@ -140,19 +140,10 @@ var apiOperationConfigs = [
         name: 'getblob'
         policy: {}
         properties: {
-          displayName: 'Get Container Blob'
+          displayName: 'Get Blob'
           method: 'GET'
-          urlTemplate: '/{container}/{blob}'
-          templateParameters: [
-            {
-              name: 'container'
-              required: true
-            }
-            {
-              name: 'blob'
-              required: true
-            }
-          ]
+          urlTemplate: '/*'
+          templateParameters: []
           description: 'getBlob'
           responses: [
             {

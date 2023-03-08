@@ -6,7 +6,7 @@
 PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/../..; pwd)"
 ENV_CODE=${1:-${ENV_CODE}}
 
-if [[ -z "$1" ]]
+if [[ -z "$ENV_CODE" ]]
   then
     echo "Environment Code value not supplied"
     exit 1
@@ -43,8 +43,12 @@ cd $CURRENT_WORKING_DIRECTORY
 # issue - pypgstac cmdline for ingesting the STAC collection and item are 
 # at 0.6.11 and the database (postgresql) is getting bootstrapped to 0.6.13.
 # These two versions need to match. This fix holds these versions to 0.6.11.
-sed -i 's/0.6.12/0.6.11/' $STAC_FASTAPI_SRC_DIR/stac-fastapi/docker-compose.yml
-sed -i 's/0.6.\*/0.6.11/' $STAC_FASTAPI_SRC_DIR/stac-fastapi/stac_fastapi/pgstac/setup.py
+SED_INLINE="-i"
+if [[ "$(uname)" == "Darwin"* ]]; then
+    SED_INLINE="-i ''"
+fi
+sed "${SED_INLINE[@]}" 's/0.6.12/0.6.11/' $STAC_FASTAPI_SRC_DIR/stac-fastapi/docker-compose.yml
+sed "${SED_INLINE[@]}" 's/0.6.\*/0.6.11/' $STAC_FASTAPI_SRC_DIR/stac-fastapi/stac_fastapi/pgstac/setup.py
 
 az acr build --registry $ACR_NAME --image stac-fastapi ${STAC_FASTAPI_SRC_DIR}/stac-fastapi
 rm -rf ${STAC_FASTAPI_SRC_DIR}

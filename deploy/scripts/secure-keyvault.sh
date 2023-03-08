@@ -6,7 +6,7 @@
 PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/../..; pwd)"
 ENV_CODE=${1:-${ENV_CODE}}
 
-if [[ -z "$1" ]]
+if [[ -z "$ENV_CODE" ]]
   then
     echo "Environment Code value not supplied"
     exit 1

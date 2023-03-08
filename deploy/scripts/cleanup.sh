@@ -4,7 +4,13 @@
 # Licensed under the MIT license.
 
 # parameters
-ENV_CODE=${1:-"stac"}
+ENV_CODE=${1:-${ENV_CODE}}
+
+if [[ -z "$ENV_CODE" ]]
+  then
+    echo "Environment Code value not supplied"
+    exit 1
+fi
 
 # variables
 MONITORING_RESOURCE_GROUP="${ENV_CODE}-monitoring-rg"
