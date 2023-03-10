@@ -20,7 +20,7 @@ PROCESSING_RESOURCE_GROUP=${PROCESSING_RESOURCE_GROUP:-"${ENV_CODE}-processing-r
 ACR_NAME=$(az acr list -g ${PROCESSING_RESOURCE_GROUP} \
     --query "[?tags.environment && tags.environment == '$ENV_NAME'].name" -otsv)
 
-az acr build --registry $ACR_NAME --image stac-cli ${PRJ_ROOT}/src/azure-stac-cli/
+az acr build --registry $ACR_NAME --image stac-cli ${PRJ_ROOT}
 
 # build stac-fastapi from https://github.com/stac-utils/stac-fastapi/archive/refs/tags/${STAC_FASTAPI_VERSION}.tar.gz
 STAC_FASTAPI_SRC_DIR=${STAC_FASTAPI_SRC_DIR:-"${PRJ_ROOT}/src/stac_fastapi_k8s/src"}

@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from typing import Optional
-from core.processor import BaseProcessor
-from stac.core.metrics import sendmetrics
+from azure_stac.core.processor import BaseProcessor
+from azure_stac.core.metrics import sendmetrics
 from psycopg import Connection
 
 class StacCol2Postgres(BaseProcessor):
@@ -47,7 +47,7 @@ class StacCol2Postgres(BaseProcessor):
         import json
         import asyncio
         import psycopg
-        from stac.common.__blob_service import download_blob_async
+        from azure_stac.common.__blob_service import download_blob_async
         
         # call parent method to bootstrap the required metrics
         # and hooks

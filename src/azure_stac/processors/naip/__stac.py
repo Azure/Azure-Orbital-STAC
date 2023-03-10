@@ -22,10 +22,10 @@ from stactools.core.io import read_text
 from stactools.core.projection import reproject_geom
 
 
-from stac.processors.naip.__grid import GridExtension
-from stac.processors.naip.__utils import parse_fgdc_metadata
-from stac.common.__blob_service import generate_sas_token
-from stac.processors.naip.__constants import USDA_PROVIDER, STAC_BANDS
+from azure_stac.processors.naip.__grid import GridExtension
+from azure_stac.processors.naip.__utils import parse_fgdc_metadata
+from azure_stac.common.__blob_service import generate_sas_token
+from azure_stac.processors.naip.__constants import USDA_PROVIDER, STAC_BANDS
 
 
 log = rio.logging.getLogger()

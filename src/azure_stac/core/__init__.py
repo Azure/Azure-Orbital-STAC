@@ -22,7 +22,7 @@ from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CLIArgumentType  # pylint: disable=unused-import
 from knack.commands import CommandGroup
 
-from stac.commands.processor import processor_cf
+from azure_stac.commands.processor import processor_cf
 
 EXCLUDED_PARAMS = ['self', 'kwargs', 'client']
 
@@ -90,7 +90,7 @@ class StacCommandsLoader(CLICommandsLoader):
     def load_command_table(self, args):
         
         with CommandGroup(self, 'processor', 
-                          operations_tmpl='stac.commands.processor#{}',
+                          operations_tmpl='azure_stac.commands.processor#{}',
                           client_factory=processor_cf) as group:
             
             group.command('run', 'run_processor')

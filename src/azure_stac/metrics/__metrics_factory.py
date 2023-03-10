@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from stac.metrics.data_metrics import DataMetrics
-from stac.metrics.message_metrics import MessageMetrics
-from stac.metrics.pod_metrics import PodMetrics
+from azure_stac.metrics.data_metrics import DataMetrics
+from azure_stac.metrics.message_metrics import MessageMetrics
+from azure_stac.metrics.pod_metrics import PodMetrics
     
 class MetricsFactory:
     

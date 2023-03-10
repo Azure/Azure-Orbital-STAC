@@ -12,7 +12,7 @@ from collections import OrderedDict
 from knack.commands import CommandGroup
 from knack.arguments import ArgumentsContext, CLIArgumentType
 
-from stac.commands.__command import BaseCommand
+from azure_stac.commands.__command import BaseCommand
 
 PROCESSORS_LIST = {
     

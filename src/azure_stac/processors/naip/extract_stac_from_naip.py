@@ -5,9 +5,9 @@
 
 import traceback
 
-from stac.core.processor import BaseProcessor
-from stac.core.metrics import sendmetrics
-from stac.processors.naip.__stac import create_item
+from azure_stac.core.processor import BaseProcessor
+from azure_stac.core.metrics import sendmetrics
+from azure_stac.processors.naip.__stac import create_item
 
 from typing import Tuple
 
@@ -178,7 +178,7 @@ class ExtractStac4mNaip(BaseProcessor):
                 
         from pathlib import Path
         from urllib.parse import urlparse
-        from stac.common.__blob_service import (check_if_blob_exists, 
+        from azure_stac.common.__blob_service import (check_if_blob_exists, 
                                                 upload_blob_async,
                                                 download_blob_async)
         
