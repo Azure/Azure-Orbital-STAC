@@ -60,14 +60,14 @@ class StacCommandsLoader(CLICommandsLoader):
                 for p in processors:
                     modname = p
                 try:
-                    module = SourceFileLoader(
+                    _ = SourceFileLoader(
                         modname, os.path.join(Path(__file__).parents[1], "commands", p)
                     ).load_module()
 
                     # todo: add asset to make sure the module contain load_commands
                     # and then dynamically invoke the loading of the commands
 
-                except (SystemError, ImportError, NotImplementedError, SystemError) as ex:
+                except (SystemError, ImportError, NotImplementedError, SystemError):
                     traceback.print_exc()
                     # error loading a specific processor module
                     # ignore and move on

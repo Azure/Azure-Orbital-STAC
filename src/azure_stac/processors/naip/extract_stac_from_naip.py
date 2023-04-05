@@ -119,7 +119,8 @@ class ExtractStac4mNaip(BaseProcessor):
         files.
         :param cog_url: Full URL of the COG file uploaded to the Storage Account
         :type cog_url: str
-        :returns: Attributes version, state, year, state measurement year and folder number (in the order)
+        :returns: Attributes version, state, year, state measurement year
+            and folder number (in the order)
         :rtype: Tuple[str, str, str, str]
         """
 
@@ -140,7 +141,8 @@ class ExtractStac4mNaip(BaseProcessor):
         url path where the raster data is being downloaded from
         :param url: URL of the raster data to be downloaded
         :type url: str
-        :returns: Attributes version, state, year, state measurement year and folder number (in the order)
+        :returns: Attributes version, state, year, state measurement year
+            and folder number (in the order)
         :rtype: Tuple[str, str, str, str, str]
         """
 
@@ -163,7 +165,6 @@ class ExtractStac4mNaip(BaseProcessor):
         import asyncio
         import os
         from pathlib import Path
-        from urllib.parse import urlparse
 
         from azure_stac.common.__blob_service import (
             check_if_blob_exists,
@@ -208,25 +209,26 @@ class ExtractStac4mNaip(BaseProcessor):
                 joined_jpeg_tail_path = "/".join(jpeg_url.split("/")[4:-1])
 
                 # az file schema URL is for use with GDAL libraries to access Storage Account
-                azure_raster_url = f"az://{self.SRC_CONTAINER_NAME}/{version}/{state}/{year}/{state_measurement_year}/{folder_number}/{file_name}"
+                azure_raster_url = f"az://{self.SRC_CONTAINER_NAME}/{version}/{state}/{year}/{state_measurement_year}/{folder_number}/{file_name}"  # noqa: E501
 
                 # full download URL for the tif file
                 download_tif_url = (
                     f"{split_url_joined}/{state_measurement_year}/{folder_number}/{file_name}"
                 )
 
-                # full download URL for metadata file that is derived from known attributes like state
-                fdgc_metadata_url = f"{domain_path_joined}/{split_url_joined}/{state}_{self.STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt"
+                # full download URL for metadata file that is derived from
+                # known attributes such as state
+                fdgc_metadata_url = f"{domain_path_joined}/{split_url_joined}/{state}_{self.STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt"  # noqa: E501
 
                 # full download URL for preview file that is derived from known attributes
-                jpeg_url = f"{domain_path_joined}/{joined_jpeg_tail_path}/{file_name_without_ext}.{self.JPG_EXTENSION}"
+                jpeg_url = f"{domain_path_joined}/{joined_jpeg_tail_path}/{file_name_without_ext}.{self.JPG_EXTENSION}"  # noqa: E501
 
                 # check if metadata file exists
                 does_metadata_file_exist = asyncio.run(
                     check_if_blob_exists(
                         conn_str=self.CONNECTION_STRING,
                         container_name=self.SRC_CONTAINER_NAME,
-                        blob_name=f"{split_url_joined}/{state}_{self.STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt",
+                        blob_name=f"{split_url_joined}/{state}_{self.STAC_METADATA_TYPE_NAME}_{year}/{folder_number}/{file_name_without_ext}.txt",  # noqa: E501
                     )
                 )
 
@@ -235,7 +237,7 @@ class ExtractStac4mNaip(BaseProcessor):
                     check_if_blob_exists(
                         conn_str=self.CONNECTION_STRING,
                         container_name=self.SRC_CONTAINER_NAME,
-                        blob_name=f"{joined_jpeg_tail_path}/{file_name_without_ext}.{self.JPG_EXTENSION}",
+                        blob_name=f"{joined_jpeg_tail_path}/{file_name_without_ext}.{self.JPG_EXTENSION}",  # noqa: E501
                     )
                 )
 
@@ -257,9 +259,10 @@ class ExtractStac4mNaip(BaseProcessor):
                         self.__translate_tif_to_jpeg(file_name_without_ext, file_name)
 
                         # upload jpeg & aux.xml to azure storage
+                        jpeg_file_name = f"{file_name_without_ext}.{self.JPG_EXTENSION}"
                         for file_to_upload in (
-                            f"{file_name_without_ext}.{self.JPG_EXTENSION}",
-                            f"{file_name_without_ext}.{self.JPG_EXTENSION}.{self.XML_EXTENSION}",
+                            jpeg_file_name,
+                            f"{jpeg_file_name}.{self.XML_EXTENSION}",
                         ):
                             asyncio.run(
                                 upload_blob_async(
@@ -288,7 +291,7 @@ class ExtractStac4mNaip(BaseProcessor):
                     state=state,
                     year=year,
                     cog_href=azure_raster_url,
-                    dst=f"https://{self.STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{self.DST_CONTAINER_NAME}",
+                    dst=f"https://{self.STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{self.DST_CONTAINER_NAME}",  # noqa: E501
                     stac_metadata=fdgc_metadata_url if does_metadata_file_exist else None,
                     thumbnail=jpeg_url,
                     providers=None,

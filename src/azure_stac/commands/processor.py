@@ -104,7 +104,8 @@ class ProcessorCommand(BaseCommand):
 
 def run_processor(client, name=None):
     """Knack command to run the processor by name
-    :param client: Processor Client instantiated at runtime by the Client Factory based on the specified processor to run
+    :param client: Processor Client instantiated at runtime by the Client Factory based
+        on the specified processor to run
     :type client: BaseProcessor
     :param name: Name of the processor to run
     :type name: str
@@ -117,7 +118,8 @@ def run_processor(client, name=None):
 
 def list_processors(client):
     """Knack command to list the loaded and/or available processor for use
-    :param client: Processor Client instantiated at runtime by the Client Factory based on the specified processor to run
+    :param client: Processor Client instantiated at runtime by the Client Factory based
+        on the specified processor to run
     :type client: BaseProcessor
     :returns: None
     :rtype: None

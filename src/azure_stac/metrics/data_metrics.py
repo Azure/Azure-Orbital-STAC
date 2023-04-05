@@ -21,7 +21,6 @@ class DataMetrics(Metrics):
         from opencensus.stats import measure as measure_module
         from opencensus.stats import view as view_module
         from opencensus.tags import tag_key as tag_key_module
-        from opencensus.tags import tag_map as tag_map_module
 
         self.data_size_measure = measure_module.MeasureInt(
             "data_size", "Size of message being processed", "bytes"
@@ -35,7 +34,7 @@ class DataMetrics(Metrics):
                 tag_key_module.TagKey("Status"),
                 tag_key_module.TagKey("Processor"),
             ],
-            data_size_measure,
+            self.data_size_measure,
             aggregation_module.SumAggregation(),
         )
 

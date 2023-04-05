@@ -67,7 +67,7 @@ class StacCol2Postgres(BaseProcessor):
         )
         try:
             conn = psycopg.connect()
-        except Exception as e:
+        except Exception:
             pass
 
         for msg in self.begin_listening():

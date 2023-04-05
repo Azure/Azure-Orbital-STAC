@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import subprocess
-from pathlib import Path
 
 
 def load_item(file_path: str):

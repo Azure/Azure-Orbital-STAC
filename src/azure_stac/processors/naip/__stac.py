@@ -6,7 +6,6 @@
 import itertools
 import os
 import re
-import sys
 from datetime import timedelta
 from typing import Final, Optional, Pattern
 
@@ -14,7 +13,6 @@ import dateutil.parser
 import pystac
 import rasterio as rio
 from pystac.extensions.eo import EOExtension
-from pystac.extensions.item_assets import ItemAssetsExtension
 from pystac.extensions.projection import ProjectionExtension
 from pystac.extensions.raster import DataType, RasterBand, RasterExtension
 from pystac.utils import str_to_datetime
@@ -53,8 +51,8 @@ def create_item(
     additional_providers=None,
     cog_url=None,
 ):
-    """Creates a STAC Item. This function will read the metadata file for information to place in
-    the STAC item.
+    """Creates a STAC Item. This function will read the metadata file for information
+    to place in the STAC item.
     :param state: The 2-letter state code for the state this item belongs to.
     :type state: str
     :param year: year.
@@ -73,7 +71,8 @@ def create_item(
     :rtype: pystac.Item
     """
 
-    # Reasoning for setting readdiri_on_open to "EMPTY_DIR": https://trac.osgeo.org/gdal/wiki/ConfigOptions#GDAL_DISABLE_READDIR_ON_OPEN
+    # Reasoning for setting readdiri_on_open to "EMPTY_DIR":
+    # https://trac.osgeo.org/gdal/wiki/ConfigOptions#GDAL_DISABLE_READDIR_ON_OPEN
     # Uncomment CPL_CURL_VERBOSE=1 to see the curl output
     gdal_env = {
         "AZURE_NO_SIGN_REQUEST": "NO",

@@ -12,7 +12,8 @@ async def check_if_blob_exists(conn_str: str, container_name: str, blob_name: st
     """Checks if a blob exists in the storage account
     :param conn_str: Connection String to the Storage Account hosting the Blob
     :type conn_str: str
-    :param container_name: Name of the Container where the blob is hosted in the Azure Storage Account
+    :param container_name: Name of the Container where the blob is hosted
+        in the Azure Storage Account
     :type container_name: str
     :param blob_name: Relative path to the blob with ref. to the container
     :type blob_name: str
@@ -32,7 +33,8 @@ async def get_blob_size(conn_str: str, container_name: str, file_path: str) -> i
     """Get the size of the blob in Storage Account (in bytes)
     :param conn_str: Connection String to the Storage Account hosting the Blob
     :type conn_str: str
-    :param container_name: Name of the Container where the blob is hosted in the Azure Storage Account
+    :param container_name: Name of the Container where the blob is hosted
+        in the Azure Storage Account
     :type container_name: str
     :param file_path: Relative path to the blob with ref. to the container
     :type file_path: str
@@ -54,7 +56,8 @@ async def upload_blob_async(
     """Uploads a blob to the storage account
     :param conn_str: Connection String to the Storage Account hosting the Blob
     :type conn_str: str
-    :param container_name: Name of the Container where the blob is hosted in the Azure Storage Account
+    :param container_name: Name of the Container where the blob is hosted
+        in the Azure Storage Account
     :type container_name: str
     :param file_path: Relative path to the blob with ref. to the container
     :type file_path: str
@@ -66,7 +69,7 @@ async def upload_blob_async(
     blob = BlobClient.from_connection_string(
         conn_str=conn_str,
         container_name=container_name,
-        blob_name=f"{file_path}/{file_name}" if file_path != None else file_name,
+        blob_name=f"{file_path}/{file_name}" if file_path is not None else file_name,
     )
 
     async with blob:
@@ -84,11 +87,13 @@ async def download_blob_async(
     if the file already exists
     :param conn_str: Connection String to the Storage Account hosting the Blob
     :type conn_str: str
-    :param container_name: Name of the Container where the blob is hosted in the Azure Storage Account
+    :param container_name: Name of the Container where the blob is hosted
+        in the Azure Storage Account
     :type container_name: str
     :param file_path: Relative path to the blob with ref. to the container
     :type file_path: str
-    :param destination_path: Absolute location to the local folder where the blob needs to be downloaded to
+    :param destination_path: Absolute location to the local folder where
+        the blob needs to be downloaded to
     :type destination_path: str
     :returns: Path to the local downloaded file
     :rtype: str
