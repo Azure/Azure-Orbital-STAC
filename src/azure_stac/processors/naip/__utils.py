@@ -7,17 +7,17 @@ import re
 
 
 def parse_fgdc_metadata(md_text):
-    """ Parses FGDC metadata. FGDC is a structure specific to NAIP data source.
+    """Parses FGDC metadata. FGDC is a structure specific to NAIP data source.
     :param md_text: Markdown text
     :type md_text: str
     :returns: metadata
     :rtype: any
     """
-    
+
     line_pattern = r"([\s]*)([^:]+)*(\:?)[\s]*(.*)"
 
     def _parse(lines, group_indent=0):
-        """ Parse FGDC data
+        """Parse FGDC data
         :param lines: lines
         :type lines: str
         :param group_indent: Defaults to 0.

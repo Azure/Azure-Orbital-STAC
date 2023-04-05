@@ -19,18 +19,25 @@ def get_env_variable(variable_name, default_value=None):
             value = default_value
     return value
 
-USDA_PROVIDER = get_env_variable('USDA_PROVIDER', pystac.Provider(
-    name="USDA Farm Service Agency",
-    url=(
-        "https://www.fsa.usda.gov/programs-and-services/aerial-photography"
-        "/imagery-programs/naip-imagery/"
-    ),
-    roles=[ProviderRole.PRODUCER, ProviderRole.LICENSOR],
-))
 
-STAC_BANDS = get_env_variable('STAC_BANDS', [
-    Band.create(name="Red", common_name="red"),
-    Band.create(name="Green", common_name="green"),
-    Band.create(name="Blue", common_name="blue"),
-    Band.create(name="NIR", common_name="nir", description="near-infrared"),
-])
+USDA_PROVIDER = get_env_variable(
+    "USDA_PROVIDER",
+    pystac.Provider(
+        name="USDA Farm Service Agency",
+        url=(
+            "https://www.fsa.usda.gov/programs-and-services/aerial-photography"
+            "/imagery-programs/naip-imagery/"
+        ),
+        roles=[ProviderRole.PRODUCER, ProviderRole.LICENSOR],
+    ),
+)
+
+STAC_BANDS = get_env_variable(
+    "STAC_BANDS",
+    [
+        Band.create(name="Red", common_name="red"),
+        Band.create(name="Green", common_name="green"),
+        Band.create(name="Blue", common_name="blue"),
+        Band.create(name="NIR", common_name="nir", description="near-infrared"),
+    ],
+)

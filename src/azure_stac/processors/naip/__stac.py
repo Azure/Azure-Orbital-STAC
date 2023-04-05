@@ -32,16 +32,17 @@ log.setLevel(rio.logging.DEBUG)
 
 # pattern for creating a Digital Orthophoto Quarter Quadrangle title from item title
 # https://github.com/stac-extensions/grid/
-DOQQ_PATTERN: Final[Pattern[str]] = re.compile(
-    r"[A-Za-z]{2}_m_(\d{7})_(ne|se|nw|sw)_")
+DOQQ_PATTERN: Final[Pattern[str]] = re.compile(r"[A-Za-z]{2}_m_(\d{7})_(ne|se|nw|sw)_")
 
-DATA_STORAGE_ACCOUNT_NAME = os.getenv('DATA_STORAGE_ACCOUNT_NAME')
-DATA_STORAGE_ACCOUNT_KEY = os.getenv('DATA_STORAGE_ACCOUNT_KEY')
-DATA_STORAGE_ACCOUNT_CONNECTION_STRING = os.getenv('DATA_STORAGE_ACCOUNT_CONNECTION_STRING')
-COLLECTION_ID = 'naip'
+DATA_STORAGE_ACCOUNT_NAME = os.getenv("DATA_STORAGE_ACCOUNT_NAME")
+DATA_STORAGE_ACCOUNT_KEY = os.getenv("DATA_STORAGE_ACCOUNT_KEY")
+DATA_STORAGE_ACCOUNT_CONNECTION_STRING = os.getenv("DATA_STORAGE_ACCOUNT_CONNECTION_STRING")
+COLLECTION_ID = "naip"
+
 
 def get_metadata_sas_url(href: str) -> str:
     return str(f"{href}?{generate_sas_token(conn_str=DATA_STORAGE_ACCOUNT_CONNECTION_STRING)}")
+
 
 def create_item(
     state,
@@ -52,7 +53,7 @@ def create_item(
     additional_providers=None,
     cog_url=None,
 ):
-    """ Creates a STAC Item. This function will read the metadata file for information to place in
+    """Creates a STAC Item. This function will read the metadata file for information to place in
     the STAC item.
     :param state: The 2-letter state code for the state this item belongs to.
     :type state: str
@@ -60,7 +61,7 @@ def create_item(
     :type year: str
     :param metadata_href: The href to the metadata
     :type metadata_href: str
-    :param cog_href: The href to the image as a COG. This needs    
+    :param cog_href: The href to the image as a COG. This needs
     to be an HREF that rasterio is able to open.
     :type cog_href: str
     :param thumbnail_href: Optional href for a thumbnail for this scene.
@@ -97,12 +98,10 @@ def create_item(
                     )
 
         except rio.errors.RasterioIOError as err:
-            
             raise err
 
         if metadata_href is not None:
-            stac_metadata_text = read_text(
-                metadata_href, get_metadata_sas_url)
+            stac_metadata_text = read_text(metadata_href, get_metadata_sas_url)
             stac_metadata = parse_fgdc_metadata(stac_metadata_text)
         else:
             stac_metadata = {}
@@ -111,7 +110,7 @@ def create_item(
             resource_desc = stac_metadata["Distribution_Information"]["Resource_Description"]
         else:
             resource_desc = os.path.basename(cog_href)
-        
+
         item_id = "{}_{}".format(state, os.path.splitext(resource_desc)[0])
 
         bounds = list(shape(geom).bounds)
@@ -129,11 +128,15 @@ def create_item(
 
         # UTC is +4 ET, so is around 9-12 AM in CONUS
         dt = dt + timedelta(hours=16)
-        properties = {f"{COLLECTION_ID}:state": state,
-                      f"{COLLECTION_ID}:year": year}
+        properties = {f"{COLLECTION_ID}:state": state, f"{COLLECTION_ID}:year": year}
 
         item = pystac.Item(
-            id=item_id, geometry=geom, bbox=bounds, datetime=dt, properties=properties, collection=COLLECTION_ID
+            id=item_id,
+            geometry=geom,
+            bbox=bounds,
+            datetime=dt,
+            properties=properties,
+            collection=COLLECTION_ID,
         )
 
         # Common metadata
@@ -214,7 +217,6 @@ def create_item(
         )
 
         return item
-    
+
     except Exception as e:
-        
         raise e

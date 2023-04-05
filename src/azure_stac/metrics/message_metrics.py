@@ -9,15 +9,11 @@ from azure_stac.core.metrics import Metrics
 
 
 class MessageMetrics(Metrics):
-    
     def __init__(self, *args, **kwargs):
-        
         pass
-    
+
     def register_metrics(self):
-        
         pass
-    
+
     def send_metrics(self):
-        
         pass
