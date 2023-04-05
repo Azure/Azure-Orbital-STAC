@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import itertools
-import os, sys
+import os
 import re
+import sys
 from datetime import timedelta
 from typing import Final, Optional, Pattern
 
@@ -21,12 +22,10 @@ from shapely.geometry import box, mapping, shape
 from stactools.core.io import read_text
 from stactools.core.projection import reproject_geom
 
-
+from azure_stac.common.__blob_service import generate_sas_token
+from azure_stac.processors.naip.__constants import STAC_BANDS, USDA_PROVIDER
 from azure_stac.processors.naip.__grid import GridExtension
 from azure_stac.processors.naip.__utils import parse_fgdc_metadata
-from azure_stac.common.__blob_service import generate_sas_token
-from azure_stac.processors.naip.__constants import USDA_PROVIDER, STAC_BANDS
-
 
 log = rio.logging.getLogger()
 log.setLevel(rio.logging.DEBUG)

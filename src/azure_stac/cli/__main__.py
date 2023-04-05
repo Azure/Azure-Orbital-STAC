@@ -8,6 +8,7 @@ import sys
 
 from azure_stac.core import get_default_cli
 
+
 def main() -> int:
     # instantiation our stac cli here
     stac_cli = get_default_cli()

@@ -5,6 +5,7 @@
 
 import re
 
+
 def parse_fgdc_metadata(md_text):
     """ Parses FGDC metadata. FGDC is a structure specific to NAIP data source.
     :param md_text: Markdown text

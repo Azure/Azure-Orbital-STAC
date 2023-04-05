@@ -4,9 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 from typing import Optional
-from azure_stac.core.processor import BaseProcessor
-from azure_stac.core.metrics import sendmetrics
+
 from psycopg import Connection
+
+from azure_stac.core.metrics import sendmetrics
+from azure_stac.core.processor import BaseProcessor
+
 
 class StacCol2Postgres(BaseProcessor):
     
@@ -43,12 +46,14 @@ class StacCol2Postgres(BaseProcessor):
     def run(self, **kwargs):
         """ Ingest STAC collection to PostgreSQL """
         
-        import os
-        import json
         import asyncio
+        import json
+        import os
+
         import psycopg
+
         from azure_stac.common.__blob_service import download_blob_async
-        
+
         # call parent method to bootstrap the required metrics
         # and hooks
         super(type(self), self).run(**kwargs)

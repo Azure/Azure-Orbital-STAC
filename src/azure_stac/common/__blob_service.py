@@ -8,7 +8,6 @@ import os
 from azure.storage.blob.aio import BlobClient
 
 
-
 async def check_if_blob_exists(conn_str: str,
                                container_name: str,
                                blob_name: str) -> bool:
@@ -144,8 +143,14 @@ def generate_sas_token(conn_str: str) -> str:
     :rtype: str
     """
     
-    from azure.storage.blob import BlobServiceClient, ResourceTypes, AccountSasPermissions, generate_account_sas
     from datetime import datetime, timedelta
+
+    from azure.storage.blob import (
+        AccountSasPermissions,
+        BlobServiceClient,
+        ResourceTypes,
+        generate_account_sas,
+    )
     
     blob_service_client = BlobServiceClient.from_connection_string(
         conn_str=conn_str)

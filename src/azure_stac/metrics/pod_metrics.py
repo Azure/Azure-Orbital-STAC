@@ -7,6 +7,7 @@ import os
 
 from azure_stac.core.metrics import Metrics
 
+
 class PodMetrics(Metrics):
     
     def __init__(self, *args, **kwargs):

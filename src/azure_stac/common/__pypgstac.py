@@ -6,6 +6,7 @@
 import subprocess
 from pathlib import Path
 
+
 def load_item(file_path: str):
     """ Load stac item to PostgreSQL
     :param file_path: Absolute path to the JSON file that contains the STAC Item

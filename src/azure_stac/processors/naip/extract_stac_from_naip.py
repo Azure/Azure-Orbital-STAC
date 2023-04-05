@@ -4,14 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import traceback
-
-from azure_stac.core.processor import BaseProcessor
-from azure_stac.core.metrics import sendmetrics
-from azure_stac.processors.naip.__stac import create_item
-
 from typing import Tuple
 
 from osgeo import gdal
+
+from azure_stac.core.metrics import sendmetrics
+from azure_stac.core.processor import BaseProcessor
+from azure_stac.processors.naip.__stac import create_item
+
 
 class ExtractStac4mNaip(BaseProcessor):
     
@@ -60,8 +60,9 @@ class ExtractStac4mNaip(BaseProcessor):
             DST is directory that a STAC Item JSON file will be created
             in.
         """
-        import os
         import json
+        import os
+
         import pystac
         
         additional_providers = None
@@ -173,15 +174,17 @@ class ExtractStac4mNaip(BaseProcessor):
     def run(self, **kwargs) -> None:
         """ Execute the processor """
         
-        import os
         import asyncio
-                
+        import os
         from pathlib import Path
         from urllib.parse import urlparse
-        from azure_stac.common.__blob_service import (check_if_blob_exists, 
-                                                upload_blob_async,
-                                                download_blob_async)
-        
+
+        from azure_stac.common.__blob_service import (
+            check_if_blob_exists,
+            download_blob_async,
+            upload_blob_async,
+        )
+
         # call parent method to bootstrap the required metrics
         # and hooks
         super(type(self), self).run(**kwargs)

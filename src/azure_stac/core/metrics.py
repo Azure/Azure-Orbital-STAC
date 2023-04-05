@@ -21,8 +21,8 @@ class Metrics(object, metaclass=ABCMeta):
             :param views: List of view to register
         """
         
-        from opencensus.stats import stats as stats_module
         from opencensus.ext.azure import metrics_exporter
+        from opencensus.stats import stats as stats_module
    
         stats = stats_module.stats
         

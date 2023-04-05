@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+
 import pystac
 from pystac.extensions.eo import Band
 from pystac.provider import ProviderRole

@@ -5,22 +5,20 @@
 
 import os
 import sys
-
+import traceback
 from collections import OrderedDict
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
-import traceback
 
+from knack.arguments import ArgumentsContext, CLIArgumentType  # pylint: disable=unused-import
 from knack.cli import CLI
-from knack.commands import CLICommandsLoader
+from knack.commands import CLICommandsLoader, CommandGroup
 from knack.completion import ARGCOMPLETE_ENV_NAME
+from knack.experimental import ExperimentalItem
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.preview import PreviewItem
-from knack.experimental import ExperimentalItem
 from knack.util import CLIError
-from knack.arguments import ArgumentsContext, CLIArgumentType  # pylint: disable=unused-import
-from knack.commands import CommandGroup
 
 from azure_stac.commands.processor import processor_cf
 

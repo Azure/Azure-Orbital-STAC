@@ -5,12 +5,12 @@
 
 import os
 import traceback
-
-from pathlib import Path
-from importlib.machinery import SourceFileLoader
 from collections import OrderedDict
-from knack.commands import CommandGroup
+from importlib.machinery import SourceFileLoader
+from pathlib import Path
+
 from knack.arguments import ArgumentsContext, CLIArgumentType
+from knack.commands import CommandGroup
 
 from azure_stac.commands.__command import BaseCommand
 
