@@ -1,10 +1,10 @@
-FROM osgeo/gdal:ubuntu-small-3.5.1
+FROM osgeo/gdal:ubuntu-small-3.6.3
 
 RUN apt-get update -y \
  && apt-get install -y \
     gdal-bin \
-    python3.8 \
-    python3.8-venv \
+    python3 \
+    python3-venv \
     python3-pip
 
 WORKDIR /app
