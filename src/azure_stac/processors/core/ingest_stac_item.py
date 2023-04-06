@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from typing import Any
 from azure_stac.core.metrics import sendmetrics
 from azure_stac.core.processor import BaseProcessor
 
@@ -11,17 +12,17 @@ class StacItem2Postgres(BaseProcessor):
     TEMPLATE_NAME = "Ingest STAC Item"
     VERSION = "1.0"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-    def __get_envvars(self):
-        import os
+    def __get_envvars(self) -> None:
+        from azure_stac.common.__utilities import getenv
 
-        self.CONNECTION_STRING = os.getenv("DATA_STORAGE_ACCOUNT_CONNECTION_STRING")
-        self.CONTAINER_NAME = os.getenv("DATA_STORAGE_PGSTAC_CONTAINER_NAME")
+        self.CONNECTION_STRING = getenv("DATA_STORAGE_ACCOUNT_CONNECTION_STRING")
+        self.CONTAINER_NAME = getenv("DATA_STORAGE_PGSTAC_CONTAINER_NAME")
 
     @sendmetrics
-    def run(self, **kwargs):
+    def run(self, **kwargs: dict[str, Any]) -> None:
         """Ingest STAC item to PostgreSQL"""
 
         import asyncio
@@ -57,5 +58,5 @@ class StacItem2Postgres(BaseProcessor):
                 raise e
 
 
-def execute_processor():
-    return StacItem2Postgres().run()
+def execute_processor() -> None:
+    StacItem2Postgres().run()

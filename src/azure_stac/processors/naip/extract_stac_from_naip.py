@@ -3,11 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
+import os
 import traceback
-from typing import Tuple
+from typing import Any, Optional, Tuple
 
 from osgeo import gdal
 
+import pystac
+
+from azure_stac.common.__utilities import getenv
 from azure_stac.core.metrics import sendmetrics
 from azure_stac.core.processor import BaseProcessor
 from azure_stac.processors.naip.__stac import create_item
@@ -19,7 +24,7 @@ class ExtractStac4mNaip(BaseProcessor):
 
     LOCAL_FILE_PATH = "./"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.__get_envvars()
 
@@ -29,15 +34,13 @@ class ExtractStac4mNaip(BaseProcessor):
         :rtype: None
         """
 
-        import os
-
-        self.JPG_EXTENSION = os.getenv("JPG_EXTENSION")
-        self.XML_EXTENSION = os.getenv("XML_EXTENSION")
-        self.DST_CONTAINER_NAME = os.getenv("DATA_STORAGE_PGSTAC_CONTAINER_NAME")
-        self.SRC_CONTAINER_NAME = os.getenv("STACIFY_STORAGE_CONTAINER_NAME")
-        self.STAC_METADATA_TYPE_NAME = os.getenv("STAC_METADATA_TYPE_NAME")
-        self.CONNECTION_STRING = os.getenv("DATA_STORAGE_ACCOUNT_CONNECTION_STRING")
-        self.STORAGE_ACCOUNT_NAME = os.getenv("DATA_STORAGE_ACCOUNT_NAME")
+        self.JPG_EXTENSION = getenv("JPG_EXTENSION")
+        self.XML_EXTENSION = getenv("XML_EXTENSION")
+        self.DST_CONTAINER_NAME = getenv("DATA_STORAGE_PGSTAC_CONTAINER_NAME")
+        self.SRC_CONTAINER_NAME = getenv("STACIFY_STORAGE_CONTAINER_NAME")
+        self.STAC_METADATA_TYPE_NAME = getenv("STAC_METADATA_TYPE_NAME")
+        self.CONNECTION_STRING = getenv("DATA_STORAGE_ACCOUNT_CONNECTION_STRING")
+        self.STORAGE_ACCOUNT_NAME = getenv("DATA_STORAGE_ACCOUNT_NAME")
 
     def __create_item_in_blob(
         self,
@@ -46,9 +49,9 @@ class ExtractStac4mNaip(BaseProcessor):
         cog_href: str,
         dst: str,
         thumbnail: str,
-        providers: str,
+        providers: Optional[str],
         cog_url: str,
-        stac_metadata: str = None,
+        stac_metadata: Optional[str] = None,
     ) -> str:
         """Creates a STAC Item based on metadata.
 
@@ -58,11 +61,6 @@ class ExtractStac4mNaip(BaseProcessor):
         DST is directory that a STAC Item JSON file will be created
         in.
         """
-        import json
-        import os
-
-        import pystac
-
         additional_providers = None
 
         if providers is not None:
@@ -112,7 +110,7 @@ class ExtractStac4mNaip(BaseProcessor):
         except Exception as err:
             raise err
 
-    def __get_url_variations(self, cog_url: str) -> Tuple[str, str, str, str]:
+    def __get_url_variations(self, cog_url: str) -> Tuple[list[str], str, list[str], str]:
         """Gets variations of the COG URL to provide the required absolute &
         relative URLs and/or paths required for constructing the various source
         and destination locations for raster data, it's metadata and other supporting
@@ -136,7 +134,7 @@ class ExtractStac4mNaip(BaseProcessor):
 
         return split_url, split_url_joined, domain_path, domain_path_joined
 
-    def __parse_url_based_attributes(self, url: str) -> Tuple[str, str, str, str, str]:
+    def __parse_url_based_attributes(self, url: list[str]) -> Tuple[str, str, str, str, str]:
         """Parses key attributes including (but not limited to) version, state, year from
         url path where the raster data is being downloaded from
         :param url: URL of the raster data to be downloaded
@@ -159,7 +157,7 @@ class ExtractStac4mNaip(BaseProcessor):
         return version, state, year, state_measurement_year, folder_number
 
     @sendmetrics
-    def run(self, **kwargs) -> None:
+    def run(self, **kwargs: dict[str, Any]) -> None:
         """Execute the processor"""
 
         import asyncio
@@ -266,7 +264,7 @@ class ExtractStac4mNaip(BaseProcessor):
                         ):
                             asyncio.run(
                                 upload_blob_async(
-                                    conn_string=self.CONNECTION_STRING,
+                                    conn_str=self.CONNECTION_STRING,
                                     container_name=self.SRC_CONTAINER_NAME,
                                     file_path="./",
                                     file_name=file_to_upload,
@@ -320,5 +318,5 @@ class ExtractStac4mNaip(BaseProcessor):
                 traceback.print_exc()
 
 
-def execute_processor():
-    return ExtractStac4mNaip().run()
+def execute_processor() -> None:
+    ExtractStac4mNaip().run()

@@ -5,14 +5,15 @@
 
 import os
 
+from typing import Any
+from typing_extensions import override
+
 from azure_stac.core.metrics import Metrics
 
 
 class DataMetrics(Metrics):
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def register_metrics(self):
+    @override
+    def register_metrics(self) -> None:
         """
         Register the data metrics including data size
         """
@@ -40,7 +41,8 @@ class DataMetrics(Metrics):
 
         self._setup_open_census([data_size_view])
 
-    def send_metrics(self, metrics: dict):
+    @override
+    def send_metrics(self, metrics: dict[str, Any]) -> None:
         """
         Records the metrics to App Insights
         :param size: Metric Value
@@ -49,6 +51,9 @@ class DataMetrics(Metrics):
         from opencensus.tags import tag_map as tag_map_module
 
         pod_name = os.getenv("POD_NAME")
+
+        if not self.MMAP:
+            raise Exception("Metrics have not been registered")
 
         self.MMAP.measure_int_put(self.data_size_measure, metrics["size"])
 

@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+from typing import Any, Optional
 
 
-def parse_fgdc_metadata(md_text):
+def parse_fgdc_metadata(md_text: str) -> Any:
     """Parses FGDC metadata. FGDC is a structure specific to NAIP data source.
     :param md_text: Markdown text
     :type md_text: str
@@ -16,7 +17,7 @@ def parse_fgdc_metadata(md_text):
 
     line_pattern = r"([\s]*)([^:]+)*(\:?)[\s]*(.*)"
 
-    def _parse(lines, group_indent=0):
+    def _parse(lines: list[str], group_indent: int = 0) -> Any:
         """Parse FGDC data
         :param lines: lines
         :type lines: str
@@ -27,7 +28,7 @@ def parse_fgdc_metadata(md_text):
         """
         result = {}
         is_multiline_text = False
-        result_text = None
+        result_text = None  # type: Optional[str]
         while len(lines) > 0:
             # Peek at the next line to see if we're done this group
             line = lines[0]
@@ -57,7 +58,8 @@ def parse_fgdc_metadata(md_text):
             # If we're collecting multi-line text values,
             # just add the line to the result text.
             if is_multiline_text:
-                result_text += " {}".format(line.strip())
+                prev_result = " {result_text}" if result_text is not None else ""
+                result_text = f"{prev_result}{line.strip()}"
                 continue
 
             this_key = m.group(2)

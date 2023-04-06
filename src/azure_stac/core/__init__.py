@@ -4,45 +4,23 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import sys
 import traceback
 from collections import OrderedDict
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
+from typing import Any, Tuple
 
-from knack.arguments import ArgumentsContext, CLIArgumentType  # pylint: disable=unused-import
+from knack.arguments import ArgumentsContext, CLIArgumentType
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader, CommandGroup
-from knack.completion import ARGCOMPLETE_ENV_NAME
-from knack.experimental import ExperimentalItem
-from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
-from knack.log import get_logger
-from knack.preview import PreviewItem
-from knack.util import CLIError
 
 from azure_stac.commands.processor import processor_cf
 
 EXCLUDED_PARAMS = ["self", "kwargs", "client"]
 
 
-def _configure_knack():
-    """Configure a Azure Orbital STAC specific cli"""
-
-    from knack.util import status_tag_messages
-
-
-class StacCli(CLI):
-    def __init__(self, **kwargs):
-        super(StacCli, self).__init__(**kwargs)
-
-    def get_cli_version(self):
-        return self.__version__
-
-
 class StacCommandsLoader(CLICommandsLoader):
-    CMD_MODULES = []
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Tuple, **kwargs: dict[str, Any]) -> None:
         try:
             commands_path = os.path.join(
                 Path(__file__).parents[
@@ -82,7 +60,7 @@ class StacCommandsLoader(CLICommandsLoader):
             *args, excluded_command_handler_args=EXCLUDED_PARAMS, **kwargs
         )
 
-    def load_command_table(self, args):
+    def load_command_table(self, args: Any) -> OrderedDict:
         with CommandGroup(
             self,
             "processor",
@@ -94,14 +72,14 @@ class StacCommandsLoader(CLICommandsLoader):
 
         return OrderedDict(self.command_table)
 
-    def load_arguments(self, command):
+    def load_arguments(self, command: Any) -> None:
         with ArgumentsContext(self, "processor run") as ac:
             ac.argument(
                 "name", arg_type=CLIArgumentType(type=str, help="Name of the processor to run")
             )
 
-        super(StacCommandsLoader, self).load_arguments(command)
+        super().load_arguments(command)
 
 
-def get_default_cli():
-    return StacCli(cli_name="stac", commands_loader_cls=StacCommandsLoader)
+def get_default_cli() -> CLI:
+    return CLI(cli_name="stac", commands_loader_cls=StacCommandsLoader)

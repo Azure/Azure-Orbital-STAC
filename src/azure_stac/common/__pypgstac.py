@@ -6,7 +6,7 @@
 import subprocess
 
 
-def load_item(file_path: str):
+def load_item(file_path: str) -> None:
     """Load stac item to PostgreSQL
     :param file_path: Absolute path to the JSON file that contains the STAC Item
     :type file_path: str

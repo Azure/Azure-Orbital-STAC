@@ -5,6 +5,7 @@
 
 import os
 
+from typing import Optional
 from azure.storage.blob.aio import BlobClient
 
 
@@ -51,7 +52,7 @@ async def get_blob_size(conn_str: str, container_name: str, file_path: str) -> i
 
 
 async def upload_blob_async(
-    conn_str: str, container_name: str, file_name: str, file_path: str = None
+    conn_str: str, container_name: str, file_name: str, file_path: Optional[str] = None
 ) -> None:
     """Uploads a blob to the storage account
     :param conn_str: Connection String to the Storage Account hosting the Blob

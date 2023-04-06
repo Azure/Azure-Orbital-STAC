@@ -3,15 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from typing import Any
+from typing_extensions import override
 from azure_stac.core.metrics import Metrics
 
 
 class PodMetrics(Metrics):
-    def __init__(self, *args, **kwargs):
+    @override
+    def register_metrics(self) -> None:
         pass
 
-    def register_metrics(self):
-        pass
-
-    def send_metrics(self):
+    @override
+    def send_metrics(self, metrics: dict[str, Any]) -> None:
         pass

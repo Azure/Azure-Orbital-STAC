@@ -6,8 +6,10 @@
 import json
 import os
 from abc import ABCMeta, abstractmethod
+from typing import Any, Generator
 
 from knack.log import get_logger
+from azure_stac.common.__utilities import getenv
 
 logger = get_logger(__name__)
 
@@ -15,7 +17,7 @@ logger = get_logger(__name__)
 class BaseProcessor(metaclass=ABCMeta):
     PROCESSOR_NAME = ""  # required, name of the processor
     VERSION = "1.0"  # optional, processor version
-    AUTHORS = []  # optional, list of authors
+    AUTHORS: list[str] = []  # optional, list of authors
 
     TOPIC_NAME = ""
     SUBSCRIPTION_NAME = ""
@@ -23,7 +25,7 @@ class BaseProcessor(metaclass=ABCMeta):
     WORKING_DIR = ""
     TEMP_FOLDER_NAME = "temp"
 
-    def __init__(self, **kwargs):
+    def __init__(self) -> None:
         self.__check_integrity()
         self.__get_settings()
 
@@ -47,15 +49,15 @@ class BaseProcessor(metaclass=ABCMeta):
             except Exception:
                 pass
 
-    def __get_settings(self):
+    def __get_settings(self) -> None:
         """
         Retrieve settings and configuration for setting up the base
         functionality for a processor
         """
-        self.TOPIC_NAME = os.getenv("TOPIC_NAME")
-        self.SUBSCRIPTION_NAME = os.getenv("SUBSCRIPTION_NAME")
+        self.TOPIC_NAME = getenv("TOPIC_NAME")
+        self.SUBSCRIPTION_NAME = getenv("SUBSCRIPTION_NAME")
 
-    def __check_integrity(self):
+    def __check_integrity(self) -> None:
         """
         Ensures a list of checks to make sure that the processors correctly
         implement the behavior and attributes.
@@ -64,7 +66,7 @@ class BaseProcessor(metaclass=ABCMeta):
         assert hasattr(self, "PROCESSOR_NAME"), "PROCESSOR_NAME must be set"
         assert hasattr(self, "VERSION"), "VERSION must be set"
 
-    def __configure_metrics(self, metric_types: any = None):
+    def __configure_metrics(self, metric_types: Any = None) -> None:
         """
         This method wil configure the list of applicable metrics and make them
         ready for the processor to send their metrics as needed.
@@ -79,13 +81,13 @@ class BaseProcessor(metaclass=ABCMeta):
             for client in metrics_client:
                 client.register_metrics()
 
-    def begin_listening(self):
+    def begin_listening(self) -> Generator:
         """
         Starts using the topic's subscription to begin receiving messages
         """
         from azure.servicebus import ServiceBusClient
 
-        self.SERVICE_BUS_CONNECTION_STRING = os.getenv("SERVICE_BUS_CONNECTION_STRING")
+        self.SERVICE_BUS_CONNECTION_STRING = getenv("SERVICE_BUS_CONNECTION_STRING")
 
         with ServiceBusClient.from_connection_string(
             conn_str=self.SERVICE_BUS_CONNECTION_STRING,
@@ -114,7 +116,7 @@ class BaseProcessor(metaclass=ABCMeta):
                     self.__clean_up()
 
     @abstractmethod
-    def run(self, **kwargs):
+    def run(self, **kwargs: dict[str, Any]) -> None:
         """
         This will be the main method that the processors need to override to
         implement their custom logic.

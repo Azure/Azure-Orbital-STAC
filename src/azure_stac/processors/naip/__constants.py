@@ -5,12 +5,14 @@
 
 import os
 
+from typing import Any
+
 import pystac
 from pystac.extensions.eo import Band
 from pystac.provider import ProviderRole
 
 
-def get_env_variable(variable_name, default_value=None):
+def get_env_variable(variable_name: str, default_value: Any = None) -> Any:
     value = os.getenv(variable_name)
     if value is None:
         if default_value is None:

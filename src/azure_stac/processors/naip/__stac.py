@@ -21,6 +21,7 @@ from stactools.core.io import read_text
 from stactools.core.projection import reproject_geom
 
 from azure_stac.common.__blob_service import generate_sas_token
+from azure_stac.common.__utilities import getenv
 from azure_stac.processors.naip.__constants import STAC_BANDS, USDA_PROVIDER
 from azure_stac.processors.naip.__grid import GridExtension
 from azure_stac.processors.naip.__utils import parse_fgdc_metadata
@@ -32,9 +33,9 @@ log.setLevel(rio.logging.DEBUG)
 # https://github.com/stac-extensions/grid/
 DOQQ_PATTERN: Final[Pattern[str]] = re.compile(r"[A-Za-z]{2}_m_(\d{7})_(ne|se|nw|sw)_")
 
-DATA_STORAGE_ACCOUNT_NAME = os.getenv("DATA_STORAGE_ACCOUNT_NAME")
-DATA_STORAGE_ACCOUNT_KEY = os.getenv("DATA_STORAGE_ACCOUNT_KEY")
-DATA_STORAGE_ACCOUNT_CONNECTION_STRING = os.getenv("DATA_STORAGE_ACCOUNT_CONNECTION_STRING")
+DATA_STORAGE_ACCOUNT_NAME = getenv("DATA_STORAGE_ACCOUNT_NAME")
+DATA_STORAGE_ACCOUNT_KEY = getenv("DATA_STORAGE_ACCOUNT_KEY")
+DATA_STORAGE_ACCOUNT_CONNECTION_STRING = getenv("DATA_STORAGE_ACCOUNT_CONNECTION_STRING")
 COLLECTION_ID = "naip"
 
 
@@ -43,14 +44,14 @@ def get_metadata_sas_url(href: str) -> str:
 
 
 def create_item(
-    state,
-    year,
-    cog_href,
+    state: str,
+    year: str,
+    cog_href: str,
     metadata_href: Optional[str],
-    thumbnail_href=None,
-    additional_providers=None,
-    cog_url=None,
-):
+    thumbnail_href: Optional[str] = None,
+    additional_providers: Optional[list[pystac.Provider]] = None,
+    cog_url: Optional[str] = None,
+) -> pystac.Item:
     """Creates a STAC Item. This function will read the metadata file for information
     to place in the STAC item.
     :param state: The 2-letter state code for the state this item belongs to.
@@ -160,15 +161,16 @@ def create_item(
             grid.code = f"DOQQ-{match.group(1)}{match.group(2).upper()}"
 
         # COG
-        item.add_asset(
-            "image",
-            pystac.Asset(
-                href=cog_url,
-                media_type=pystac.MediaType.COG,
-                roles=["data"],
-                title="RGBIR COG tile",
-            ),
-        )
+        if cog_url:
+            item.add_asset(
+                "image",
+                pystac.Asset(
+                    href=cog_url,
+                    media_type=pystac.MediaType.COG,
+                    roles=["data"],
+                    title="RGBIR COG tile",
+                ),
+            )
 
         # Metadata
         if any(stac_metadata) and metadata_href is not None:

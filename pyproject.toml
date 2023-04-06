@@ -46,6 +46,7 @@ dev = [
   "mypy >= 1.1.1",
   "flake8 >= 6.0.0",
   "flake8-pyproject >= 1.2.3",  # for flake8 to read pyproject.toml
+  "types-python-dateutil"
 ]
 
 [project.scripts]

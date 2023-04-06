@@ -4,16 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 from abc import ABCMeta, abstractmethod
+from typing import Any, Callable, Tuple
 
 
 class Metrics(object, metaclass=ABCMeta):
     CONNECTION_STRING = ""
     MMAP = None
 
-    def __init__(self, **kwargs):
-        pass
-
-    def _setup_open_census(self, views: any):
+    def _setup_open_census(self, views: Any) -> None:
         """
         Bootstrap opencensus for sending metrics
         :param views: List of view to register
@@ -40,20 +38,20 @@ class Metrics(object, metaclass=ABCMeta):
         self.MMAP = stats_recorder.new_measurement_map()
 
     @abstractmethod
-    def register_metrics(self):
+    def register_metrics(self) -> None:
         pass
 
     @abstractmethod
-    def send_metrics(self):
+    def send_metrics(self, metrics: dict[str, Any]) -> None:
         pass
 
 
-def sendmetrics(func):
+def sendmetrics(func: Callable) -> Callable:
     """
     Decorator to send metrics to App Insights
     """
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Tuple, **kwargs: dict[str, Any]) -> None:
         """
         Wrapper to send the metrics at the end of a processor run
         """

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from typing import Optional
+from typing import Any, Optional
 
 from psycopg import Connection
 
@@ -23,7 +23,7 @@ class StacCol2Postgres(BaseProcessor):
     CONN_STRING = ""
     CONTAINER_NAME = ""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def __get_envvars(self) -> None:
@@ -31,17 +31,17 @@ class StacCol2Postgres(BaseProcessor):
         :returns: None
         :rtype: None
         """
-        import os
+        from azure_stac.common.__utilities import getenv
 
-        self.PGHOST = os.getenv("PGHOST")
-        self.PGUSER = os.getenv("PGUSER")
-        self.PGDATABASE = os.getenv("PGDATABASE")
-        self.PGPASSWORD = os.getenv("PGPASSWORD")
-        self.CONN_STRING = os.getenv("DATA_STORAGE_ACCOUNT_CONNECTION_STRING")
-        self.CONTAINER_NAME = os.getenv("STACCOLLECTION_STORAGE_CONTAINER_NAME")
+        self.PGHOST = getenv("PGHOST")
+        self.PGUSER = getenv("PGUSER")
+        self.PGDATABASE = getenv("PGDATABASE")
+        self.PGPASSWORD = getenv("PGPASSWORD")
+        self.CONN_STRING = getenv("DATA_STORAGE_ACCOUNT_CONNECTION_STRING")
+        self.CONTAINER_NAME = getenv("STACCOLLECTION_STORAGE_CONTAINER_NAME")
 
     @sendmetrics
-    def run(self, **kwargs):
+    def run(self, **kwargs: dict[str, Any]) -> None:
         """Ingest STAC collection to PostgreSQL"""
 
         import asyncio
@@ -111,5 +111,5 @@ class StacCol2Postgres(BaseProcessor):
                 raise e
 
 
-def execute_processor():
-    return StacCol2Postgres().run()
+def execute_processor() -> None:
+    StacCol2Postgres().run()

@@ -5,16 +5,13 @@
 
 import os
 import traceback
-from collections import OrderedDict
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
-
-from knack.arguments import ArgumentsContext, CLIArgumentType
-from knack.commands import CommandGroup
+from typing import Any, Tuple
 
 from azure_stac.commands.__command import BaseCommand
 
-PROCESSORS_LIST = {}
+PROCESSORS_LIST: dict[str, Any] = {}
 
 GROUP = "processor"
 
@@ -24,7 +21,7 @@ ARGUMENTS = {"run": {"name": str}}
 
 
 class ProcessorCommand(BaseCommand):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Tuple, **kwargs: dict[str, Any]) -> None:
         """Dynamically load all processors for use by commads"""
 
         processors_path = os.path.join(
@@ -56,44 +53,10 @@ class ProcessorCommand(BaseCommand):
 
         super(ProcessorCommand, self).__init__(*args, **kwargs)
 
-    def load_arguments(self, command=None):
-        """Load arguments for the commands in this group
-        :param command: Command to load arguments
-        :type command: any
-        :results: None
-        :rtype: None
-        """
-
-        with ArgumentsContext(self, "processor run") as ac:
-            ac.argument(
-                "name", arg_type=CLIArgumentType(type=str, help="Name of the processor to run")
-            )
-
-        super(ProcessorCommand, self).load_arguments(command)
-
-    def load_commands(self, args=None):
-        """Load commands for the command group
-        :param args: Arguments for the command
-        :type args: any
-        :results: None
-        :rtype: None
-        """
-
-        with CommandGroup(
-            self,
-            "processor",
-            operations_tmpl="stac.commands.processor#{}",
-            client_factory=processor_cf,
-        ) as group:
-            group.command("run", "run_processor")
-            group.command("list", "list_processors")
-
-        return OrderedDict(self.command_table)
-
-    def list_sub_commands(self):
+    def list_sub_commands(self) -> None:
         pass
 
-    def show_help(self):
+    def show_help(self) -> None:
         pass
 
 
@@ -102,7 +65,7 @@ class ProcessorCommand(BaseCommand):
 # --------------------------------#
 
 
-def run_processor(client, name=None):
+def run_processor(client: Any, name: str) -> None:
     """Knack command to run the processor by name
     :param client: Processor Client instantiated at runtime by the Client Factory based
         on the specified processor to run
@@ -116,7 +79,7 @@ def run_processor(client, name=None):
     PROCESSORS_LIST[name].execute_processor()
 
 
-def list_processors(client):
+def list_processors(client: Any) -> None:
     """Knack command to list the loaded and/or available processor for use
     :param client: Processor Client instantiated at runtime by the Client Factory based
         on the specified processor to run
@@ -134,7 +97,7 @@ def list_processors(client):
 # --------------------------------#
 
 
-def processor_cf(_):
+def processor_cf(_: Any) -> ProcessorCommand:
     """Creates the client object for invoking the processors and passes
     that to the individual commands for use
     :param _: Client Context sent by CLI Loader when processor group is created
