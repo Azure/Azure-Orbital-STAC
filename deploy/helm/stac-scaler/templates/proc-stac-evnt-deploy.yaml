@@ -25,6 +25,11 @@ spec:
           resources:
               {{- toYaml .resources | nindent 16 }}
           env:
+            - name: DATA_STORAGE_ACCOUNT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: storageaccountkey
+                  key: StorageAccountKey
             - name: DATA_STORAGE_ACCOUNT_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
