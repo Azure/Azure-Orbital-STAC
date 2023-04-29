@@ -40,8 +40,8 @@ param jumpboxAdminPassword string
 @description('Disable private endpoint for PostgreSQL')
 param privateEndpointDisabled bool = false
 
-@description('Platform Version for API Management Service')
-param apimPlatformVersion string = 'stv2'
+@description('Ingress Public IP DNS Label Prefix (optional)')
+param ingressPublicIPDnsPrefix string = ''
 
 // Guid to role definitions to be used during role
 // assignments including the below roles definitions:
@@ -54,8 +54,6 @@ var dataResourceGroupName = '${environmentCode}-data-rg'
 var processingResourceGroupName = '${environmentCode}-processing-rg'
 var projectName = 'stac'
 var namingPrefix = '${environmentCode}-${projectName}'
-
-param loadBalancerPrivateIP string = '10.6.3.254'
 
 // This parameter is a placeholder to retain current work we have for public access
 // Setting it to true may not work for all cases.
@@ -222,12 +220,8 @@ module processingModule 'groups/processing.bicep' = {
     jumpboxSubnetID: networkingModule.outputs.jumpboxSubnetId
     jumpboxAdminUsername: jumpboxAdminUsername
     jumpboxAdminPasswordOrKey: jumpboxAdminPassword
-    loadBalancerPrivateIP: loadBalancerPrivateIP
-    storageAccountNameForApim: dataModule.outputs.storageAccountName
-    storageAccountResourceGroupName: dataRg.name
-    apimSubnetId: networkingModule.outputs.apimSubnetId
     azureBastionSubnetID: networkingModule.outputs.bastionSubnetId
-    apimPlatformVersion: apimPlatformVersion
+    ingressPublicIPDnsPrefix: ingressPublicIPDnsPrefix
   }
   dependsOn: [
     dataModule

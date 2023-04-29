@@ -1,0 +1,22 @@
+[
+  {
+    "allowedMemberTypes": [
+      "User"
+    ],
+    "description": "STAC Writers can modify items in the catalog as well as add and remove items and collections.",
+    "displayName": "STAC Writers",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "STAC.Write"
+  },
+  {
+    "allowedMemberTypes": [
+      "User"
+    ],
+    "description": "STAC Readers can read data from the STAC.",
+    "displayName": "STAC Readers",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "STAC.Read"
+  }
+]

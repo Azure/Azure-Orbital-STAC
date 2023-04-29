@@ -6,39 +6,25 @@
 PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/../..; pwd)"
 ENV_CODE=${1:-${ENV_CODE}}
 LOCATION=${2:-${LOCATION}}
-JUMPBOX_PASSWORD=${3:-${JUMPBOX_PASSWORD}}
-JUMPBOX_USERNAME=${4:-${JUMPBOX_USERNAME:-"adminuser"}}
-LB_PRIVATE_IP=${5:-${LB_PRIVATE_IP:-"10.6.3.254"}}
+LE_EMAIL_ADDRESS=${3:-${LE_EMAIL_ADDRESS}}
+JUMPBOX_PASSWORD=${4:-${JUMPBOX_PASSWORD}}
+JUMPBOX_USERNAME=${5:-${JUMPBOX_USERNAME:-"adminuser"}}
 
 set -e
 
-if [[ -z "$ENV_CODE" ]]
-  then
-    echo "Environment Code value not supplied"
-    exit 1
-fi
-
-if [[ -z "$LOCATION" ]]
-  then
-    echo "Location value not supplied"
-    exit 1
-fi
-
-if [[ -z "$JUMPBOX_PASSWORD" ]]
-  then
-    echo "Jumpbox Password not supplied"
-    exit 1
-fi
+[[ -z "$ENV_CODE" ]] && { echo "Environment Code value not supplied"; exit 1; }
+[[ -z "$LOCATION" ]] && { echo "Location value not supplied"; exit 1; }
+[[ -z "$JUMPBOX_PASSWORD" ]] && { echo "Jumpbox Password not supplied"; exit 1; }
+[[ -z "$LE_EMAIL_ADDRESS" ]] && { echo "Let's Encrypt e-mail address (LE_EMAIL_ADDRESS) not specified"; exit 1; }
 
 echo "Performing bicep template deployment"
-LB_PRIVATE_IP=$LB_PRIVATE_IP \
 $PRJ_ROOT/deploy/scripts/install.sh "$ENV_CODE" "$LOCATION" "$JUMPBOX_PASSWORD" "$JUMPBOX_USERNAME"
 
 echo "Building containers and Deploying to Infra"
 $PRJ_ROOT/deploy/scripts/build.sh "$ENV_CODE"
 
 echo "Performing configuration and Deploying Apps"
-LB_PRIVATE_IP=$LB_PRIVATE_IP \
+LE_EMAIL_ADDRESS="$LE_EMAIL_ADDRESS" \
 $PRJ_ROOT/deploy/scripts/configure.sh "$ENV_CODE"
 
 echo "Securing Keyvault access"

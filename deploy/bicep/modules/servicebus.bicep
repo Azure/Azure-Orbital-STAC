@@ -32,5 +32,6 @@ resource servicebus_RootManageSharedAccessKey 'Microsoft.ServiceBus/namespaces/A
   }
 }
 
+output name string = servicebus.name
 output authorizationRuleId string = servicebus_RootManageSharedAccessKey.id
 output authorizationRuleName string = servicebus_RootManageSharedAccessKey.name

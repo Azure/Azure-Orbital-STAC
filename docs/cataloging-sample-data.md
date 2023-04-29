@@ -1,15 +1,23 @@
 # Cataloging the sample data
 
-Sample data is hosted in a Storage Account that is available for anyone to download without authentication. The data in this Storage Account can be used to run through the cataloging process and then queries through the STAC API.
+Sample data is hosted in a Storage Account that is available for anyone to
+download without authentication. The data in this Storage Account can be used
+to run through the cataloging process and then queries through the STAC API.
 
-The steps below walk you through the creation of STAC Collection and STAC Item. When following the steps below, make sure the order of execution is followed as the sequence of upload is critical to the cataloging process.
+The steps below walk you through the creation of STAC Collection and STAC
+Item. When following the steps below, make sure the order of execution is
+followed as the sequence of upload is critical to the cataloging process.
 
 ## Steps to Catalog Sample data
 
-1. First step in the process is the creation of the [STAC collection](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md). A STAC Collection is created from a [json document](../deploy/sample-data/collection_naip_test.json) that is uploaded to the appropriate container in the Storage Account.
+1. First step in the process is the creation of the
+[STAC collection](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md).
+A STAC Collection is created from a [json document](../deploy/sample-data/collection_naip_test.json)
+that is uploaded to the appropriate container in the Storage Account.
 
     ```bash
-    curl -s https://raw.githubusercontent.com/Azure/Azure-Orbital-STAC/main/deploy/sample-data/collection_naip_test.json | azcopy copy "https://<data-storage-account>.blob.core.windows.net/staccollection/collection_naip_test.json?<SAS-token-for-data-storage-account>" --from-to PipeBlob
+    curl -s https://raw.githubusercontent.com/Azure/Azure-Orbital-STAC/main/deploy/sample-data/collection_naip_test.json | \
+    azcopy copy "https://<data-storage-account>.blob.core.windows.net/staccollection/collection_naip_test.json?<SAS-token-for-data-storage-account>" --from-to PipeBlob
     ```
 
 2. Generate the SAS token for getting the data from Planetary Computers.
@@ -18,7 +26,8 @@ The steps below walk you through the creation of STAC Collection and STAC Item. 
     TOKEN=$(curl -s https://planetarycomputer.microsoft.com/api/sas/v1/token/naip | jq -r .token)
     ```
 
-    Alternatively, clicking on the link <https://planetarycomputer.microsoft.com/api/sas/v1/token/naip> will give an output like the following:
+    Alternatively, clicking on the link <https://planetarycomputer.microsoft.com/api/sas/v1/token/naip>
+    will give an output like the following:
 
     ```json
     {
@@ -27,14 +36,18 @@ The steps below walk you through the creation of STAC Collection and STAC Item. 
     }
     ```
 
-    The `token` field is the SAS token. The `msft:expiry` field specifies the time (in UTC) this token expires, which is 45 mins from the time it was first generated. Set the variable `TOKEN` to the token value.
+    The `token` field is the SAS token. The `msft:expiry` field specifies the
+    time (in UTC) this token expires, which is 45 mins from the time it was
+    first generated. Set the variable `TOKEN` to the token value.
 
     ```bash
     TOKEN=<value from token field>
 
     We will use this token to download the sample data.
 
-3. Once the STAC collection is created, the next steps is to create the [STAC Items](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md). Addition of the STAC Item to a STAC Collection is two step process.
+3. Once the STAC collection is created, the next steps is to create the
+[STAC Items](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md).
+Addition of the STAC Item to a STAC Collection is two step process.
 
     a. Upload metadata
 

@@ -23,3 +23,5 @@ resource containerRepoitory 'Microsoft.ContainerRegistry/registries@2021-12-01-p
     zoneRedundancy: (zoneRedundancy) ? 'Enabled' : 'Disabled'
   }
 }
+
+output name string = containerRepoitory.name

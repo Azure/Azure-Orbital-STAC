@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stac-browser
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: stac-browser
+  template:
+    metadata:
+      labels:
+        {{- toYaml .Values.labels | nindent 8 }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: stac-browser
+          image: "{{ .Values.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}          
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+      restartPolicy: Always

@@ -25,11 +25,8 @@ module appinsights '../modules/appinsights.bicep' = {
     environmentName: environmentTag
     applicationInsightsName: '${namingPrefix}-appinsights'
     location: location
-    workspaceId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.OperationalInsights/workspaces/${namingPrefix}-workspace'
+    workspaceId: workspace.outputs.workspaceId
   }
-  dependsOn: [
-    workspace
-  ]
 }
 
 output workspaceId string = workspace.outputs.workspaceId

@@ -11,7 +11,6 @@ activeDeadlineSeconds: 600
 
 # repository: myacr.azurecr.io
 
-deploymentNamespace: pgstac
 envCode: stac
 
 processors:
@@ -100,7 +99,10 @@ processors:
 
 stacfastapi:
   replicas: 1
-  # privateIp: "" # 10.6.3.15
+  rootPath: /api
+  blobStoreEndpoint: ~
+  hostname: ~
+  clusterIssuer: letsencrypt
   labels:
     app: app-stacfastapi
   image:

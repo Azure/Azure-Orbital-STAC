@@ -27,5 +27,5 @@ echo "Getting Keyvault name"
 KEYVAULT_NAME=$(az keyvault list --resource-group ${DATA_RESOURCE_GROUP} --query '[0].name' -o tsv)
 
 echo "Securing Keyvault to be accessed only on jumpbox subnet"
-az keyvault network-rule add --name ${KEYVAULT_NAME} --resource-group ${DATA_RESOURCE_GROUP} --subnet ${JUMPBOX_SUBNET_ID}
-az keyvault update --name ${KEYVAULT_NAME} --resource-group ${DATA_RESOURCE_GROUP} --set properties.networkAcls.defaultAction=Deny
+az keyvault network-rule add --name ${KEYVAULT_NAME} --resource-group ${DATA_RESOURCE_GROUP} --subnet ${JUMPBOX_SUBNET_ID} -o none
+az keyvault update --name ${KEYVAULT_NAME} --resource-group ${DATA_RESOURCE_GROUP} --set properties.networkAcls.defaultAction=Deny -o none
