@@ -5,9 +5,9 @@
 
 import os
 
-from stac.core.metrics import Metrics
+from azure_stac.core.metrics import Metrics
 
-class MessageMetrics(Metrics):
+class PodMetrics(Metrics):
     
     def __init__(self, *args, **kwargs):
         

@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from core.processor import BaseProcessor
-from stac.core.metrics import sendmetrics
+from azure_stac.core.processor import BaseProcessor
+from azure_stac.core.metrics import sendmetrics
 
 
 class StacItem2Postgres(BaseProcessor):
@@ -28,9 +28,9 @@ class StacItem2Postgres(BaseProcessor):
         """ Ingest STAC item to PostgreSQL """
         
         import asyncio
-        from stac.common.__blob_service import download_blob_async
-        from stac.common.__pypgstac import load_item
-        from stac.common.__utilities import convert_json_to_ndjson
+        from azure_stac.common.__blob_service import download_blob_async
+        from azure_stac.common.__pypgstac import load_item
+        from azure_stac.common.__utilities import convert_json_to_ndjson
         
         # call parent method to bootstrap the required metrics
         # and hooks

@@ -77,7 +77,7 @@ class BaseProcessor(metaclass=ABCMeta):
         This method wil configure the list of applicable metrics and make them 
         ready for the processor to send their metrics as needed.
         """
-        from stac.metrics.__metrics_factory import MetricsFactory
+        from azure_stac.metrics.__metrics_factory import MetricsFactory
         
         if metric_types is not None:
         

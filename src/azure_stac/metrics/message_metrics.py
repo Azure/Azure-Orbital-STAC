@@ -3,5 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-knack
-opencensus-ext-azure
+import os
+
+from azure_stac.core.metrics import Metrics
+
+class MessageMetrics(Metrics):
+    
+    def __init__(self, *args, **kwargs):
+        
+        pass
+    
+    def register_metrics(self):
+        
+        pass
+    
+    def send_metrics(self):
+        
+        pass

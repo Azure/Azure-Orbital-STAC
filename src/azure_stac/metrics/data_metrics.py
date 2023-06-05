@@ -5,7 +5,7 @@
 
 import os
 
-from stac.core.metrics import Metrics
+from azure_stac.core.metrics import Metrics
 
 
 class DataMetrics(Metrics):
