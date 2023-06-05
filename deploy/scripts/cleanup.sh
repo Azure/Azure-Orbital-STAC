@@ -6,11 +6,10 @@
 # parameters
 ENV_CODE=${1:-${ENV_CODE}}
 
-if [[ -z "$ENV_CODE" ]]
-  then
-    echo "Environment Code value not supplied"
-    exit 1
-fi
+[[ -z "$ENV_CODE" ]] && { echo "Environment Code value not supplied"; exit 1; }
+
+ENV_TAG=${ENV_TAG:-"stac-${ENV_CODE}"}
+DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-"${ENV_TAG}-deploy"}
 
 # variables
 MONITORING_RESOURCE_GROUP="${ENV_CODE}-monitoring-rg"
@@ -27,3 +26,4 @@ az group delete --name ${DATA_RESOURCE_GROUP} --no-wait --yes
 az deployment sub delete --name ${DATA_RESOURCE_GROUP} --no-wait
 az group delete --name ${PROCESSING_RESOURCE_GROUP} --no-wait --yes
 az deployment sub delete --name ${PROCESSING_RESOURCE_GROUP} --no-wait
+az deployment sub delete --name ${DEPLOYMENT_NAME} --no-wait

@@ -35,5 +35,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   }
 }
 
+output name string = storageAccount.name
 output storageAccountId string = storageAccount.id
 output fileEndpointUri string = storageAccount.properties.primaryEndpoints.file

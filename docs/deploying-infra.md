@@ -2,14 +2,17 @@
 
 The script requires following input
 
-- `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
+- `environmentCode` which serves as the prefix for infrastructure services
+   names. Allows only alpha numeric(no special characters) and must be
+   between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
-- `jumpboxPassword` through which users will SSH into Azure VM. The supplied password must be between 6-72 characters long
-and must satisfy at least 3 out of 4 of the following:
-  - Lowercase characters
-  - Uppercase characters
-  - Numbers (0-9)
-  - Special characters (except Control characters)
+- `jumpboxPassword` through which users will SSH into Azure VM. The supplied
+   password must be between 6-72 characters long and must satisfy at least 3
+   out of 4 of the following:
+     - Lowercase characters
+     - Uppercase characters
+     - Numbers (0-9)
+     - Special characters (except Control characters)
 
 The deployment involves the following steps outlined below:
 
@@ -21,7 +24,9 @@ No | Step | Duration (approx.) | Required / Optional
 
 ## Deployment & Configurations
 
-STAC solution is supported on multiple Azure clouds. If you work across different regions or use [Azure Stack](https://learn.microsoft.com/azure-stack/user/?view=azs-2206), you may need to use more than one cloud.
+STAC solution is supported on multiple Azure clouds. If you work across
+different regions or use [Azure Stack](https://learn.microsoft.com/azure-stack/user/?view=azs-2206),
+you may need to use more than one cloud.
 
 To get the active cloud and a list of all the available clouds:
 
@@ -37,7 +42,8 @@ False       AzureChinaCloud    latest
 False       AzureUSGovernment  latest
 False       AzureGermanCloud   latest
 ```
-The currently active cloud has `True` in the `IsActive` column. Only one cloud can be active at any time.
+The currently active cloud has `True` in the `IsActive` column. Only one cloud
+can be active at any time.
 
 To switch to one of the national clouds Ex: AzureUSGovernment
 
@@ -51,26 +57,31 @@ Active subscription switched to <'subscription name' (subscription id)>.
 ```
 
 **NOTE**
-If your authentication for the activated cloud has expired, you need to re-authenticate before performing any other CLI tasks. If this is your first time switching to the new cloud, you also need to set the active subscription.
+If your authentication for the activated cloud has expired, you need to
+re-authenticate before performing any other CLI tasks. If this is your first
+time switching to the new cloud, you also need to set the active subscription.
 
-(Optional) Login to azure as shown below and set the correct subscription in which you want to provision the resources. 
+(Optional) Login to azure as shown below and set the correct subscription in
+which you want to provision the resources. 
 
 ```azurecli
 az login
 az account set -s <subscription_id>
 ```
 
-For end-to-end deployment, you can either choose to run the `setup.sh` script that will take care of deploying all the services, building the docker images and configuring the variables or run the scripts individually as shown below.
+For end-to-end deployment, you can either choose to run the `setup.sh` script
+that will take care of deploying all the services, building the docker images
+and configuring the variables or run the scripts individually as shown below.
 
 Note: For Sovereign Clouds, 
 
-* set `APIM_PLATFORM_VERSION` to 'stv1' as 'stv2' is not supported. 
-* set `POSTGRES_PRIVATE_ENDPOINT_DISABLED` to true as Private EndPoint for PostgreSQL are not supported.
+* set `POSTGRES_PRIVATE_ENDPOINT_DISABLED` to true as Private EndPoint for
+  PostgreSQL are not supported.
 
-You can make the above changes by settings the environment variables using the commands below.
+You can make the above changes by settings the environment variables using the
+commands below.
 
 ```bash
-export APIM_PLATFORM_VERSION=stv1
 export POSTGRES_PRIVATE_ENDPOINT_DISABLED=true
 ```
 
@@ -107,7 +118,9 @@ OR
 
 2. Building Docker images
 
-   In this step, Docker images such as stac-event-consumer, generate-stac-json, stac-collection, and stac-fastapi will be built and deployed to ACR (Azure Container Registry).
+   In this step, Docker images such as stac-event-consumer, generate-stac-json,
+   stac-collection, and stac-fastapi will be built and deployed to ACR (Azure
+   Container Registry).
 
    ```bash
    ./deploy/scripts/build.sh <environmentCode>
@@ -115,7 +128,8 @@ OR
 
 3. Configuring and Deploying container applications
 
-   This step collects the required configuration variables from the infrastructure, and passes them to kubectl deployment specification.
+   This step collects the required configuration variables from the
+   infrastructure, and passes them to kubectl deployment specification.
 
    ```bash
    ./deploy/scripts/configure.sh <environmentCode>
@@ -123,8 +137,24 @@ OR
 
 ## Cleanup Script
 
-   Run the below script to clean up the Azure resources provisioned as part of the deployment. The script uses `environmentCode` to identify and remove the services.
+   Run the below script to clean up the Azure resources provisioned as part of
+   the deployment. The script uses `environmentCode` to identify and remove the
+   services.
 
    ```bash
    ./deploy/scripts/cleanup.sh <environmentCode>
    ```
+
+## Securing STAC APIs
+
+The deployment leaves the STAC API and blob proxy (to allow assets to be
+accessed) open by default. If you wish to protect the APIs so that you must
+authenticate to access them, you can do so by running:
+
+```bash
+./deploy/scripts/secure-stac-endpoints.sh <environmentCode>
+```
+
+This will deploy oauth2-proxy and require that you authenticate with Azure
+Active Directory (in the same tenant as the STAC deployment) in order to access
+resources.

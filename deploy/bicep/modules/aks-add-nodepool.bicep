@@ -24,7 +24,7 @@ resource aksNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2022
     mode: agentPoolMode
     type: 'VirtualMachineScaleSets'
     nodeLabels: nodeLable
-    vnetSubnetID: (empty(vnetSubnetID) ? json('null') : vnetSubnetID)
+    vnetSubnetID: (empty(vnetSubnetID) ? null : vnetSubnetID)
     enableAutoScaling: enableAutoScaling
     scaleDownMode: 'Delete'
     maxPods: maxPods

@@ -19,7 +19,6 @@ param jumpboxSubnetAddressPrefix string = '10.6.0.0/24'
 param pgDelegatedSubnetAddressPrefix string = '10.6.1.0/24'
 param dataSubnetAddressPrefix string = '10.6.2.0/24'
 param aksSubnetAddressPrefix string = '10.6.3.0/24'
-param apimSubnetAddressPrefix string = '10.6.4.0/24'
 param bastionSubnetAddressPrefix string = '10.6.250.0/24'
 param pgPrivateDNSZoneName string
 param blobPrivateDNSZoneName string =''
@@ -36,28 +35,29 @@ var privateDnsZoneConfig = [
   }
 ]
 
+// Allow http and https traffic to K8S ingress. Port 80
+// traffic is required for Let's Encrypt certificate creation.
+// The nginx ingress controller redirects http to https if tls
+// is configured for the ingress. Therefore, all ingresses
+// should be configured with tls.
 var aksSecurityGroupRules = [ {
-  name: 'Allow_APIM_to_K8S'
+  name: 'Allow_HTTPS_to_K8S_Ingress'
   properties: {
     access: 'Allow'
-    description: 'Allow APIM to K8S traffic'
+    description: 'Allow HTTP(S) to K8S ingress traffic'
     destinationAddressPrefix: '*'
-    destinationPortRange: '8082'
+    destinationPortRanges: [
+      '80'
+      '443'
+    ]
     direction: 'Inbound'
     priority: 100
     protocol: 'TCP'
     sourceAddressPrefix: '*'
     sourcePortRange: '*'
   }
-} 
-]
-
-module apimSecurityGroup '../modules/apim.security-group.bicep' = if(newOrExisting == 'new') {
-  name: '${namingPrefix}-apim-security-group'
-  params: {
-    location: location
-  }
 }
+]
 
 module jumpboxSubnetOverrideSecurityGroup '../modules/security-group.bicep' = if(newOrExisting == 'new') {
   name: '${namingPrefix}-jumpbox-subnet-overide-security-group'
@@ -109,7 +109,6 @@ module vnet '../modules/vnet.bicep' = if (newOrExisting == 'new') {
     addressPrefix: vnetAddressPrefix
   }
   dependsOn:[
-    apimSecurityGroup
     jumpboxSubnetOverrideSecurityGroup
     dataSubnetOverrideSecurityGroup
     pgDelegatedSubnetOverrideSecurityGroup
@@ -121,7 +120,7 @@ module vnet '../modules/vnet.bicep' = if (newOrExisting == 'new') {
 module jumpboxSubnet '../modules/subnet.bicep' = if(newOrExisting == 'new') {
   name: '${namingPrefix}-jumpbox-subnet'
   params: {
-    vNetName: virtualNetworkName
+    vNetName: vnet.outputs.name
     subnetName: 'jumpbox-subnet'
     subnetAddressPrefix: jumpboxSubnetAddressPrefix
     serviceEndPoints:[
@@ -137,16 +136,12 @@ module jumpboxSubnet '../modules/subnet.bicep' = if(newOrExisting == 'new') {
     ]
     nsgId: jumpboxSubnetOverrideSecurityGroup.outputs.id
   }
-  dependsOn: [
-    vnet
-    jumpboxSubnetOverrideSecurityGroup
-  ]
 }
 
 module pgDelegatedSubnet '../modules/subnet.bicep' = if (newOrExisting == 'new') {
   name: '${namingPrefix}-pg-delegated-subnet'
   params: {
-    vNetName: virtualNetworkName
+    vNetName: vnet.outputs.name
     subnetName: 'pg-subnet'
     subnetAddressPrefix: pgDelegatedSubnetAddressPrefix
     delegations: [
@@ -162,16 +157,14 @@ module pgDelegatedSubnet '../modules/subnet.bicep' = if (newOrExisting == 'new')
     nsgId: pgDelegatedSubnetOverrideSecurityGroup.outputs.id
   }
   dependsOn: [
-    vnet
     jumpboxSubnet
-    pgDelegatedSubnetOverrideSecurityGroup
   ]
 }
 
 module dataSubnet '../modules/subnet.bicep' = if (newOrExisting == 'new') {
   name: '${namingPrefix}-data-subnet'
   params: {
-    vNetName: virtualNetworkName
+    vNetName: vnet.outputs.name
     subnetName: 'data-subnet'
     subnetAddressPrefix: dataSubnetAddressPrefix
     serviceEndPoints:[
@@ -183,17 +176,15 @@ module dataSubnet '../modules/subnet.bicep' = if (newOrExisting == 'new') {
     nsgId: dataSubnetOverrideSecurityGroup.outputs.id
   }
   dependsOn: [
-    vnet
     jumpboxSubnet
     pgDelegatedSubnet
-    dataSubnetOverrideSecurityGroup
   ]
 }
 
 module aksSubnet '../modules/subnet.bicep' = if(newOrExisting == 'new') {
   name: '${namingPrefix}-aks-subnet'
   params: {
-    vNetName: virtualNetworkName
+    vNetName: vnet.outputs.name
     subnetName: 'aks-subnet'
     subnetAddressPrefix: aksSubnetAddressPrefix
     serviceEndPoints:[
@@ -205,42 +196,16 @@ module aksSubnet '../modules/subnet.bicep' = if(newOrExisting == 'new') {
     nsgId: aksSubnetOverrideSecurityGroup.outputs.id
   }
   dependsOn: [
-    vnet
     jumpboxSubnet
     pgDelegatedSubnet
     dataSubnet
-    aksSubnetOverrideSecurityGroup
-  ]
-}
-
-module apimSubnet '../modules/subnet.bicep' = if (newOrExisting == 'new') {
-  name: '${namingPrefix}-apim-subnet'
-  params: {
-    vNetName: virtualNetworkName
-    subnetName: 'apim-subnet'
-    subnetAddressPrefix: apimSubnetAddressPrefix
-    serviceEndPoints:[
-      {
-        locations: [location]
-        service: 'Microsoft.Storage'
-      }
-    ]
-    nsgId: apimSecurityGroup.outputs.id
-  }
-  dependsOn: [
-    vnet
-    jumpboxSubnet
-    pgDelegatedSubnet
-    dataSubnet
-    aksSubnet
-    apimSecurityGroup
   ]
 }
 
 module bastionSubnet '../modules/subnet.bicep' = if (newOrExisting == 'new') {
   name: '${namingPrefix}-bastion-subnet'
   params: {
-    vNetName: virtualNetworkName
+    vNetName: vnet.outputs.name
     subnetName: 'AzureBastionSubnet' // The Bastion Subnet is required to be named AzureBastionSubnet
     subnetAddressPrefix: bastionSubnetAddressPrefix
     privateEndpointNetworkPolicies: 'Disabled'
@@ -248,14 +213,10 @@ module bastionSubnet '../modules/subnet.bicep' = if (newOrExisting == 'new') {
     nsgId: bastionSubnetOverrideSecurityGroup.outputs.id
   }
   dependsOn: [
-    vnet
     jumpboxSubnet
     pgDelegatedSubnet
     dataSubnet
     aksSubnet
-    apimSecurityGroup
-    apimSubnet
-    bastionSubnetOverrideSecurityGroup
   ]
 }
 
@@ -265,13 +226,10 @@ module privateDNSZones '../modules/private-dns-zone.bicep' = [for (conf, index) 
     privateDnsZoneName: conf.zoneName
   }
   dependsOn: [
-    vnet
     jumpboxSubnet
     pgDelegatedSubnet
     dataSubnet
     aksSubnet
-    apimSecurityGroup
-    apimSubnet
     bastionSubnet
   ]
 }]
@@ -284,13 +242,10 @@ module privateDNSZoneVirtualLinks '../modules/private-dns-zone.vnetlink.bicep' =
     vnetLinkName: vnetLinkName
   }
   dependsOn: [
-    vnet
     jumpboxSubnet
     pgDelegatedSubnet
     dataSubnet
     aksSubnet
-    apimSecurityGroup
-    apimSubnet
     bastionSubnet
     privateDNSZones
   ]
@@ -301,7 +256,6 @@ output jumpboxSubnetId string = jumpboxSubnet.outputs.id
 output pgDelegatedSubnetId string = pgDelegatedSubnet.outputs.id
 output dataSubnetId string = dataSubnet.outputs.id
 output aksSubnetId string = aksSubnet.outputs.id
-output apimSubnetId string = apimSubnet.outputs.id
 output bastionSubnetId string = bastionSubnet.outputs.id
 output serviceBusAccessingSubnetsList array = [aksSubnet.outputs.id, dataSubnet.outputs.id, jumpboxSubnet.outputs.id]
 output pgPrivateDNSZoneName string = pgPrivateDNSZoneName

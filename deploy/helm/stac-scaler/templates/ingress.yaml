@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fast-stac-api
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.stacfastapi.clusterIssuer }}
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      # Clear the Accept-Encoding header in order to avoid gzip compression
+      proxy_set_header Accept-Encoding '';
+      # Rewrite storage URLs to point to the blobstore proxy
+      subs_filter {{ .Values.stacfastapi.blobStoreEndpoint }} https://$host/blobstore/;
+      subs_filter_types application/json application/geo+json application/schema+json;
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - {{ .Values.stacfastapi.hostname }}
+    secretName: stac-certificate
+  rules:
+  - host: {{ .Values.stacfastapi.hostname }}
+    http:
+      paths:
+      - path: {{ .Values.stacfastapi.rootPath }}(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: app-stacfastapi
+            port:
+              number: 8082

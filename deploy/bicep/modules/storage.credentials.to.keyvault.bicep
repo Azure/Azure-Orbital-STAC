@@ -33,6 +33,6 @@ module storageAccountConnStrSecret './akv.secrets.bicep' = {
     environmentName: environmentName
     keyVaultName: keyVaultName
     secretName: storageAccountConnStrSecretNameVar
-    secretValue: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
+    secretValue: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
   }
 }

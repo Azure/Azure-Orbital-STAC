@@ -73,4 +73,5 @@ resource akv 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   }
 }
 
+output name string = akv.name
 output vaultUri string = akv.properties.vaultUri

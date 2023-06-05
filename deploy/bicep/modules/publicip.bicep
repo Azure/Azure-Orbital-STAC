@@ -29,3 +29,4 @@ resource publicIP 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
 
 output id string = publicIP.id
 output hostname string = publicIP.properties.dnsSettings.fqdn
+output ipAddress string = publicIP.properties.ipAddress

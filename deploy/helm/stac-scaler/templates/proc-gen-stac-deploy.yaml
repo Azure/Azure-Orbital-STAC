@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: processor-generate-stac-json
-  namespace: {{ .Values.deploymentNamespace }}
 {{- with .Values.processors.generatestacjson }}
 spec:
   replicas: 3

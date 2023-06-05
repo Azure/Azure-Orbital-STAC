@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: stac-browser
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.clusterIssuer }}
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - {{ .Values.hostname }}
+    secretName: stac-certificate
+  rules:
+  - host: {{ .Values.hostname }}
+    http:
+      paths:
+      - path: {{ .Values.rootPath }}(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: stac-browser
+            port:
+              number: 8080

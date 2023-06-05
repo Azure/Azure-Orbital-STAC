@@ -184,15 +184,11 @@ module storageAccountCredentials '../modules/storage.credentials.to.keyvault.bic
   name: '${namingPrefix}-storage-credentials'
   params: {
     environmentName: environmentTag
-    storageAccountName: storageAccountNameVar
-    keyVaultName: keyvaultNameVar
+    storageAccountName: storageAccount.outputs.name
+    keyVaultName: keyVault.outputs.name
     keyVaultResourceGroup: resourceGroupNameVar
     secretNamePrefix: environmentCode
   }
-  dependsOn: [
-    keyVault
-    storageAccount
-  ]
 }
 
 module storageAccountBlobPrivateEndPoint '../modules/private-endpoint.bicep' =  {
@@ -228,25 +224,18 @@ module pgAdministratorLoginPassword '../modules/akv.secrets.bicep' = {
   name: '${namingPrefix}-postgres-credential-to-kv'
   params: {
     environmentName: environmentTag
-    keyVaultName: keyvaultNameVar
+    keyVaultName: keyVault.outputs.name
     secretName: 'PGAdminLoginPass'
     secretValue: postgresAdminLoginPassVar
   }
-  dependsOn: [
-    keyVault
-    pgServer
-  ]
 }
 
 module storageContainers '../modules/storage.container.bicep' = [for(containerName, index) in storageContainerNames: {
   name: '${namingPrefix}-storage-container-${index}'
   params: {
-    storageAccountName: storageAccountNameVar
+    storageAccountName: storageAccount.outputs.name
     containerName: containerName
   }
-  dependsOn: [
-    storageAccount
-  ]
 }]
 
 module servicebus '../modules/servicebus.bicep' = {
@@ -263,14 +252,11 @@ module servicebus '../modules/servicebus.bicep' = {
 module servicebusVNet '../modules/servicebus.secured.vnet.bicep' =  {
   name: '${namingPrefix}-vnet-secured-servicebus'
   params: {
-    name: servicebusNamespaceNameVar
+    name: servicebus.outputs.name
     serviceBusAccessingSubnetsList: serviceBusAccessingSubnetsList
     defaultAction: enablePublicAccess?'Allow':'Deny'
     trustedServiceAccessEnabled: true // this is needed for eventgrid to be allowed to bypass the firewall rules
   }
-  dependsOn: [
-    servicebus
-  ]
 }
 
 module servicebusTopics '../modules/servicebus.topic.bicep' = [for (topic, index) in serviceBusTopicsConfig: {
@@ -278,12 +264,9 @@ module servicebusTopics '../modules/servicebus.topic.bicep' = [for (topic, index
   params: {
     name: topic.name
     auhorizationRuleName: topic.authorizationRuleName
-    serviceBusNamespace: servicebusNamespaceNameVar
+    serviceBusNamespace: servicebus.outputs.name
     serviceBusSku: servicebusSku
   }
-  dependsOn: [
-    servicebus
-  ]
 }]
 
 module servicebusTopicsConnectionString '../modules/servicebus.topic.credential.to.keyvault.bicep' = {
@@ -291,13 +274,9 @@ module servicebusTopicsConnectionString '../modules/servicebus.topic.credential.
   params: {
     environmentName: environmentTag
     authorizationRuleId: servicebus.outputs.authorizationRuleId
-    keyVaultName: keyvaultNameVar
+    keyVaultName: keyVault.outputs.name
     keyVaultResourceGroup: resourceGroupNameVar
   }
-  dependsOn: [
-    keyVault
-    servicebus
-  ]
 }
 
 module servicebusTopicsDefaultSubscription '../modules/servicebus.topic.subscription.bicep' = [for (topic, index) in serviceBusTopicsConfig: {
@@ -305,7 +284,7 @@ module servicebusTopicsDefaultSubscription '../modules/servicebus.topic.subscrip
   params: {
     name: topic.defaultSubscription
     topicName: topic.name
-    serviceBusNamespace: servicebusNamespaceNameVar
+    serviceBusNamespace: servicebus.outputs.name
   }
   dependsOn: [
     servicebusTopics
@@ -326,21 +305,17 @@ module eventGridTopics '../modules/eventgrid.bicep' = {
 module grantServiceBusDataSenderRoleToEventGrid '../modules/servicebus-role-assignment.bicep' = {
   name: '${namingPrefix}-servicebus-data-sender-role-grant'
   params: {
-    resourceName: servicebusNamespaceNameVar
+    resourceName: servicebus.outputs.name
     roleDefinitionId: '/providers/Microsoft.Authorization/roleDefinitions/${serviceBusDataSenderRoleGuid}'
     principalId: eventGridTopics.outputs.principalId
   }
-  dependsOn: [
-    servicebusTopicsConnectionString
-    eventGridTopics
-  ]
 }
 
 module eventGridServiceBusTopicsSubscription '../modules/eventgrid.serviceBus.subscription.bicep' = {
   name: '${namingPrefix}-eventgrid-topic-subs'
   params: {
     events: eventGridTopicsConfig.events
-    serviceBusNamespace: servicebusNamespaceNameVar
+    serviceBusNamespace: servicebus.outputs.name
     eventGridName: eventGridTopicsConfigNameVar
   }
   dependsOn: [

@@ -29,8 +29,8 @@ resource serverName_resource 'Microsoft.DBforPostgreSQL/flexibleServers@2021-06-
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
     network: privateEndpointDisabled ? null: {
-      delegatedSubnetResourceId: (empty(delegatedSubnetResourceId) ? json('null') : delegatedSubnetResourceId)
-      privateDnsZoneArmResourceId: (empty(privateDnsZoneArmResourceId) ? json('null') : privateDnsZoneArmResourceId)
+      delegatedSubnetResourceId: (empty(delegatedSubnetResourceId) ? null : delegatedSubnetResourceId)
+      privateDnsZoneArmResourceId: (empty(privateDnsZoneArmResourceId) ? null : privateDnsZoneArmResourceId)
     }
     highAvailability: {
       mode: haMode

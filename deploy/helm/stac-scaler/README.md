@@ -1,9 +1,13 @@
 
 # Azure Orbital STAC Processor
 
-This chart deploys a [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/) that runs the STAC Processor on files stored in Azure Blob Storage.
+This chart deploys a [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
+that runs the STAC Processor on files stored in Azure Blob Storage.
 
-The steps covered in this document is automated as part of main deployment covered in the [README.md](../../README.md). If you would like to customize and/or contribute to this Chart, follow the steps in this document to deploy the Kubernetes components to your Azure Kubernetes Cluster.
+The steps covered in this document is automated as part of main deployment
+covered in the [README.md](../../README.md). If you would like to customize
+and/or contribute to this Chart, follow the steps in this document to deploy
+the Kubernetes components to your Azure Kubernetes Cluster.
 
 ## Pre-requisites
 
@@ -16,27 +20,37 @@ The tools below are required for installation of the `stac-scaler` Chart.
 
 ## Installation
 
-Before executing the script, user needs to login to azure as shown below and set the correct subscription in which they want to provision the resources.
+Before executing the script, user needs to login to azure as shown below and
+set the correct subscription in which they want to provision the resources.
 
 ```
 az login
 
 az account set -s <subscription_id>
 ```
-One of pre-requisites for installing this Chart is [KEDA](https://keda.sh/docs/2.8/concepts/). KEDA is a Kubernetes based Event Driven Autoscaler. With KEDA, you can drive the scaling of any container in Kubernetes based on the number of events needing to be processed.
+One of pre-requisites for installing this Chart is [KEDA](https://keda.sh/docs/2.10/concepts/).
+KEDA is a Kubernetes based Event Driven Autoscaler. With KEDA, you can drive
+the scalingof any container in Kubernetes based on the number of events needing
+to be processed.
 
 ```
-kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.8.0/keda-2.8.0.yaml
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo update
+kubectl create namespace keda
+helm upgrade --install keda kedacore/keda --namespace keda
 ```
 
-In order to install the `STAC Processor` chart, it is recommended you first create a values-custom.yaml file in the current directory. Then the chart can be deployed with:
+In order to install the `STAC Processor` chart, it is recommended you first
+create a values-custom.yaml file in the current directory. Then the chart can
+be deployed with:
 
 ```
 helm install [-n <my_namespace>] <release_name> . -f values-custom.yaml
 ```
 ## Values
 
-This section of the document will go over all the possible values you can override in `values-custom.yaml` file in the current directory.
+This section of the document will go over all the possible values you can
+override in `values-custom.yaml` file in the current directory.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -49,7 +63,9 @@ This section of the document will go over all the possible values you can overri
 
 ### Processor
 
-A `processor` entry must have values as described below. Each `processor` entry defines a image to be pull from the ACR and run in the Kubernetes Cluster as Jobs through scaling.
+A `processor` entry must have values as described below. Each `processor` entry
+defines a image to be pull from the ACR and run in the Kubernetes Cluster as
+Jobs through scaling.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|

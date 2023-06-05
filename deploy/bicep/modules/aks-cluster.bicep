@@ -10,10 +10,9 @@ param networkPlugin string = 'azure'
 param networkMode string = 'transparent'
 param logAnalyticsWorkspaceResourceID string = ''
 param vnetSubnetID string = ''
-param clientId string = ''
 param kubernetesVersion string = '1.25.4'
 
-resource aks 'Microsoft.ContainerService/managedClusters@2022-09-02-preview' = {
+resource aks 'Microsoft.ContainerService/managedClusters@2023-01-02-preview' = {
   name: clusterName
   location: location
   tags: {
@@ -39,7 +38,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-09-02-preview' = {
         nodeLabels: {
           App : 'default'
         }
-        vnetSubnetID: (empty(vnetSubnetID) ? json('null') : vnetSubnetID)
+        vnetSubnetID: (empty(vnetSubnetID) ? null : vnetSubnetID)
       }
     ]
     addonProfiles: {
@@ -51,9 +50,6 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-09-02-preview' = {
       }
       azureKeyvaultSecretsProvider: {
         enabled: true
-        identity: {
-          clientId: clientId
-        }
       }
     }
     networkProfile: {
@@ -68,6 +64,9 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-09-02-preview' = {
   }
 }
 
+output name string = aks.name
 output Id string = aks.id
 output principalId string = aks.identity.principalId
 output kubeletIdentityId string = aks.properties.identityProfile.kubeletidentity.objectId
+output managedResourceGroup string = aks.properties.nodeResourceGroup
+output podCidr string = aks.properties.networkProfile.podCidr

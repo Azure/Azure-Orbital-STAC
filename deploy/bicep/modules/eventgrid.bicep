@@ -38,4 +38,5 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
   }
 }
 
+output name string = eventGridTopic.name
 output principalId string = eventGridTopic.identity.principalId

@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: deployment-app-stacfastapi
-  namespace: {{ .Values.deploymentNamespace }}
 spec:
   replicas: {{ .Values.stacfastapi.replicas }}
   selector:
@@ -20,7 +19,7 @@ spec:
         - args:
             - bash
             - -c
-            - ./scripts/wait-for-it.sh {{ .Values.stacfastapi.env.PGHOST }}:{{ .Values.stacfastapi.env.POSTGRES_PORT }} && pypgstac pgready && pypgstac migrate && python -m stac_fastapi.pgstac.app
+            - ./scripts/wait-for-it.sh {{ .Values.stacfastapi.env.PGHOST }}:{{ .Values.stacfastapi.env.POSTGRES_PORT }} && pypgstac pgready && pypgstac migrate && uvicorn --root-path "{{ .Values.stacfastapi.rootPath }}" --proxy-headers --host 0.0.0.0 --port 8082 stac_fastapi.pgstac.app:app
           image: "{{ .Values.repository }}/{{ .Values.stacfastapi.image.name }}:{{ .Values.stacfastapi.image.tag }}"
           imagePullPolicy: {{ .Values.stacfastapi.image.pullPolicy }}
           name: stacfastapi-pgstac
