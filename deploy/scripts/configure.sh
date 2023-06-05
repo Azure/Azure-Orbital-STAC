@@ -182,6 +182,7 @@ helm install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set processors.staccollection.env.PGUSER=${PGUSER} \
     --set processors.staccollection.env.PGDATABASE=${PGDATABASE} \
     --set processors.staceventconsumer.namespace=${SERVICE_BUS_NAMESPACE} \
+    --set processors.staceventconsumer.env.DATA_STORAGE_ACCOUNT_NAME=${DATA_STORAGE_ACCOUNT_NAME} \
     --set processors.staceventconsumer.env.GENERATED_STAC_STORAGE_CONTAINER_NAME=${GENERATED_STAC_STORAGE_CONTAINER_NAME} \
     --set processors.staceventconsumer.env.DATA_STORAGE_PGSTAC_CONTAINER_NAME=${DATA_STORAGE_PGSTAC_CONTAINER_NAME} \
     --set processors.staceventconsumer.env.PGHOST=${PGHOST} \

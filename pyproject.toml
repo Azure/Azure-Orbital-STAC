@@ -19,18 +19,21 @@ classifiers = [
   "Topic :: Scientific/Engineering :: GIS",
 ]
 dependencies = [
-  "knack",
-  "opencensus-ext-azure",
-  "azure-servicebus == 7.8.1",
-  "azure-storage-blob == 12.14.1",
-  "pystac == 1.6.1",
+  "knack >= 0.10.0",
+  "opencensus-ext-azure >= 1.1.9",
+  "azure-servicebus == 7.8.3",
+  "azure-storage-blob == 12.15.0",
+  "pystac == 1.7.1",
   "python_dateutil == 2.8.2",
-  "python_dotenv == 0.21.0",
-  "rasterio == 1.3.4",
-  "stactools == 0.4.2",
-  "psycopg[binary] == 3.1.7",
-  "pypgstac[psycopg] == 0.6.11",
-  "charset-normalizer <3.0, >=2.0"
+  "python_dotenv == 1.0.0",
+  "rasterio == 1.3.6",
+  "stactools == 0.4.5",
+  "psycopg[binary] == 3.1.8",
+  "pypgstac[psycopg] == 0.7.3",
+  # Don't set a version for GDAL, since it will likely be pre-installed
+  # on the system (e.g., on Linux) and we won't want to force an upgrade
+  # or downgrade.
+  "gdal",
 ]
 
 [project.urls]
@@ -38,11 +41,12 @@ repository = "https://github.com/Azure/Azure-Orbital-STAC"
 
 [project.optional-dependencies]
 dev = [
-  "black >= 22.12.0",
-  "isort >= 5.11.0",
-  "mypy >= 0.991",
+  "black >= 23.1.0",
+  "isort >= 5.12.0",
+  "mypy >= 1.1.1",
   "flake8 >= 6.0.0",
-  "flake8-pyproject >= 1.2.2",  # for flake8 to read pyproject.toml
+  "flake8-pyproject >= 1.2.3",  # for flake8 to read pyproject.toml
+  "types-python-dateutil"
 ]
 
 [project.scripts]

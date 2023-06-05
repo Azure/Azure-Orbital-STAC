@@ -26,9 +26,7 @@ def validated_code(v: str) -> str:
     if not isinstance(v, str):
         raise ValueError("Invalid Grid code: must be str")
     if not CODE_PATTERN.fullmatch(v):
-        raise ValueError(
-            f"Invalid Grid code: {v}" f" does not match the regex {CODE_REGEX}"
-        )
+        raise ValueError(f"Invalid Grid code: {v}" f" does not match the regex {CODE_REGEX}")
     return v
 
 
