@@ -82,3 +82,5 @@ DEPLOYMENT_SCRIPT="az deployment sub create -o none -l $LOCATION -n $DEPLOYMENT_
     owner_aad_object_id=$USER_OBJ_ID $DNS_ARG"
 
 $DEPLOYMENT_SCRIPT
+
+az deployment-scripts list -g "${ENV_CODE}-vnet-rg" --query "[].name" -o tsv | xargs -otl az deployment-scripts delete -g "${ENV_CODE}-vnet-rg" $_ --yes --name
