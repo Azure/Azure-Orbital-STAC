@@ -92,6 +92,22 @@ module aksManagedIdentity '../modules/managed.identity.user.bicep' = {
   }
 }
 
+resource waitSection 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+  kind: 'AzurePowerShell'
+  name: 'WaitSection'
+  location: location
+  properties: {
+    azPowerShellVersion: '3.0'
+    scriptContent: 'start-sleep -Seconds 300'
+    cleanupPreference: 'Always'
+    retentionInterval: 'PT1H'
+  }
+  dependsOn: [
+    aksManagedIdentity
+  ]
+}
+
+
 module akvPolicyForMI '../modules/akv.policy.bicep' = {
   name: '${namingPrefix}-aks-policy-for-mi'
   scope: resourceGroup(keyVaultResourceGroupName)
@@ -104,6 +120,9 @@ module akvPolicyForMI '../modules/akv.policy.bicep' = {
       'List'
     ]
   }
+  dependsOn: [
+    waitSection
+  ]
 }
 
 module aksCluster '../modules/aks-cluster.bicep' =  {
