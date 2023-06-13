@@ -6,6 +6,9 @@ The script requires following input
    names. Allows only alpha numeric(no special characters) and must be
    between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
+- `emailAddress` which is an e-mail address used for acquiring a TLS certificate
+   with Let's Encrypt. The e-mail address is for Let's Encrypt to notify you of
+   any issues with your certificate and when it is about to expire.
 - `jumpboxPassword` through which users will SSH into Azure VM. The supplied
    password must be between 6-72 characters long and must satisfy at least 3
    out of 4 of the following:
@@ -87,7 +90,7 @@ export POSTGRES_PRIVATE_ENDPOINT_DISABLED=true
 
 ```bash
 
-./deploy/scripts/setup.sh <environmentCode> <location> <jumpboxPassword>
+./deploy/scripts/setup.sh <environmentCode> <location> <emailAddress> <jumpboxPassword>
 ```
 
 
@@ -132,7 +135,7 @@ OR
    infrastructure, and passes them to kubectl deployment specification.
 
    ```bash
-   ./deploy/scripts/configure.sh <environmentCode>
+   ./deploy/scripts/configure.sh <environmentCode> <emailAddress>
    ```
 
 ## Cleanup Script
