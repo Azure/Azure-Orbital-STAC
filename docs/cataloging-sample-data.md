@@ -16,8 +16,13 @@ A STAC Collection is created from a [json document](../deploy/sample-data/collec
 that is uploaded to the appropriate container in the Storage Account.
 
     ```bash
+    # Replace with the name of your storage account, or update the entire URL for sovereign clouds
+    export STORAGE_BLOB_ENDPOINT=https://<data-storage-account>.blob.core.windows.net/
+    # Generate a SAS token for your storage account
+    export SAS_TOKEN=<SAS-token-for-data-storage-account>
+    
     curl -s https://raw.githubusercontent.com/Azure/Azure-Orbital-STAC/main/deploy/sample-data/collection_naip_test.json | \
-    azcopy copy "https://<data-storage-account>.blob.core.windows.net/staccollection/collection_naip_test.json?<SAS-token-for-data-storage-account>" --from-to PipeBlob
+    azcopy copy "${STORAGE_BLOB_ENDPOINT}staccollection/collection_naip_test.json?${SAS_TOKEN}" --from-to PipeBlob
     ```
 
 2. Generate the SAS token for getting the data from Planetary Computers.
@@ -52,13 +57,13 @@ Addition of the STAC Item to a STAC Collection is two step process.
     a. Upload metadata
 
     ```bash
-    azcopy copy "https://naipeuwest.blob.core.windows.net/naip/v002/wa/2015/wa_fgdc_2015/45117?${TOKEN}" "https://<data-storage-account>.blob.core.windows.net/stacify/v002/wa/2015/wa_fgdc_2015?<SAS-token-for-data-storage-account>" --recursive=true
+    azcopy copy "https://naipeuwest.blob.core.windows.net/naip/v002/wa/2015/wa_fgdc_2015/45117?${TOKEN}" "${STORAGE_BLOB_ENDPOINT}stacify/v002/wa/2015/wa_fgdc_2015?${SAS_TOKEN}" --recursive=true
     ```
 
     b. Upload raster data
 
     ```bash
-    azcopy copy "https://naipeuwest.blob.core.windows.net/naip/v002/wa/2015/wa_100cm_2015/45117?${TOKEN}" "https://<data-storage-account>.blob.core.windows.net/stacify/v002/wa/2015/wa_100cm_2015?<SAS-token-for-data-storage-account>" --recursive=true
+    azcopy copy "https://naipeuwest.blob.core.windows.net/naip/v002/wa/2015/wa_100cm_2015/45117?${TOKEN}" "${STORAGE_BLOB_ENDPOINT}stacify/v002/wa/2015/wa_100cm_2015?${SAS_TOKEN}" --recursive=true
     ```
 
 ## Steps to validate Cataloged data
@@ -66,7 +71,8 @@ Addition of the STAC Item to a STAC Collection is two step process.
 Run the below curl command for validation:
   
 ```bash
-curl <Gateway URL>/api/collections/naip | json_pp
+export GATEWAY_URL=<Gateway URL>
+curl ${GATEWAY_URL}/api/collections/naip | json_pp
 
-curl <Gateway URL>/api/collections/naip/items | json_pp
+curl ${GATEWAY_URL}/api/collections/naip/items | json_pp
 ```

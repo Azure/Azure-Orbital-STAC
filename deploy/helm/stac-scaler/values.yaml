@@ -106,7 +106,7 @@ stacfastapi:
   labels:
     app: app-stacfastapi
   image:
-    name: stac-fastapi
+    name: stac-fastapi-pgstac
     pullPolicy: Always
     tag: "latest"
   env:

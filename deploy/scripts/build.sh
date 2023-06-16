@@ -10,8 +10,8 @@ ENV_CODE=${1:-${ENV_CODE}}
 
 set -ae
 ENV_NAME=${ENV_NAME:-"stac-${ENV_CODE}"}
-STAC_FASTAPI_VERSION=${STAC_FASTAPI_VERSION:-"2.4.5"}
-STAC_BROWSER_VERSION=${STAC_BROWSER_VERSION:-"3.0.0"}
+STAC_FASTAPI_VERSION=${STAC_FASTAPI_VERSION:-"2.4.8"}
+STAC_BROWSER_VERSION=${STAC_BROWSER_VERSION:-"3.0.2"}
 PROCESSING_RESOURCE_GROUP=${PROCESSING_RESOURCE_GROUP:-"${ENV_CODE}-processing-rg"}
 
 ACR_NAME=$(az acr list -g ${PROCESSING_RESOURCE_GROUP} \
@@ -20,16 +20,16 @@ ACR_NAME=$(az acr list -g ${PROCESSING_RESOURCE_GROUP} \
 echo "Building stac-cli Docker image in ACR"
 az acr build -o none --no-logs --registry $ACR_NAME --image stac-cli ${PRJ_ROOT}
 
-# build stac-fastapi from https://github.com/stac-utils/stac-fastapi/archive/refs/tags/${STAC_FASTAPI_VERSION}.tar.gz
-STAC_FASTAPI_SRC_DIR=${STAC_FASTAPI_SRC_DIR:-"${PRJ_ROOT}/src/stac_fastapi_k8s/src"}
-STAC_FASTAPI_RELEASE_URI=${STAC_FASTAPI_RELEASE_URI:-"https://github.com/stac-utils/stac-fastapi/archive/refs/tags/${STAC_FASTAPI_VERSION}.tar.gz"}
+# build stac-fastapi-pgstac from https://github.com/stac-utils/stac-fastapi-pgstac/archive/refs/tags/${STAC_FASTAPI_VERSION}.tar.gz
+STAC_FASTAPI_SRC_DIR=${STAC_FASTAPI_SRC_DIR:-"${PRJ_ROOT}/src/stac_fastapi_pgstac_k8s/src"}
+STAC_FASTAPI_RELEASE_URI=${STAC_FASTAPI_RELEASE_URI:-"https://github.com/stac-utils/stac-fastapi-pgstac/archive/refs/tags/${STAC_FASTAPI_VERSION}.tar.gz"}
 mkdir -p $STAC_FASTAPI_SRC_DIR
 wget $STAC_FASTAPI_RELEASE_URI -P $STAC_FASTAPI_SRC_DIR
 tar xf ${STAC_FASTAPI_SRC_DIR}/${STAC_FASTAPI_VERSION}.tar.gz -C ${STAC_FASTAPI_SRC_DIR}
-echo "Building stac-fastapi Docker image in ACR"
-az acr build -o none --no-logs --registry $ACR_NAME --image stac-fastapi \
-  --file ${STAC_FASTAPI_SRC_DIR}/stac-fastapi-${STAC_FASTAPI_VERSION}/docker/Dockerfile \
-  ${STAC_FASTAPI_SRC_DIR}/stac-fastapi-${STAC_FASTAPI_VERSION}
+echo "Building stac-fastapi-pgstac Docker image in ACR"
+az acr build -o none --no-logs --registry $ACR_NAME --image stac-fastapi-pgstac \
+  --file ${STAC_FASTAPI_SRC_DIR}/stac-fastapi-pgstac-${STAC_FASTAPI_VERSION}/Dockerfile \
+  ${STAC_FASTAPI_SRC_DIR}/stac-fastapi-pgstac-${STAC_FASTAPI_VERSION}
 rm -rf ${STAC_FASTAPI_SRC_DIR}
 
 # build stac-browser from https://github.com/radiantearth/stac-browser/archive/refs/tags/v${STAC_BROWSER_VERSION}.tar.gz

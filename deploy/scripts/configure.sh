@@ -225,6 +225,7 @@ helm upgrade --install stac-scaler ${PRJ_ROOT}/deploy/helm/stac-scaler \
     --set serviceAccountName=${AKS_SERVICE_ACCOUNT_NAME} \
     --set keyVaultName=${KEY_VAULT_NAME} \
     --set tenantId=${IDENTITY_TENANT} \
+    --set cloudName=$(az cloud show --query name -otsv) \
     --set processors.staccollection.env.DATA_STORAGE_ACCOUNT_NAME=${DATA_STORAGE_ACCOUNT_NAME} \
     --set processors.staccollection.env.STACCOLLECTION_STORAGE_CONTAINER_NAME=${STACCOLLECTION_STORAGE_CONTAINER_NAME} \
     --set processors.staccollection.env.PGHOST=${PGHOST} \
@@ -487,7 +488,7 @@ spec:
           service:
             name: stac-browser
             port:
-              number: 8082
+              number: 8080
 EOF
 
 # Deploy the auth proxy if selected
