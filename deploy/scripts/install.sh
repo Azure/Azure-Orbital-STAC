@@ -38,13 +38,17 @@ ENABLE_PUBLIC_ACCESS=${8:-${ENABLE_PUBLIC_ACCESS:-"false"}}
 USER_OBJ_ID=${USER_OBJ_ID:-"$(az ad signed-in-user show --query id --output tsv 2> /dev/null || echo '')"}
 POSTGRES_PRIVATE_ENDPOINT_DISABLED=${POSTGRES_PRIVATE_ENDPOINT_DISABLED:-false}
 if [[ -n "$DNS_PREFIX" ]]; then
-  DNS_ARG="ingressPublicIPDnsPrefixVar=$DNS_PREFIX"
+  DNS_ARG="ingressPublicIPDnsPrefix=$DNS_PREFIX"
 fi
 
-if [[ -z "$USER_OBJ_ID" ]]
-  then
+if [[ -z "$USER_OBJ_ID" ]]; then
+  # If there was no "id" field, then try "objectId"
+  USER_OBJ_ID="$(az ad signed-in-user show --query objectId --output tsv 2> /dev/null || echo '')"
+fi
+if [[ -z "$USER_OBJ_ID" ]]; then
     echo "Set USER_OBJ_ID environment variable after retrieving the value from device with an approved MDM provider like Intune"
     echo "To get USER_OBJ_ID, run 'az ad signed-in-user show --query id --output tsv'"
+    exit 1
 fi
 
 # Register the workload identity feature, and wait for it to be registered.
@@ -83,4 +87,6 @@ DEPLOYMENT_SCRIPT="az deployment sub create -o none -l $LOCATION -n $DEPLOYMENT_
 
 $DEPLOYMENT_SCRIPT
 
-az deployment-scripts list -g "${ENV_CODE}-vnet-rg" --query "[].name" -o tsv | xargs -otl az deployment-scripts delete -g "${ENV_CODE}-vnet-rg" $_ --yes --name
+for script in $(az deployment-scripts list -g "${ENV_CODE}-vnet-rg" --query "[].name" -o tsv); do
+  az deployment-scripts delete -g "${ENV_CODE}-vnet-rg" --yes --name $script
+done

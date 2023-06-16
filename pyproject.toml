@@ -21,19 +21,19 @@ classifiers = [
 dependencies = [
   "knack >= 0.10.0",
   "opencensus-ext-azure >= 1.1.9",
-  "azure-servicebus == 7.8.3",
-  "azure-storage-blob == 12.15.0",
-  "pystac == 1.7.1",
+  "azure-servicebus == 7.11.0",
+  "azure-storage-blob == 12.16.0",
+  "pystac == 1.7.3",
   "python_dateutil == 2.8.2",
   "python_dotenv == 1.0.0",
-  "rasterio == 1.3.6",
-  "stactools == 0.4.5",
-  "psycopg[binary] == 3.1.8",
-  "pypgstac[psycopg] == 0.7.3",
-  # Don't set a version for GDAL, since it will likely be pre-installed
-  # on the system (e.g., on Linux) and we won't want to force an upgrade
-  # or downgrade.
-  "gdal",
+  "rasterio == 1.3.7",
+  "stactools == 0.4.8",
+  "psycopg[binary] == 3.1.9",
+  "pypgstac[psycopg] == 0.7.10",
+  # This version should match the version of GDAL that is pre-installled
+  # on the system (e.g., on Linux). See the base image version in Dockerfile
+  # for the version of GDAL that is pre-installed when building for Docker.
+  "gdal == 3.6.3",
 ]
 
 [project.urls]
