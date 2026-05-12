@@ -33,7 +33,7 @@ dependencies = [
   # This version should match the version of GDAL that is pre-installled
   # on the system (e.g., on Linux). See the base image version in Dockerfile
   # for the version of GDAL that is pre-installed when building for Docker.
-  "gdal == 3.6.3",
+  "gdal == 3.13.0",
 ]
 
 [project.urls]
